@@ -23,12 +23,14 @@ public final class Constants {
 	public static class Operator {
 		public static final double kStickDeadband = 0.1;
         public static final double kPrecisionMovementMultiplier = 0.3; // TODO: Tune to what feels good
+		public static final double kPrecisionRotationMultiplier = 0.3;
 	}
 
 	public static class Chassis {
 		public static final double kRobotWeight = 0.0; // kg, incl bumpers and battery
 		public static final double kOffsetToSwerveModule = Units.inchesToMeters(10.375);
-		public static final double kFalconFreeSpeedRPS = 6380.0d / 60.0d;
+		public static final double kFalconFreeSpeedRPS = 6380.0d / 60.0d; // div 60
+		public static final double kKrakenFreeSpeedRPM = 6000;
 		public static final double kMaxSpeed = Conversions.falconToMPS(kFalconFreeSpeedRPS, MK4I.kWheelCircumference,
 			MK4I.kDriveGearRatio);
 

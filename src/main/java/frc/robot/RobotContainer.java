@@ -51,6 +51,8 @@ public class RobotContainer {
 				() -> nonInvSquare(-driverLeft.getY()),
 				() -> nonInvSquare(-driverLeft.getX()),
 				() -> nonInvSquare(-driverRight.getX()),
+				() -> driverLeft.getTrigger(),
+				() -> driverRight.getTrigger(),
 				() -> true));
 
 		// Binds heading locks to the right stick's dpad. Pressing up will face forward,

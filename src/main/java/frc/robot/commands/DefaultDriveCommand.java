@@ -20,14 +20,16 @@ public class DefaultDriveCommand extends Command {
 	private final DoubleSupplier rotationSupplier;
 	private final BooleanSupplier fieldRelativeSupplier;
 	private final BooleanSupplier preciseMovementSupplier;
+	private final BooleanSupplier preciseRotationSupplier;
 
 	public DefaultDriveCommand(SwerveDrive swerve, DoubleSupplier xSupplier, DoubleSupplier ySupplier,
-			DoubleSupplier omegaSupplier, BooleanSupplier preciseMovementSupplier, BooleanSupplier fieldRelativeSupplier) {
+			DoubleSupplier omegaSupplier, BooleanSupplier preciseMovementSupplier, BooleanSupplier preciseRotationSupplier, BooleanSupplier fieldRelativeSupplier) {
 		this.swerve = swerve;
 		this.translationXSupplier = xSupplier;
 		this.translationYSupplier = ySupplier;
 		this.rotationSupplier = omegaSupplier;
 		this.preciseMovementSupplier = preciseMovementSupplier;
+		this.preciseRotationSupplier = preciseRotationSupplier;
 		this.fieldRelativeSupplier = fieldRelativeSupplier;
 
 		addRequirements(swerve);
@@ -40,6 +42,7 @@ public class DefaultDriveCommand extends Command {
 		this.translationYSupplier = () -> ySpeed;
 		this.rotationSupplier = () -> omegaSpeed;
 		this.preciseMovementSupplier = () -> false;
+		this.preciseRotationSupplier = () -> false;
 		this.fieldRelativeSupplier = () -> fieldRelative;
 
 		addRequirements(swerve);
@@ -48,7 +51,8 @@ public class DefaultDriveCommand extends Command {
 	@Override
 	public void execute() {
 		// evaluate created members for x,y,theta, run drive command
-		double mut = preciseMovementSupplier.getAsBoolean() ? Constants.Operator.kPrecisionMovementMultiplier: 1.0;
+		double preciseMovement = preciseMovementSupplier.getAsBoolean() ? Constants.Operator.kPrecisionMovementMultiplier: 1.0;
+		double preciseRotation = preciseRotationSupplier.getAsBoolean() ? Constants.Operator.kPrecisionRotationMultiplier : 1.0;
 		Translation2d trans = new Translation2d(translationXSupplier.getAsDouble(), translationYSupplier.getAsDouble())
 				.times(Constants.Chassis.kMaxSpeed);
 		swerve.drive(trans, rotationSupplier.getAsDouble() * Constants.Chassis.kMaxAngularVelocity,

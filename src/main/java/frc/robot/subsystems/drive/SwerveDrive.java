@@ -137,11 +137,11 @@ public class SwerveDrive extends SubsystemBase {
 		// stuff for AutoBuilder
 
 		DCMotor krakenDcMotorProfile = new DCMotor(
-			yawFromWhenWeLastSetTargetHeading, // TODO: Populate with real data
-			targetHeading, 
-			simHeading, 
-			prevTime, 
-			prevRotOutput, 
+			13.12, // TODO: Populate with real data
+			7.09, 
+			366, 
+			2, 
+			Constants.Chassis.kKrakenFreeSpeedRPM * 2 * Math.PI, 
 			1);
 
 		ModuleConfig moduleConfig = new ModuleConfig(
