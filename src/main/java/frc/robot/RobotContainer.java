@@ -11,9 +11,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
 
 import frc.robot.commands.*;
+import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.PigeonWrapper;
+
 import com.redstorm509.stormkit.controllers.ThrustmasterJoystick;
 import com.redstorm509.stormkit.controllers.ThrustmasterJoystick.StickButton;
 
@@ -25,18 +28,23 @@ public class RobotContainer {
 	private CommandXboxController operator = new CommandXboxController(2);
 
 	private final SwerveDrive swerve;
+	private final Arm arm;
+	private final Elevator elevator;
 	
 	private SendableChooser<Command> chooser = new SendableChooser<Command>();
 
 	public RobotContainer() {
 		this.swerve = new SwerveDrive(pigeon, new Limelight("womp womp"));
+		this.arm = new Arm();
+		this.elevator = new Elevator();
+		
 
 		configureButtonBindings();
 		addAutonomousRoutines();
 	}
 
 	private static double nonInvSquare(double axis) {
-		double deadbanded = MathUtil.applyDeadband(axis, Constants.kStickDeadband);
+		double deadbanded = MathUtil.applyDeadband(axis, Constants.Operator.kStickDeadband);
 		double squared = Math.abs(deadbanded) * deadbanded;
 		return squared;
 	}

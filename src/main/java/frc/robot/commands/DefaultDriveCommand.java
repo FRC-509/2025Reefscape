@@ -53,9 +53,11 @@ public class DefaultDriveCommand extends Command {
 		// evaluate created members for x,y,theta, run drive command
 		double preciseMovement = preciseMovementSupplier.getAsBoolean() ? Constants.Operator.kPrecisionMovementMultiplier: 1.0;
 		double preciseRotation = preciseRotationSupplier.getAsBoolean() ? Constants.Operator.kPrecisionRotationMultiplier : 1.0;
-		Translation2d trans = new Translation2d(translationXSupplier.getAsDouble(), translationYSupplier.getAsDouble())
+		Translation2d trans = new Translation2d(
+			translationXSupplier.getAsDouble() * preciseMovement, 
+			translationYSupplier.getAsDouble() * preciseMovement)
 				.times(Constants.Chassis.kMaxSpeed);
-		swerve.drive(trans, rotationSupplier.getAsDouble() * Constants.Chassis.kMaxAngularVelocity,
+		swerve.drive(trans, rotationSupplier.getAsDouble() * preciseRotation * Constants.Chassis.kMaxAngularVelocity,
 				fieldRelativeSupplier.getAsBoolean(), false);
 	}
 }

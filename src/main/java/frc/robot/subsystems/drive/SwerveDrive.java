@@ -137,7 +137,7 @@ public class SwerveDrive extends SubsystemBase {
 		// stuff for AutoBuilder
 
 		DCMotor krakenDcMotorProfile = new DCMotor(
-			13.12, // TODO: Populate with real data
+			13.12, // TODO: Populate with MORE real data
 			7.09, 
 			366, 
 			2, 
@@ -167,16 +167,12 @@ public class SwerveDrive extends SubsystemBase {
 					public ChassisSpeeds calculateRobotRelativeSpeeds(Pose2d currentPose, PathPlannerTrajectoryState targetState) {
 						return getChassisSpeeds(); // TODO: assert this works?
 					}
-
-					public void reset(Pose2d currentPose, ChassisSpeeds currentSpeeds) {
-						resetOdometry(currentPose);
-					}
-
+					public void reset(Pose2d currentPose, ChassisSpeeds currentSpeeds) { resetOdometry(currentPose); }
 					public boolean isHolonomic() { return true; }
 				},
 				new RobotConfig(
 					Constants.Chassis.kRobotWeight,
-					0.0, // get later
+					0.0, // TODO: get later
 					moduleConfig,
 					// TODO: which way is forward, which way does it think is forwards
 					// Front Left, Front Right, Back Left, Back Right 

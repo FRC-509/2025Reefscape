@@ -18,7 +18,6 @@ import frc.robot.util.math.Conversions;
 public final class Constants {
 	public static final String kRio = "rio";
 	public static final String kCANIvore = "509CANIvore"; //TODO: Make sure to flash 
-	public static final double kStickDeadband = 0.1;
 
 	public static class Operator {
 		public static final double kStickDeadband = 0.1;
