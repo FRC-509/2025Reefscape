@@ -134,24 +134,6 @@ public class SwerveDrive extends SubsystemBase {
 				new Pose2d());
 		*/
 
-		// stuff for AutoBuilder
-
-		DCMotor krakenDcMotorProfile = new DCMotor(
-			13.12, // TODO: Populate with MORE real data
-			7.09, 
-			366, 
-			2, 
-			Constants.Chassis.kKrakenFreeSpeedRPM * 2 * Math.PI, 
-			1);
-
-		ModuleConfig moduleConfig = new ModuleConfig(
-			Constants.Chassis.MK4I.kWheelRadius,
-			Constants.Chassis.kMaxSpeed, 
-			Constants.Chassis.MK4I.wheelCOF,
-			krakenDcMotorProfile,
-			Constants.CurrentLimits.kSwerveModule, 
-			4);
-
 
 		// end
 
@@ -173,7 +155,7 @@ public class SwerveDrive extends SubsystemBase {
 				new RobotConfig(
 					Constants.Chassis.kRobotWeight,
 					0.0, // TODO: get later
-					moduleConfig,
+					Constants.Chassis.kModuleConfig,
 					// TODO: which way is forward, which way does it think is forwards
 					// Front Left, Front Right, Back Left, Back Right 
 					new Translation2d(+Constants.Chassis.kOffsetToSwerveModule, -Constants.Chassis.kOffsetToSwerveModule),

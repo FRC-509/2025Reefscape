@@ -68,7 +68,7 @@ public class SwerveModule {
 		steerMotorConfig.Slot0.kI = Constants.PIDConstants.Drive.kSteerAngleI;
 		steerMotorConfig.Slot0.kD = Constants.PIDConstants.Drive.kSteerAngleD;
 		steerMotorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-		steerMotorConfig.CurrentLimits.SupplyCurrentLimit = Constants.CurrentLimits.kSwerveModule;
+		steerMotorConfig.CurrentLimits.SupplyCurrentLimit = Constants.CurrentLimits.kSwerveModuleSupply;
 
 		// Since we've just configured the steer motors to use data from the absolute
 		// encoders, we don't need to divide the steer motor's position by the gear
