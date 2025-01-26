@@ -89,10 +89,6 @@ public class Elevator extends SubsystemBase {
 		encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
         encoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5;
 		extensionEncoder.getConfigurator().apply(encoderConfig);
-    
-        // Trapazoid motion profiling initilization
-        trapezoidProfile.calculate(timer.get(), new State(), new State(0, 0));
-    
     }
 
     public void rawExtension(boolean extending){

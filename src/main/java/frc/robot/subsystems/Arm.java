@@ -1,9 +1,15 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -21,8 +27,8 @@ public class Arm extends SubsystemBase {
     private final CANcoder pivotEncoder = new CANcoder(Constants.IDs.kPivotEncoder);
     
     private final TrapezoidProfile trapezoidProfile = new TrapezoidProfile(new Constraints(0, 0));
-    private State tpGoal = new TrapezoidProfile.State();
-    private State tpCurrent = new TrapezoidProfile.State();
+    private State tpGoal = new State(0,0);
+    private State tpCurrent = new State(0,0);
     private final Timer timer = new Timer();
 
     private final VoltageOut openLoop = new VoltageOut(0).withEnableFOC(false);
@@ -31,7 +37,53 @@ public class Arm extends SubsystemBase {
     private boolean intaking;
 
     public Arm(){
+        TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
 
+        // Current limits
+		pivotConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+		pivotConfig.CurrentLimits.SupplyCurrentLimit = Constants.CurrentLimits.kArmSupply; 
+        pivotConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        pivotConfig.CurrentLimits.StatorCurrentLimit = Constants.CurrentLimits.kArmStator;
+
+        // PID value assignment
+		pivotConfig.Slot0.kP = Constants.PIDConstants.Arm.kRotationP;
+		pivotConfig.Slot0.kI = Constants.PIDConstants.Arm.kRotationI;
+		pivotConfig.Slot0.kD = Constants.PIDConstants.Arm.kRotationD;
+		pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+        // Assigning encoder as feedback device
+		pivotConfig.Feedback.FeedbackRemoteSensorID = pivotEncoder.getDeviceID();
+		pivotConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+		pivotConfig.Feedback.RotorToSensorRatio = Constants.Arm.kRotationGearRatio;
+
+		pivotMotor.getConfigurator().apply(pivotConfig);
+		
+        // rotation encoder
+		CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
+		encoderConfig.MagnetSensor.MagnetOffset = (Constants.Arm.kPivotMagnetOffset) / 360.0;
+		encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive; // change
+        encoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
+		pivotEncoder.getConfigurator().apply(encoderConfig);
+
+        // Make starting position zero
+
+
+        // Intake 
+        TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
+
+        // Current limits
+		pivotConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+		pivotConfig.CurrentLimits.SupplyCurrentLimit = Constants.CurrentLimits.kIntakeSupply; 
+        pivotConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        pivotConfig.CurrentLimits.StatorCurrentLimit = Constants.CurrentLimits.kIntakeStator;
+
+        // PID value assignment
+		pivotConfig.Slot0.kP = Constants.PIDConstants.Arm.kIntakeP;
+		pivotConfig.Slot0.kI = Constants.PIDConstants.Arm.kIntakeI;
+		pivotConfig.Slot0.kD = Constants.PIDConstants.Arm.kIntakeD;
+		pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+		intakeMotor.getConfigurator().apply(intakeConfig);
     }
 
     public void rawIntake(boolean intaking, boolean coralIntake){
@@ -41,11 +93,18 @@ public class Arm extends SubsystemBase {
             intakeMotor.setControl(openLoop.withOutput(-Constants.Arm.kIntakeSpeed * 12.0));
         }
     }
-
+    
+    /**
+     * @param desiredRotation The target angle, in degrees from the starting configuration (0 degrees)
+     */
     public void rotateToDegrees(double desiredRotation){
         desiredRotation %= 360; // Ensures a degree value within 360 degrees, within reason
         desiredRotation /= 360.0; // Changes degree rotation to 
         pivotMotor.setControl(closedLoopPosition.withPosition(desiredRotation));
+    }
+
+    public void setTargetRotation(double desiredRotation){
+        tpGoal = new State(desiredRotation,0);
     }
 
     /**
@@ -71,5 +130,4 @@ public class Arm extends SubsystemBase {
             
         }
     }
-
 }

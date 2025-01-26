@@ -17,9 +17,7 @@ public class SuperStructureStaging {
             this.arm = arm;
 
             addRequirements(elevator, arm);
-        }
-
-                
+        }       
     }
 
     public static void REST(){

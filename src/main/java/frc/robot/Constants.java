@@ -111,7 +111,7 @@ public final class Constants {
 
 	public static class Arm {
 		public static final double kRotationGearRatio = 0.0;
-		public static final double kRotationMagnetOffset = 0.0;
+		public static final double kPivotMagnetOffset = 0.0;
 		
 		public static final double kIntakeSpeed = 0.0; // 0-1
 	}
@@ -181,6 +181,10 @@ public final class Constants {
 			public static final double kRotationP = 0.0;
 			public static final double kRotationI = 0.0;
 			public static final double kRotationD = 0.0;
+
+			public static final double kIntakeP = 0.0;
+			public static final double kIntakeI = 0.0;
+			public static final double kIntakeD = 0.0;
 		}
 	}
 
@@ -193,6 +197,9 @@ public final class Constants {
 		
 		public static final double kArmSupply = 0.0;
 		public static final double kArmStator = 0.0;
+
+		public static final double kIntakeSupply = 0.0;
+		public static final double kIntakeStator = 0.0;
 	}
 
 	public static class Field {
