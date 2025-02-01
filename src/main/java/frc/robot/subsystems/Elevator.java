@@ -4,20 +4,18 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import com.redstorm509.stormkit.math.PositionTarget;
 
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.commands.StagingManager;
 
 public class Elevator extends SubsystemBase {
     
@@ -25,40 +23,10 @@ public class Elevator extends SubsystemBase {
 	private final TalonFX extensionFollower = new TalonFX(Constants.IDs.kExtensionFollower);
 
     private CANcoder extensionEncoder = new CANcoder(0);
-    
-    private final TrapezoidProfile trapezoidProfile = new TrapezoidProfile(new Constraints(0, 0));
-    private final Timer timer = new Timer(); 
 
     private VoltageOut openLoop = new VoltageOut(0).withEnableFOC(false);
 	private PositionVoltage closedLoopPosition = new PositionVoltage(0).withEnableFOC(false);
-
-    private enum ExtensionState {
-        // Defaultst                                    
-        ZEROED(new State()),
-
-        // Coral
-        CORAL_L4(new State()),
-        CORAL_L3(new State()),
-        CORAL_L2(new State()),
-        CORAL_L1(new State()),
-        CORAL_GROUND(new State()),
-
-        // Algae
-        ALGAE_HIGH(new State()),
-        ALGAE_LOW(new State()),
-        ALGAE_GROUND(new State());
-
-
-        public final State state;
-
-        ExtensionState(State state){
-            this.state = state;
-        }
-    }
-
-    public ExtensionState currentExtensionState;
-    public ExtensionState targetExtensionState;
-
+    private VelocityVoltage closedLoopVelocity = new VelocityVoltage(0).withEnableFOC(false);
 
     public Elevator(){
         TalonFXConfiguration extensionConfig = new TalonFXConfiguration();
@@ -91,16 +59,49 @@ public class Elevator extends SubsystemBase {
 		extensionEncoder.getConfigurator().apply(encoderConfig);
     }
 
-    public void rawExtension(boolean extending){
-        extensionLeader.setControl(openLoop.withOutput(null));
+    public void rawExtension(double extension){ 
+        extensionLeader.setControl(openLoop.withOutput(12 * extension));
     }
 
-    public void setTargetState(ExtensionState target){
-        targetExtensionState = target;
+    public void setPositionControl(double position){
+        // Process input
+        extensionLeader.setControl(closedLoopPosition.withPosition(position));
+    }
+
+    public void setExtendingVelocity(double velocity){
+        extensionLeader.setControl(closedLoopVelocity.withVelocity(velocity));
+    }
+
+    /**
+     * @return The current extension of the elevator from the ground, in meters
+     */
+    public double getExtension(){
+        return extensionLeader.getRotorPosition().getValueAsDouble() * 1.0; // TODO: rotor Position to extension m conversion
+    }
+
+    /**
+     * @return The current velocity of the elevator away from the ground, in meters per second
+     */
+    public double getExtendingVelocity() {
+        return extensionLeader.getVelocity().getValueAsDouble() * 1.0; // TODO: rotor velocity to extension m/s conversion
+    }
+
+    /**
+     * Sets the elevator to maintain it's current position with a seperate PID profile
+     */
+    public void maintainExntension() {
+        extensionLeader.setControl(closedLoopPosition.withPosition(extensionLeader.getPosition().getValueAsDouble())); 
+    }
+
+    public boolean isInwardsRotationSafe() {
+        return MathUtil.isNear(
+            StagingManager.StagingState.ZEROED.extension, 
+            getExtension(), 
+            Constants.Arm.kValidRotationTolerance);
     }
 
     @Override
     public void periodic() {
-        
+
     }
 }

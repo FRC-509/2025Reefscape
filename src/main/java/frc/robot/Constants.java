@@ -7,6 +7,7 @@ package frc.robot;
 import com.pathplanner.lib.config.ModuleConfig;
 
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import frc.robot.util.math.Conversions;
 
@@ -106,7 +107,10 @@ public final class Constants {
 		// Gear ratio between the rotation of the motor and the rotation extending the elevator 
 		public static final double kExtensionGearRatio = 0.0; // steer gear ratio
 		public static final double kExtensionMagnetOffset = 0.0;
-		
+        public static final double kValidStateTolerance = 0;
+		public static final double kMaxVelocity = 0; // Find desired units of setVelocity
+        public static final double kMaxAcceleration = 0;
+		public static final  Constraints kMotionProfileConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
 	}
 
 	public static class Arm {
@@ -114,6 +118,7 @@ public final class Constants {
 		public static final double kPivotMagnetOffset = 0.0;
 		
 		public static final double kIntakeSpeed = 0.0; // 0-1
+		public static final double kValidRotationTolerance = 0;
 	}
 
 	public static class IDs {
