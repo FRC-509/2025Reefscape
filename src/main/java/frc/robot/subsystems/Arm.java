@@ -4,7 +4,6 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
@@ -17,12 +16,10 @@ import frc.robot.Constants;
 public class Arm extends SubsystemBase {
     
     private final TalonFX pivotMotor = new TalonFX(Constants.IDs.kPivotMotor);
-    private final TalonFX intakeMotor = new TalonFX(Constants.IDs.kIntakeMotor);
 
     // sensors :(
     private final CANcoder pivotEncoder = new CANcoder(Constants.IDs.kPivotEncoder);
 
-    private final VoltageOut intakeOpenLoop = new VoltageOut(0).withEnableFOC(false);
 	private final PositionVoltage closedLoopPosition = new PositionVoltage(0).withEnableFOC(false);
     private final VelocityVoltage closedLoopVelocity = new VelocityVoltage(0.0).withEnableFOC(false);
 
@@ -57,35 +54,6 @@ public class Arm extends SubsystemBase {
 		pivotEncoder.getConfigurator().apply(encoderConfig);
 
         // Make starting position zero
-
-
-        // Intake 
-        TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
-
-        // Current limits
-		pivotConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-		pivotConfig.CurrentLimits.SupplyCurrentLimit = Constants.CurrentLimits.kIntakeSupply; 
-        pivotConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        pivotConfig.CurrentLimits.StatorCurrentLimit = Constants.CurrentLimits.kIntakeStator;
-
-        // PID value assignment
-		pivotConfig.Slot0.kP = Constants.PIDConstants.Arm.kIntakeP;
-		pivotConfig.Slot0.kI = Constants.PIDConstants.Arm.kIntakeI;
-		pivotConfig.Slot0.kD = Constants.PIDConstants.Arm.kIntakeD;
-		pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-
-		intakeMotor.getConfigurator().apply(intakeConfig);
-    }
-
-    public void setRawIntake(boolean stop, boolean intaking, boolean coralIntake){
-        if (stop) {
-            intakeMotor.setControl(intakeOpenLoop.withOutput(Constants.Arm.kIntakeSpeed * 12.0));
-        }
-        else if (coralIntake && intaking || !coralIntake && !intaking){ // TODO: find which is inverted
-            intakeMotor.setControl(intakeOpenLoop.withOutput(Constants.Arm.kIntakeSpeed * 12.0));
-        } else {
-            intakeMotor.setControl(intakeOpenLoop.withOutput(-Constants.Arm.kIntakeSpeed * 12.0));
-        }
     }
 
     /**
@@ -120,8 +88,6 @@ public class Arm extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // if (Math.abs(intakeMotor.getVelocity().getValueAsDouble()) <= 0.8 * Constants.Arm.kIntakeSpeed * 512.0 && intaking){
-        //     // stop intake
-        // }
+        
     }
 }

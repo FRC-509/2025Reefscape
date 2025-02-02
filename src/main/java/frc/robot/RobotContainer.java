@@ -14,6 +14,7 @@ import frc.robot.commands.*;
 import frc.robot.commands.StagingManager.StagingState;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.PigeonWrapper;
@@ -29,15 +30,17 @@ public class RobotContainer {
 	private CommandXboxController operator = new CommandXboxController(2);
 
 	private final SwerveDrive swerve;
-	private final Arm arm;
 	private final Elevator elevator;
+	private final Arm arm;
+	private final Intake intake;
 		
 	private SendableChooser<Command> chooser = new SendableChooser<Command>();
 
 	public RobotContainer() {
 		this.swerve = new SwerveDrive(pigeon, new Limelight("womp womp"));
-		this.arm = new Arm();
 		this.elevator = new Elevator();
+		this.arm = new Arm();
+		this.intake = new Intake();
 
 		configureButtonBindings();
 		addAutonomousRoutines();
@@ -91,10 +94,25 @@ public class RobotContainer {
 
 		// OPERATOR ------------------------------------
 
+		// Elevator / Arm setpoint control
 		operator.a().onTrue(StagingManager.PlaceCoral_L4(elevator, arm)); // TODO: Change to preferences
 		operator.b().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L2, elevator, arm));
 		operator.x().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L3, elevator, arm));
 		operator.y().onTrue(StagingManager.GroundPickup(elevator, arm));
+
+		// Algae Intake / Coral Outake
+		operator.rightBumper().whileTrue(Commands.runEnd(() -> {
+			intake.intake(true);
+		}, () -> {
+			intake.stopIntaking();
+		}, intake));
+
+		// Coral Intake / Algae Outake
+		operator.leftBumper().whileTrue(Commands.runEnd(() -> {
+			intake.intake(false);
+		}, () -> {
+			intake.stopIntaking();
+		}, intake));
 	}
 
 	private void addAutonomousRoutines() {
