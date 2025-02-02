@@ -35,7 +35,7 @@ public class StagingManager {
         }
     }
 
-    public SequentialCommandGroup ZeroState(Elevator elevator, Arm arm){
+    public static SequentialCommandGroup ZeroState(Elevator elevator, Arm arm){
         return new SequentialCommandGroup(
             new ParallelCommandGroup(
                 new RotateTo(StagingState.ALGAE_HIGH.rotation, () -> elevator.isInwardsRotationSafe(), arm),
@@ -44,24 +44,31 @@ public class StagingManager {
         );
     }
 
-    public ParallelCommandGroup PlaceCoral_L4(Elevator elevator, Arm arm){
+    public static ParallelCommandGroup PlaceCoral_L4(Elevator elevator, Arm arm){
         return new ParallelCommandGroup(
             new RotateTo(StagingState.CORAL_L4.rotation, () -> elevator.isInwardsRotationSafe(), arm),
             new ExtendTo(StagingState.CORAL_L4.extension, () -> arm.isExtensionSafe(), elevator)
         );
     }
 
-    public ParallelCommandGroup PlaceCoral_Mid(StagingState state,Elevator elevator, Arm arm){
+    public static ParallelCommandGroup PlaceCoral_Mid(StagingState state,Elevator elevator, Arm arm){
         return new ParallelCommandGroup(
             new RotateTo(state.rotation, () -> elevator.isInwardsRotationSafe(), arm),
             new ExtendTo(state.extension, () -> arm.isExtensionSafe(), elevator)
         );
     }
 
-    public ParallelCommandGroup GroundPickup(Elevator elevator, Arm arm){
+    public static ParallelCommandGroup GroundPickup(Elevator elevator, Arm arm){
         return new ParallelCommandGroup(
             new RotateTo(StagingState.CORAL_GROUND.rotation, () -> elevator.isInwardsRotationSafe(), arm),
             new ExtendTo(StagingState.CORAL_GROUND.extension, () -> arm.isExtensionSafe(), elevator)
+        );
+    }
+
+    public static ParallelCommandGroup CarryingPosition(Elevator elevator, Arm arm){
+        return new ParallelCommandGroup(
+            new RotateTo(StagingState.ZEROED.rotation, () -> elevator.isInwardsRotationSafe(), arm),
+            new ExtendTo(StagingState.ZEROED.extension, () -> arm.isExtensionSafe(), elevator)
         );
     }
 }

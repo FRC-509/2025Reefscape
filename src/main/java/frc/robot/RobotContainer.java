@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
 
 import frc.robot.commands.*;
+import frc.robot.commands.StagingManager.StagingState;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.drive.*;
@@ -30,14 +31,13 @@ public class RobotContainer {
 	private final SwerveDrive swerve;
 	private final Arm arm;
 	private final Elevator elevator;
-	
+		
 	private SendableChooser<Command> chooser = new SendableChooser<Command>();
 
 	public RobotContainer() {
 		this.swerve = new SwerveDrive(pigeon, new Limelight("womp womp"));
 		this.arm = new Arm();
 		this.elevator = new Elevator();
-		
 
 		configureButtonBindings();
 		addAutonomousRoutines();
@@ -50,6 +50,9 @@ public class RobotContainer {
 	}
 
 	private void configureButtonBindings() {
+
+		// DRIVER ------------------------------------
+
 		// Binds translation to the left stick, and rotation to the right stick.
 		// Defaults to field-oriented drive unless the left button on the left stick is
 		// held down.
@@ -85,6 +88,13 @@ public class RobotContainer {
 			swerve.setTargetHeading(0);
 		}, swerve));
 
+
+		// OPERATOR ------------------------------------
+
+		operator.a().onTrue(StagingManager.PlaceCoral_L4(elevator, arm)); // TODO: Change to preferences
+		operator.b().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L2, elevator, arm));
+		operator.x().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L3, elevator, arm));
+		operator.y().onTrue(StagingManager.GroundPickup(elevator, arm));
 	}
 
 	private void addAutonomousRoutines() {
