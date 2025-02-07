@@ -23,7 +23,10 @@ import com.redstorm509.stormkit.controllers.ThrustmasterJoystick;
 import com.redstorm509.stormkit.controllers.ThrustmasterJoystick.StickButton;
 
 public class RobotContainer {
+
 	private final PigeonWrapper pigeon = new PigeonWrapper(30, Constants.kCANIvore);
+	private final Limelight baseLimelight = new Limelight(null);
+	private final Limelight highLimelight = new Limelight(null);
 
 	private ThrustmasterJoystick driverLeft = new ThrustmasterJoystick(0);
 	private ThrustmasterJoystick driverRight = new ThrustmasterJoystick(1);

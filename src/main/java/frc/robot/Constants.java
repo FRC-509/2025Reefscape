@@ -150,6 +150,14 @@ public final class Constants {
 
 	}
 
+	public static class Vision {
+
+		public static final double kRotationAlignmentSpeedScalar = 5.45;
+		public static final double kAlignmentRotationTolerance = 0; // meters
+        public static final double kAlignmentTranslationTolerance = 0; // degrees
+		
+	}
+
 	public static class PIDConstants {
 		public static class Drive {
 			// TODO: Change all values

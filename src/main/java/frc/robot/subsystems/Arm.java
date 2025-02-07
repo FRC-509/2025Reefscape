@@ -64,7 +64,7 @@ public class Arm extends SubsystemBase {
     }
 
     /**
-     * @return The rotations per second of the
+     * @return The rotations per second of the arm
      */
     public double getRotatingVelocity() {
         return pivotMotor.getVelocity().getValueAsDouble();
