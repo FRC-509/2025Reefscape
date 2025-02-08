@@ -9,7 +9,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
-
+import frc.robot.Constants.PIDConstants.Climb;
 import frc.robot.commands.*;
 import frc.robot.commands.StagingManager.StagingState;
 import frc.robot.subsystems.Arm;
@@ -36,7 +36,8 @@ public class RobotContainer {
 	private final Elevator elevator;
 	private final Arm arm;
 	private final Intake intake;
-		
+	private final Climb climb;
+	
 	private SendableChooser<Command> chooser = new SendableChooser<Command>();
 
 	public RobotContainer() {
@@ -44,6 +45,7 @@ public class RobotContainer {
 		this.elevator = new Elevator();
 		this.arm = new Arm();
 		this.intake = new Intake();
+		this.climb = new Climb();
 
 		configureButtonBindings();
 		addAutonomousRoutines();

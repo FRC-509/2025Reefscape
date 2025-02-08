@@ -181,7 +181,7 @@ public class SwerveModule {
 
 	public void simPeriodic() {
 		double error = (lastSet.angle.getRotations() - simulated.angle.getRotations()) / Constants.Chassis.MK4I.kAngleGearRatio;
-		double rotationsPerSecond = Constants.Chassis.kFalconFreeSpeedRPS * error * Constants.PIDConstants.Drive.kSteerAngleP / 12.0;
+		double rotationsPerSecond = Constants.Chassis.kKrakenFreeSpeedRPS * error * Constants.PIDConstants.Drive.kSteerAngleP / 12.0;
 
 		simulated.angle = Rotation2d.fromRotations(simulated.angle.getRotations() + rotationsPerSecond * 0.02);
 		simulated.distanceMeters += lastSet.speedMetersPerSecond * 0.02;

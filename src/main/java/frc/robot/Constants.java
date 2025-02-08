@@ -9,6 +9,7 @@ import com.pathplanner.lib.config.ModuleConfig;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.util.math.Conversions;
 
 /**
@@ -30,20 +31,20 @@ public final class Constants {
 	}
 
 	public static class Chassis {
-		public static final double kRobotWeight = 0.0; // kg, incl bumpers and battery
+		public static final double kRobotWeight = 100.0d; // kg, incl bumpers and battery
 		public static final double kOffsetToSwerveModule = Units.inchesToMeters(10.375);
-		public static final double kFalconFreeSpeedRPS = 6380.0d / 60.0d; // div 60
-		public static final double kKrakenFreeSpeedRPM = 6000;
-		public static final double kMaxSpeed = Conversions.falconToMPS(kFalconFreeSpeedRPS, MK4I.kWheelCircumference,
+		public static final double kKrakenFreeSpeedRPM = 6000.0d;
+		public static final double kKrakenFreeSpeedRPS = kKrakenFreeSpeedRPM / 60.0d;
+		public static final double kMaxSpeed = Conversions.falconToMPS(kKrakenFreeSpeedRPS, MK4I.kWheelCircumference,
 			MK4I.kDriveGearRatio);
 
 		public static class MK4I { // MK4i level 2s
 			public static final double kWheelRadius = Units.inchesToMeters(2.0);
 			public static final double kWheelCircumference = 2 * kWheelRadius * Math.PI; // 0.3192 meters
-			public static final double kDriveGearRatio = 425.0d / 63.0d;
+			public static final double kDriveGearRatio = 425.0d / 63.0d; // TODO: Change
 			public static final double kAngleGearRatio = 150.0d / 7.0d;
 			public static final double kCouplingRatio = 25.0d / 7.0d;
-			public static final double wheelCOF = 0.0; // TODO: find later
+			public static final double wheelCOF = 1.0; // default placeholder value
 		}
 
 		public static final double kMaxAngularVelocity = kMaxSpeed
@@ -51,11 +52,11 @@ public final class Constants {
 		// public static final double kMaxAngularAcceleration = 0.0;
 
 		public static final DCMotor kKrakenDcMotorProfile = new DCMotor(
-			13.12, // TODO: Populate with MORE real data
+			12, // TODO: Populate with MORE real data
 			7.09, 
 			366, 
-			2, 
-			kKrakenFreeSpeedRPM * 2 * Math.PI, 
+			2,
+			kKrakenFreeSpeedRPS * 2 * Math.PI,
 			1);
 
 		public static final ModuleConfig kModuleConfig = new ModuleConfig(
@@ -105,20 +106,20 @@ public final class Constants {
 
 	public static class Elevator {
 		// Gear ratio between the rotation of the motor and the rotation extending the elevator 
-		public static final double kExtensionGearRatio = 0.0; // steer gear ratio
-		public static final double kExtensionMagnetOffset = 0.0;
-        public static final double kValidStateTolerance = 0;
+		public static final double kExtensionGearRatio = 1.0 / 12.0; //TODO: validate
+		public static final double kExtensionMagnetOffset = 0.0; // TODO: find later
+        public static final double kValidStateTolerance = 0.005; // meters
 		public static final double kMaxVelocity = 0; // Find desired units of setVelocity
         public static final double kMaxAcceleration = 0;
 		public static final  Constraints kMotionProfileConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
 	}
 
 	public static class Arm {
-		public static final double kRotationGearRatio = 0.0;
+		public static final double kRotationGearRatio = 4.0 / 3.0;
 		public static final double kPivotMagnetOffset = 0.0;
 		
-		public static final double kIntakeSpeed = 0.0; // 0-1
-		public static final double kValidRotationTolerance = 0;
+		public static final double kIntakeSpeed = 0.15; // 0.0-1.0
+		public static final double kValidRotationTolerance = 0.01; // In degrees TODO: Tune
 	}
 
 	public static class IDs {
@@ -147,6 +148,9 @@ public final class Constants {
         public static final int kPivotMotor = 0;
 		public static final int kPivotEncoder = 0;
 		public static final int kIntakeMotor = 0;
+
+		public static final int kClimbMotor = 0;
+		public static final int kClimbSolenoid = 0;
 
 	}
 
@@ -199,6 +203,12 @@ public final class Constants {
 			public static final double kIntakeI = 0.0;
 			public static final double kIntakeD = 0.0;
 		}
+
+        public static class Climb {
+			public static final double kRotateP = 0.0;
+			public static final double kRotateI = 0.0;
+			public static final double kRotateD = 0.0;
+		}
 	}
 
 	public static class CurrentLimits {
@@ -213,9 +223,17 @@ public final class Constants {
 
 		public static final double kIntakeSupply = 0.0;
 		public static final double kIntakeStator = 0.0;
+
+        public static final double kClimbSupply = 0;
+
+        public static final double kClimbStator = 0;
 	}
 
 	public static class Field {
 		public static final double kFieldLength = 16.54d; // Double check
+	}
+
+	public static double tunableNumber(String name, double defaultValue){
+		return SmartDashboard.getNumber(name, defaultValue);
 	}
 }
