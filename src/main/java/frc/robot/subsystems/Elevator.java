@@ -46,7 +46,9 @@ public class Elevator extends SubsystemBase {
         // Assigning encoder as feedback device
 		extensionConfig.Feedback.FeedbackRemoteSensorID = extensionEncoder.getDeviceID();
 		extensionConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-		extensionConfig.Feedback.RotorToSensorRatio = Constants.Elevator.kExtensionGearRatio;
+		extensionConfig.Feedback.RotorToSensorRatio = Constants.Elevator.kRotorToSensorRatio;
+        extensionConfig.Feedback.SensorToMechanismRatio = Constants.Elevator.kSensorToMechanismRatio;
+
 
 		extensionLeader.getConfigurator().apply(extensionConfig);
 		extensionFollower.getConfigurator().apply(extensionConfig);

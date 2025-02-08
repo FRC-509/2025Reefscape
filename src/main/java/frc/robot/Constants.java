@@ -28,6 +28,7 @@ public final class Constants {
 		public static final double kStickDeadband = 0.1;
         public static final double kPrecisionMovementMultiplier = 0.3; // TODO: Tune to what feels good
 		public static final double kPrecisionRotationMultiplier = 0.3;
+		public static final double kTriggerDeadband = 0;
 	}
 
 	public static class Chassis {
@@ -106,12 +107,13 @@ public final class Constants {
 
 	public static class Elevator {
 		// Gear ratio between the rotation of the motor and the rotation extending the elevator 
-		public static final double kExtensionGearRatio = 1.0 / 12.0; //TODO: validate
+		public static final double kRotorToSensorRatio = 1.0 / 12.0; //TODO: validate
 		public static final double kExtensionMagnetOffset = 0.0; // TODO: find later
         public static final double kValidStateTolerance = 0.005; // meters
 		public static final double kMaxVelocity = 0; // Find desired units of setVelocity
         public static final double kMaxAcceleration = 0;
 		public static final  Constraints kMotionProfileConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
+        public static final double kSensorToMechanismRatio = 0;
 	}
 
 	public static class Arm {
@@ -120,6 +122,16 @@ public final class Constants {
 		
 		public static final double kIntakeSpeed = 0.15; // 0.0-1.0
 		public static final double kValidRotationTolerance = 0.01; // In degrees TODO: Tune
+        public static final double kSensorToMechanismRatio = 0;
+        public static final double kRotorToSensorRatio = 0;
+	}
+
+	public static class Climber {
+		public static final double kRotationGearRatio = 4.0 / 3.0;		
+		public static final double kValidRotationTolerance = 0.01; // In degrees TODO: Tune
+		public static final double kMaxRotationalSpeed = 0;
+		public static final double kClimbPositionDegrees = 0;
+        public static final double kSensorToMechanismRatio = 0;
 	}
 
 	public static class IDs {
@@ -204,7 +216,7 @@ public final class Constants {
 			public static final double kIntakeD = 0.0;
 		}
 
-        public static class Climb {
+        public static class Climber {
 			public static final double kRotateP = 0.0;
 			public static final double kRotateI = 0.0;
 			public static final double kRotateD = 0.0;

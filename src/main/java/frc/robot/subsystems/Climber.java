@@ -5,22 +5,21 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.fasterxml.jackson.databind.introspect.AnnotationCollector.OneAnnotation;
 
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-public class Climb extends SubsystemBase {
+public class Climber extends SubsystemBase {
     
     private final TalonFX climbMotor = new TalonFX(Constants.IDs.kClimbMotor);
-    private final PositionVoltage rotateClosedLoop = new PositionVoltage(climbMotor.getPosition().getValueAsDouble()).withEnableFOC(false);
+    private final PositionVoltage rotationClosedLoop = new PositionVoltage(climbMotor.getPosition().getValueAsDouble()).withEnableFOC(false);
 
 	private Solenoid lockSolenoid = new Solenoid(PneumaticsModuleType.REVPH, Constants.IDs.kClimbSolenoid);
     private boolean lockClimb;
 
-    public Climb() {
+    public Climber() {
         lockClimb = false;
         TalonFXConfiguration climbConfig = new TalonFXConfiguration();
 
@@ -31,30 +30,52 @@ public class Climb extends SubsystemBase {
         climbConfig.CurrentLimits.StatorCurrentLimit = Constants.CurrentLimits.kClimbStator;
 
         // PID value assignment
-		climbConfig.Slot0.kP = Constants.PIDConstants.Climb.kRotateP;
-		climbConfig.Slot0.kI = Constants.PIDConstants.Climb.kRotateI;
-		climbConfig.Slot0.kD = Constants.PIDConstants.Climb.kRotateD;
+		climbConfig.Slot0.kP = Constants.PIDConstants.Climber.kRotateP;
+		climbConfig.Slot0.kI = Constants.PIDConstants.Climber.kRotateI;
+		climbConfig.Slot0.kD = Constants.PIDConstants.Climber.kRotateD;
 		climbConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
         // Feedback
         climbConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+        climbConfig.Feedback.SensorToMechanismRatio = Constants.Climber.kSensorToMechanismRatio;
 
 		climbMotor.getConfigurator().apply(climbConfig);
     }
 
     /**
-     * Sets the position target of the climber to it's vertical state  
+     * Sets the position target of the climber to it's most vertical state  
      */
     public void setClimbPivot(){
-        climbMotor.setControl(rotateClosedLoop.withPosition(0));
+        climbMotor.setControl(rotationClosedLoop.withPosition(Constants.Climber.kClimbPositionDegrees));
     }
 
     /**
-     * Sets the position of the climber 
+     * @param rotationDeriv The desired rate of change of the climber's postion,
+     *                      represented as a value from 0.0 to 1.0, with 1.0 being 
+     *                      the maximum rotational speed of the climber 
      */
-    public void setPassivePivot(){
-        climbMotor.setControl(rotateClosedLoop.withPosition(0));
+    public void pivot(double rotationDeriv){
+        setPivotDegrees(getPivotDegrees() + Constants.Climber.kMaxRotationalSpeed * rotationDeriv);
     }
+
+    public double getPivotDegrees() {
+		return climbMotor.getPosition().getValueAsDouble() * 360.0;
+	}
+
+	public void setPivotDegrees(double targetDegrees) {
+		double delta = (targetDegrees - getPivotDegrees()) % 360;
+
+		if (delta > 180.0d) {
+			delta -= 360.0d;
+		} else if (delta < -180.0d) {
+			delta += 360.0d;
+		}
+
+		double target = getPivotDegrees() + delta;
+		double ticks = target / 360.0d;
+
+		climbMotor.setControl(rotationClosedLoop.withPosition(ticks));
+	}
 
     public void toggleLockClimb(){
         lockClimb = !lockClimb;
@@ -63,5 +84,6 @@ public class Climb extends SubsystemBase {
 
     public void overideLock(boolean lock){
         lockSolenoid.set(lock);
+        lockClimb = lock;
     }
 }

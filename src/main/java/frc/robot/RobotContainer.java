@@ -9,10 +9,10 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
-import frc.robot.Constants.PIDConstants.Climb;
 import frc.robot.commands.*;
 import frc.robot.commands.StagingManager.StagingState;
 import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.drive.*;
@@ -36,7 +36,7 @@ public class RobotContainer {
 	private final Elevator elevator;
 	private final Arm arm;
 	private final Intake intake;
-	private final Climb climb;
+	private final Climber climber;
 	
 	private SendableChooser<Command> chooser = new SendableChooser<Command>();
 
@@ -45,7 +45,7 @@ public class RobotContainer {
 		this.elevator = new Elevator();
 		this.arm = new Arm();
 		this.intake = new Intake();
-		this.climb = new Climb();
+		this.climber = new Climber();
 
 		configureButtonBindings();
 		addAutonomousRoutines();
@@ -101,9 +101,9 @@ public class RobotContainer {
 
 		// Elevator / Arm setpoint control
 		operator.a().onTrue(StagingManager.PlaceCoral_L4(elevator, arm)); // TODO: Change to preferences
-		operator.b().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L2, elevator, arm));
-		operator.x().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L3, elevator, arm));
-		operator.y().onTrue(StagingManager.GroundPickup(elevator, arm));
+		operator.b().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L3, elevator, arm));
+		operator.y().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L2, elevator, arm));
+		operator.x().onTrue(StagingManager.GroundPickup(elevator, arm));
 
 		// Algae Intake / Coral Outake
 		operator.rightBumper().whileTrue(Commands.runEnd(() -> {
@@ -118,6 +118,11 @@ public class RobotContainer {
 		}, () -> {
 			intake.stopIntaking();
 		}, intake));
+
+		climber.setDefaultCommand(new DefaultClimbCommand(
+			() -> operator.getRightY(), 
+			() -> operator.getRightTriggerAxis() >= Constants.Operator.kTriggerDeadband, 
+			climber));
 	}
 
 	private void addAutonomousRoutines() {

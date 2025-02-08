@@ -41,7 +41,8 @@ public class Arm extends SubsystemBase {
         // Assigning encoder as feedback device
 		pivotConfig.Feedback.FeedbackRemoteSensorID = pivotEncoder.getDeviceID();
 		pivotConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-		pivotConfig.Feedback.RotorToSensorRatio = Constants.Arm.kRotationGearRatio;
+		pivotConfig.Feedback.RotorToSensorRatio = Constants.Arm.kRotorToSensorRatio;
+        pivotConfig.Feedback.SensorToMechanismRatio = Constants.Arm.kSensorToMechanismRatio;
 
 		pivotMotor.getConfigurator().apply(pivotConfig);
 		
