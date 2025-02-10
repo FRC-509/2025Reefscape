@@ -124,6 +124,9 @@ public final class Constants {
 		public static final double kValidRotationTolerance = 0.01; // In degrees TODO: Tune
         public static final double kSensorToMechanismRatio = 0;
         public static final double kRotorToSensorRatio = 0;
+		
+        public static final double kExtensionSafeAngle = 0;
+        public static final double kPassiveCoralSpeed = 0;
 	}
 
 	public static class Climber {

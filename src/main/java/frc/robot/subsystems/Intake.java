@@ -40,8 +40,16 @@ public class Intake extends SubsystemBase {
         }
     }
 
+    public void setPassiveCoral(){
+        intakeMotor.setControl(intakeOpenLoop.withOutput(Constants.Arm.kPassiveCoralSpeed * 12.0));
+    }
+
     public void stopIntaking() {
         intakeMotor.setControl(intakeOpenLoop.withOutput(Constants.Arm.kIntakeSpeed * 12.0));
+    }
+
+    public boolean isIntakingCoral() {
+        return Math.abs(intakeMotor.getVelocity().getValueAsDouble()) <= 0.8 * Constants.Arm.kIntakeSpeed * 512.0;
     }
 
     // @Override

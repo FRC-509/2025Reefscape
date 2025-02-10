@@ -12,7 +12,6 @@ public class StagingManager {
     public static enum StagingState {
         // Defaults                               
         ZEROED(0.0,0.0),
-        
 
         // Coral
         CORAL_L4(0.0,0.0),
@@ -20,6 +19,7 @@ public class StagingManager {
         CORAL_L2(0.0,0.0),
         CORAL_L1(0.0,0.0),
         CORAL_GROUND(0.0,0.0),
+        CORAL_STATION(0.0,0.0),
 
         // Algae
         ALGAE_HIGH(0.0,0.0),
@@ -65,10 +65,17 @@ public class StagingManager {
         );
     }
 
+    public static ParallelCommandGroup CoralStation(Elevator elevator, Arm arm){
+        return new ParallelCommandGroup(
+            new RotateTo(StagingState.CORAL_GROUND.rotation, () -> elevator.isInwardsRotationSafe(), arm),
+            new ExtendTo(StagingState.CORAL_GROUND.extension, () -> arm.isExtensionSafe(), elevator)
+        );
+    }
+
     public static ParallelCommandGroup CarryingPosition(Elevator elevator, Arm arm){
         return new ParallelCommandGroup(
-            new RotateTo(StagingState.ZEROED.rotation, () -> elevator.isInwardsRotationSafe(), arm),
-            new ExtendTo(StagingState.ZEROED.extension, () -> arm.isExtensionSafe(), elevator)
+            new RotateTo(StagingState.CORAL_STATION.rotation, () -> elevator.isInwardsRotationSafe(), arm),
+            new ExtendTo(StagingState.CORAL_STATION.extension, () -> arm.isExtensionSafe(), elevator)
         );
     }
 }

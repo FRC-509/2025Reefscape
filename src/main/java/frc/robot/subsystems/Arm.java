@@ -84,7 +84,7 @@ public class Arm extends SubsystemBase {
     }
 
     public boolean isExtensionSafe(){
-        return getRotation() > 0.0; // TODO: MUST FIX AND ADD REAL VALUE RAHHHHH
+        return getRotation() > Constants.Arm.kExtensionSafeAngle; // TODO: MUST FIX AND ADD REAL VALUE RAHHHHH
     }
 
     @Override
