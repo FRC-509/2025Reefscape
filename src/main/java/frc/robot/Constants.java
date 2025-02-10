@@ -33,6 +33,7 @@ public final class Constants {
 
 	public static class Chassis {
 		public static final double kRobotWeight = 100.0d; // kg, incl bumpers and battery
+		public static final double kMOI = 4.4659;
 		public static final double kOffsetToSwerveModule = Units.inchesToMeters(10.375);
 		public static final double kKrakenFreeSpeedRPM = 6000.0d;
 		public static final double kKrakenFreeSpeedRPS = kKrakenFreeSpeedRPM / 60.0d;
