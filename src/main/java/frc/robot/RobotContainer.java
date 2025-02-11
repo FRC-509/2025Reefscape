@@ -105,17 +105,24 @@ public class RobotContainer {
 		operator.b().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L3, elevator, arm));
 		operator.y().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L2, elevator, arm));
 		operator.x().onTrue(StagingManager.GroundPickup(elevator, arm));
+		operator.leftTrigger(Constants.Operator.kTriggerDeadband).onTrue(StagingManager.CoralStation(elevator, arm));
+
+		operator.a().onFalse(StagingManager.ZeroState(elevator, arm));
+		operator.b().onFalse(StagingManager.ZeroState(elevator, arm));
+		operator.y().onFalse(StagingManager.ZeroState(elevator, arm));
+		operator.x().onFalse(StagingManager.ZeroState(elevator, arm));
+		operator.leftTrigger(Constants.Operator.kTriggerDeadband).onFalse(StagingManager.ZeroState(elevator, arm));
 
 		// Algae Intake / Coral Outake
 		operator.rightBumper().whileTrue(Commands.runEnd(
-		() -> { intake.setState(IntakingState.ALGAE_INTAKE); }, 
-		() -> { intake.stop(); },
+		() -> intake.setState(IntakingState.ALGAE_INTAKE), 
+		() -> intake.stop(),
 		intake));
 
 		// Coral Intake / Algae Outake
 		operator.leftBumper().whileTrue(Commands.runEnd(
-			() -> { intake.setState(IntakingState.CORAL_INTAKE); }, 
-			() -> { intake.stop(); }, 
+			() -> intake.setState(IntakingState.CORAL_INTAKE), 
+			() -> intake.stop(), 
 			intake));
 
 		climber.setDefaultCommand(new DefaultClimbCommand(
