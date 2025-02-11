@@ -6,6 +6,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -52,11 +54,11 @@ public class Intake extends SubsystemBase {
 
     public void setState(IntakingState state){
         // If you go from Coral Intake -> Algae Intake, it is the operator attempting to outake
-        if ((state.equals(IntakingState.CORAL_INTAKE) || state.equals(IntakingState.CORAL_PASSIVE)) 
-            && state.equals(IntakingState.ALGAE_INTAKE))
+        if (state.equals(IntakingState.ALGAE_INTAKE)
+            && (state.equals(IntakingState.CORAL_INTAKE) || state.equals(IntakingState.CORAL_PASSIVE)))
             this.intakingState = IntakingState.CORAL_OUTAKE;
-        else if ((state.equals(IntakingState.ALGAE_INTAKE) || state.equals(IntakingState.ALGAE_PASSIVE)) 
-            && state.equals(IntakingState.CORAL_OUTAKE))
+        else if (state.equals(IntakingState.CORAL_OUTAKE)
+            && (state.equals(IntakingState.ALGAE_INTAKE) || state.equals(IntakingState.ALGAE_PASSIVE)))
             this.intakingState = IntakingState.ALGAE_OUTAKE;
         else this.intakingState = state;
     }
@@ -85,8 +87,18 @@ public class Intake extends SubsystemBase {
             intakeMotor.setControl(intakeOpenLoop.withOutput(intakingState.voltageOut));
         
         lastIntakingState = intakingState;
+        SmartDashboard.putString("Intaking State", intakingState.toString());
+        SmartDashboard.putString("Last Intaking State", lastIntakingState.toString());
         SmartDashboard.putBoolean("Has Intaken Gamepiece",
             intakingState.equals(IntakingState.ALGAE_INTAKE) && stallTorqueCurrent > Constants.Intake.kAlgaeTorqueCurrent
             || intakingState.equals(IntakingState.ALGAE_INTAKE) && stallTorqueCurrent > Constants.Intake.kAlgaeTorqueCurrent);
+    }
+
+    public static SequentialCommandGroup outakeCommand(boolean coral, Intake intake) {
+        return new SequentialCommandGroup(
+			Commands.run(() -> intake.outake(coral), intake),
+			Commands.waitSeconds(coral ? Constants.Intake.kCoralOutakeDelay : Constants.Intake.kAlgaeOutakeDelay),
+			Commands.run(() -> intake.stop(), intake)
+		);
     }
 }

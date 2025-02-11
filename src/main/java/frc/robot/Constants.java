@@ -144,6 +144,7 @@ public final class Constants {
         public static final double kCoralOutakeVoltage = 0;
 
 		public static final double kCoralOutakeDelay = 0.5; // seconds // TODO: Reduce
+        public static final double kAlgaeOutakeDelay = 0.2;
 	}
 
 	public static class Climber {

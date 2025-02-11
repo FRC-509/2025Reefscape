@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.commands.*;
 import frc.robot.commands.StagingManager.StagingState;
 import frc.robot.subsystems.Arm;
-import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Intake.IntakingState;
@@ -26,8 +25,8 @@ import com.redstorm509.stormkit.controllers.ThrustmasterJoystick.StickButton;
 public class RobotContainer {
 
 	private final PigeonWrapper pigeon = new PigeonWrapper(30, Constants.kCANIvore);
-	private final Limelight baseLimelight = new Limelight(null);
-	private final Limelight highLimelight = new Limelight(null);
+	// private final Limelight baseLimelight = new Limelight(null);
+	// private final Limelight highLimelight = new Limelight(null);
 
 	private ThrustmasterJoystick driverLeft = new ThrustmasterJoystick(0);
 	private ThrustmasterJoystick driverRight = new ThrustmasterJoystick(1);
@@ -37,7 +36,7 @@ public class RobotContainer {
 	private final Elevator elevator;
 	private final Arm arm;
 	private final Intake intake;
-	private final Climber climber;
+	// private final Climber climber;
 	
 	private SendableChooser<Command> chooser = new SendableChooser<Command>();
 
@@ -46,7 +45,7 @@ public class RobotContainer {
 		this.elevator = new Elevator();
 		this.arm = new Arm();
 		this.intake = new Intake();
-		this.climber = new Climber();
+		// this.climber = new Climber();
 
 		configureButtonBindings();
 		addAutonomousRoutines();
@@ -113,22 +112,18 @@ public class RobotContainer {
 		operator.x().onFalse(StagingManager.ZeroState(elevator, arm));
 		operator.leftTrigger(Constants.Operator.kTriggerDeadband).onFalse(StagingManager.ZeroState(elevator, arm));
 
-		// Algae Intake / Coral Outake
-		operator.rightBumper().whileTrue(Commands.runEnd(
-		() -> intake.setState(IntakingState.ALGAE_INTAKE), 
-		() -> intake.stop(),
-		intake));
+		// Coral Intake / outake on release
+		operator.leftBumper().onTrue(Commands.run(() -> intake.setState(IntakingState.CORAL_INTAKE), intake));
+		operator.leftBumper().onFalse(Intake.outakeCommand(true, intake));
 
-		// Coral Intake / Algae Outake
-		operator.leftBumper().whileTrue(Commands.runEnd(
-			() -> intake.setState(IntakingState.CORAL_INTAKE), 
-			() -> intake.stop(), 
-			intake));
+		// Algae Intake / outake on release
+		operator.rightBumper().onTrue(Commands.run(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));
+		operator.leftBumper().onFalse(Intake.outakeCommand(false, intake));
 
-		climber.setDefaultCommand(new DefaultClimbCommand(
-			() -> operator.getRightY(), 
-			() -> operator.getRightTriggerAxis() >= Constants.Operator.kTriggerDeadband, 
-			climber));
+		// climber.setDefaultCommand(new DefaultClimbCommand(
+		// 	() -> operator.getRightY(), 
+		// 	() -> operator.getRightTriggerAxis() >= Constants.Operator.kTriggerDeadband, 
+		// 	climber));
 	}
 
 	private void addAutonomousRoutines() {
