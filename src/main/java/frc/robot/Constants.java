@@ -130,6 +130,22 @@ public final class Constants {
         public static final double kPassiveCoralSpeed = 0;
 	}
 
+	public static class Intake { //TODO: Find Me
+        public static final double kAlgaeIntakeVoltage = 0;
+		public static final double kCoralIntakeVoltage = 0;
+
+        public static final double kAlgaeTorqueCurrent = 0;
+		public static final double kCoralTorqueCurrent = 0;
+
+        public static final double kAlgaePassiveVoltage = 0;
+        public static final double kCoralPassiveVoltage = 0;
+
+        public static final double kAlgaeOutakeVoltage = 0;
+        public static final double kCoralOutakeVoltage = 0;
+
+		public static final double kCoralOutakeDelay = 0.5; // seconds // TODO: Reduce
+	}
+
 	public static class Climber {
 		public static final double kRotationGearRatio = 4.0 / 3.0;		
 		public static final double kValidRotationTolerance = 0.01; // In degrees TODO: Tune

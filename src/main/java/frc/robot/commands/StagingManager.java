@@ -72,10 +72,10 @@ public class StagingManager {
         );
     }
 
-    public static ParallelCommandGroup CarryingPosition(Elevator elevator, Arm arm){
+    public static ParallelCommandGroup AlgaePickup(StagingState level, Elevator elevator, Arm arm){
         return new ParallelCommandGroup(
-            new RotateTo(StagingState.CORAL_STATION.rotation, () -> elevator.isInwardsRotationSafe(), arm),
-            new ExtendTo(StagingState.CORAL_STATION.extension, () -> arm.isExtensionSafe(), elevator)
+            new RotateTo(level.rotation, () -> elevator.isInwardsRotationSafe(), arm),
+            new ExtendTo(level.extension, () -> arm.isExtensionSafe(), elevator)
         );
     }
 }

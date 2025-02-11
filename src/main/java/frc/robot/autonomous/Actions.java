@@ -9,11 +9,13 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.robot.Constants;
 import frc.robot.commands.StagingManager;
 import frc.robot.commands.StagingManager.StagingState;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Intake.IntakingState;
 import frc.robot.subsystems.drive.SwerveDrive;
 
 public class Actions {
@@ -36,9 +38,9 @@ public class Actions {
                 Commands.sequence(
                     new WaitCommand(waitExtensionSeconds),
                     StagingManager.PlaceCoral_L4(elevator, arm)),
-                    Commands.runOnce(() -> intake.intake(true), intake),
-                    Commands.waitSeconds(0.5), // TODO: REDUCE
-                    Commands.runOnce(() -> intake.stopIntaking(), intake));
+                    Commands.runOnce(() -> intake.outake(true), intake),
+                    Commands.waitSeconds(Constants.Intake.kCoralOutakeDelay),
+                    Commands.runOnce(() -> intake.stop(), intake));
     }
     
     public SequentialCommandGroup DriveToAndPlaceMidLevelCoral(
@@ -60,9 +62,9 @@ public class Actions {
                 Commands.sequence(
                     new WaitCommand(waitExtensionSeconds),
                     StagingManager.PlaceCoral_Mid(level, elevator, arm)),
-            Commands.runOnce(() -> intake.intake(true), intake),
-            Commands.waitSeconds(0.5), // TODO: REDUCE
-            Commands.runOnce(() -> intake.stopIntaking(), intake));
+            Commands.runOnce(() -> intake.outake(true), intake),
+            Commands.waitSeconds(Constants.Intake.kCoralOutakeDelay),
+            Commands.runOnce(() -> intake.stop(), intake));
     }
 
     public SequentialCommandGroup DriveToAndCoralStation(
@@ -84,11 +86,31 @@ public class Actions {
                 Commands.sequence(
                     new WaitCommand(waitExtensionSeconds),
                     StagingManager.CoralStation(elevator, arm),
-                    Commands.runOnce(() -> intake.intake(false), intake)),
-                    Commands.waitUntil(() -> intake.isIntakingCoral()),
-                    Commands.waitSeconds(0.5), // TODO: REDUCE
-                    Commands.runOnce(() -> intake.setPassiveCoral(), intake));
+                    Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake)));
     }
+
+    public SequentialCommandGroup DriveToAndRemoveAlgae(
+            String pathName,
+            double waitExtensionSeconds,
+            StagingState level,
+            SwerveDrive swerve,
+            Elevator elevator,
+            Arm arm,
+            Intake intake){
+        PathValidation path = new PathValidation(pathName);
+        return new SequentialCommandGroup(
+            path.errorCancel,
+            Commands.parallel(
+                Commands.sequence(
+                    path.pathCommand,
+                    Commands.runOnce(() -> swerve.stopModules(), swerve))
+                ),
+                Commands.sequence(
+                    new WaitCommand(waitExtensionSeconds),
+                    StagingManager.CoralStation(elevator, arm),
+                    Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake)));
+    }
+    
     
 
     public class PathValidation {

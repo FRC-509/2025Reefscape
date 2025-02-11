@@ -15,6 +15,7 @@ import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Intake.IntakingState;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.PigeonWrapper;
@@ -77,13 +78,13 @@ public class RobotContainer {
 		// Binds heading locks to the right stick's dpad. Pressing up will face forward,
 		// pressing down will face backward.
 		(new Trigger(() -> driverRight.getPOV(0) == 0))
-				.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(0), swerve));
+			.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(0), swerve));
 		(new Trigger(() -> driverRight.getPOV(0) == 90))
-				.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(-90), swerve));
+			.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(-90), swerve));
 		(new Trigger(() -> driverRight.getPOV(0) == 270))
-				.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(90), swerve));
+			.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(90), swerve));
 		(new Trigger(() -> driverRight.getPOV(0) == 180))
-				.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(180), swerve));
+			.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(180), swerve));
 
 		// Toggle heading correction by pressing the bottom-rightmost botton on the left
 		// side of the right stick. Heading correction defaults to ON at boot.
@@ -100,24 +101,22 @@ public class RobotContainer {
 		// OPERATOR ------------------------------------
 
 		// Elevator / Arm setpoint control
-		operator.a().onTrue(StagingManager.PlaceCoral_L4(elevator, arm)); // TODO: Change to preferences
+		operator.a().onTrue(StagingManager.PlaceCoral_L4(elevator, arm));
 		operator.b().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L3, elevator, arm));
 		operator.y().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L2, elevator, arm));
 		operator.x().onTrue(StagingManager.GroundPickup(elevator, arm));
 
 		// Algae Intake / Coral Outake
-		operator.rightBumper().whileTrue(Commands.runEnd(() -> {
-			intake.intake(true);
-		}, () -> {
-			intake.stopIntaking();
-		}, intake));
+		operator.rightBumper().whileTrue(Commands.runEnd(
+		() -> { intake.setState(IntakingState.ALGAE_INTAKE); }, 
+		() -> { intake.stop(); },
+		intake));
 
 		// Coral Intake / Algae Outake
-		operator.leftBumper().whileTrue(Commands.runEnd(() -> {
-			intake.intake(false);
-		}, () -> {
-			intake.stopIntaking();
-		}, intake));
+		operator.leftBumper().whileTrue(Commands.runEnd(
+			() -> { intake.setState(IntakingState.CORAL_INTAKE); }, 
+			() -> { intake.stop(); }, 
+			intake));
 
 		climber.setDefaultCommand(new DefaultClimbCommand(
 			() -> operator.getRightY(), 
