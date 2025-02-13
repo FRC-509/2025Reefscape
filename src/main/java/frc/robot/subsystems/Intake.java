@@ -32,9 +32,15 @@ public class Intake extends SubsystemBase {
     }
     private IntakingState intakingState;
     private IntakingState lastIntakingState;
+    private boolean commandOutake;
+    private double[] lastTorqueCurrent;
 
     public Intake() {
         this.intakingState = IntakingState.STOP;
+        this.lastIntakingState = IntakingState.STOP;
+        commandOutake = false;
+        this.lastTorqueCurrent = new double[10]; // holds last 5 values
+
         TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
 
         // Current limits
@@ -60,45 +66,76 @@ public class Intake extends SubsystemBase {
         // else if (state.equals(IntakingState.CORAL_OUTAKE)
         //     && (state.equals(IntakingState.ALGAE_INTAKE) || state.equals(IntakingState.ALGAE_PASSIVE)))
         //     this.intakingState = IntakingState.ALGAE_OUTAKE;
+        System.out.println("SETTING STATE");
         this.intakingState = state;
     }
 
     public void outake(boolean coral){
-        intakingState = coral ? IntakingState.CORAL_OUTAKE : IntakingState.ALGAE_OUTAKE;
+        intakingState = !coral ? IntakingState.CORAL_OUTAKE : IntakingState.ALGAE_OUTAKE;
         intakeMotor.setControl(intakeOpenLoop.withOutput(intakingState.voltageOut));
         lastIntakingState = intakingState;
     }
 
     public void stop(){
         intakingState = IntakingState.STOP;
+        System.out.println("STOPPING :3");
         intakeMotor.setControl(intakeOpenLoop.withOutput(intakingState.voltageOut));
         lastIntakingState = intakingState;
     }
 
+    public void setCommandOutake(boolean commandOutaking){
+        this.commandOutake = commandOutaking;
+    }
+
+    public void updateTorqueCurrentLog(double newTorqueCurrent){
+        for (int i = 0; i < lastTorqueCurrent.length - 1; i++) lastTorqueCurrent[i+1] = lastTorqueCurrent[i];
+        lastTorqueCurrent[0] = newTorqueCurrent;
+    }
+
+    public boolean checkPrevTorqueCurrents(double comparison){
+        for (double torqueCurrent : lastTorqueCurrent) if (torqueCurrent > comparison) return true;
+        return false;
+    }
+
     @Override
     public void periodic() {
+        dashboard();
+        if(commandOutake) return; 
         double stallTorqueCurrent = intakeMotor.getTorqueCurrent().getValueAsDouble();
-        if (intakingState.equals(IntakingState.ALGAE_INTAKE) && stallTorqueCurrent > Constants.Intake.kAlgaeTorqueCurrent)
+        if (intakingState.equals(IntakingState.ALGAE_INTAKE) && stallTorqueCurrent > Constants.Intake.kAlgaeTorqueCurrent){
             intakingState = IntakingState.ALGAE_PASSIVE;
-        else if (intakingState.equals(IntakingState.ALGAE_INTAKE) && stallTorqueCurrent > Constants.Intake.kAlgaeTorqueCurrent)
+        } else if (intakingState.equals(IntakingState.CORAL_INTAKE) 
+            && stallTorqueCurrent > Constants.Intake.kCoralTorqueCurrent
+            && checkPrevTorqueCurrents(Constants.Intake.kCoralTorqueCurrent)) {
+            System.out.println("SETTING CORAL PASSIVE HERE ANYWAYS");
             intakingState = IntakingState.CORAL_PASSIVE;
+        }
 
         if (!intakingState.equals(lastIntakingState))
             intakeMotor.setControl(intakeOpenLoop.withOutput(intakingState.voltageOut));
         
         lastIntakingState = intakingState;
+        updateTorqueCurrentLog(stallTorqueCurrent);
+    }
+
+    public void dashboard(){
+        double stallTorqueCurrent = intakeMotor.getTorqueCurrent().getValueAsDouble();
+        SmartDashboard.putNumber("VoltageOutIntakeSigma", intakeMotor.getVelocity().getValueAsDouble());
         SmartDashboard.putString("Intaking State", intakingState.toString());
         SmartDashboard.putString("Last Intaking State", lastIntakingState.toString());
+        SmartDashboard.putNumber("Stall Torque Current", stallTorqueCurrent);
         SmartDashboard.putBoolean("Has Intaken Gamepiece",
             intakingState.equals(IntakingState.ALGAE_INTAKE) && stallTorqueCurrent > Constants.Intake.kAlgaeTorqueCurrent
-            || intakingState.equals(IntakingState.ALGAE_INTAKE) && stallTorqueCurrent > Constants.Intake.kAlgaeTorqueCurrent);
+            || intakingState.equals(IntakingState.CORAL_INTAKE) && stallTorqueCurrent > Constants.Intake.kCoralTorqueCurrent);
     }
 
     public static SequentialCommandGroup outakeCommand(boolean coral, Intake intake) {
         return new SequentialCommandGroup(
-			Commands.run(() -> intake.outake(coral), intake),
+            Commands.runOnce(() -> intake.setCommandOutake(true), intake),
+            Commands.runOnce(() -> intake.outake(coral), intake),
 			Commands.waitSeconds(coral ? Constants.Intake.kCoralOutakeDelay : Constants.Intake.kAlgaeOutakeDelay),
-			Commands.run(() -> intake.stop(), intake)
+			Commands.runOnce(() -> intake.stop(), intake),
+            Commands.runOnce(() -> intake.setCommandOutake(false), intake)
 		);
     }
 }

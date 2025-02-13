@@ -28,6 +28,7 @@ public class RotateTo extends Command {
 
     @Override
     public void initialize() {
+        this.trapezoidProfile = new TrapezoidProfile(Constants.Arm.kMotionProfileConstraints);
         tpGoal = new State(targetRotation, 0.0);
         tpCurrent = new State(arm.getRotation(), arm.getRotatingVelocity());
         resetMotionProfile = false;

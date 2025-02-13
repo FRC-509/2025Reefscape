@@ -23,6 +23,7 @@ public class ExtendTo extends Command {
         this.targetExtension = extension;
         this.extensionSafe = extensionSafe;
         this.elevator = elevator;
+        this.trapezoidProfile = new TrapezoidProfile(Constants.Elevator.kMotionProfileConstraints);
         addRequirements(elevator);
     }
 

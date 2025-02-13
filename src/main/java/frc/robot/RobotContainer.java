@@ -33,8 +33,8 @@ public class RobotContainer {
 	private CommandXboxController operator = new CommandXboxController(2);
 
 	private final SwerveDrive swerve;
-	private final Elevator elevator;
-	private final Arm arm;
+	// private final Elevator elevator;
+	// private final Arm arm;
 	private final Intake intake;
 	// private final Climber climber;
 	
@@ -42,8 +42,8 @@ public class RobotContainer {
 
 	public RobotContainer() {
 		this.swerve = new SwerveDrive(pigeon, new Limelight("womp womp"));
-		this.elevator = new Elevator();
-		this.arm = new Arm();
+		// this.elevator = new Elevator();
+		// this.arm = new Arm();
 		this.intake = new Intake();
 		// this.climber = new Climber();
 
@@ -100,20 +100,20 @@ public class RobotContainer {
 		// OPERATOR ------------------------------------
 
 		// Elevator / Arm setpoint control
-		operator.a().onTrue(StagingManager.PlaceCoral_L4(elevator, arm));
-		operator.b().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L3, elevator, arm));
-		operator.y().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L2, elevator, arm));
-		operator.x().onTrue(StagingManager.GroundPickup(elevator, arm));
-		operator.leftTrigger(Constants.Operator.kTriggerDeadband).onTrue(StagingManager.CoralStation(elevator, arm));
+		// operator.a().onTrue(StagingManager.PlaceCoral_L4(elevator, arm));
+		// operator.b().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L3, elevator, arm));
+		// operator.y().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L2, elevator, arm));
+		// operator.x().onTrue(StagingManager.GroundPickup(elevator, arm));
+		// operator.leftTrigger(Constants.Operator.kTriggerDeadband).onTrue(StagingManager.CoralStation(elevator, arm));
 
-		operator.a().onFalse(StagingManager.ZeroState(elevator, arm));
-		operator.b().onFalse(StagingManager.ZeroState(elevator, arm));
-		operator.y().onFalse(StagingManager.ZeroState(elevator, arm));
-		operator.x().onFalse(StagingManager.ZeroState(elevator, arm));
-		operator.leftTrigger(Constants.Operator.kTriggerDeadband).onFalse(StagingManager.ZeroState(elevator, arm));
+		// operator.a().onFalse(StagingManager.ZeroState(elevator, arm));
+		// operator.b().onFalse(StagingManager.ZeroState(elevator, arm));
+		// operator.y().onFalse(StagingManager.ZeroState(elevator, arm));
+		// operator.x().onFalse(StagingManager.ZeroState(elevator, arm));
+		// operator.leftTrigger(Constants.Operator.kTriggerDeadband).onFalse(StagingManager.ZeroState(elevator, arm));
 
 		// Coral Intake / outake on release
-		operator.leftBumper().onTrue(Commands.run(() -> intake.setState(IntakingState.CORAL_INTAKE), intake));
+		operator.leftBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake));
 		operator.leftBumper().onFalse(Intake.outakeCommand(true, intake));
 
 		// Algae Intake / outake on release

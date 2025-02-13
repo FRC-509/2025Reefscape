@@ -128,6 +128,7 @@ public final class Constants {
 		
         public static final double kExtensionSafeAngle = 0;
         public static final double kPassiveCoralSpeed = 0;
+		public static final Constraints kMotionProfileConstraints = null;
 	}
 
 	public static class Intake { //TODO: Find Me
@@ -135,16 +136,16 @@ public final class Constants {
 		public static final double kCoralIntakeVoltage = 6;
 
         public static final double kAlgaeTorqueCurrent = 0;
-		public static final double kCoralTorqueCurrent = 22;
+		public static final double kCoralTorqueCurrent = 28;
 
         public static final double kAlgaePassiveVoltage = 0;
         public static final double kCoralPassiveVoltage = 0.75;
 
         public static final double kAlgaeOutakeVoltage = 0;
-        public static final double kCoralOutakeVoltage = 0;
+        public static final double kCoralOutakeVoltage = -5;
 
-		public static final double kCoralOutakeDelay = 0.5; // seconds // TODO: Reduce
-        public static ay = 0.2;
+		public static final double kCoralOutakeDelay = 0.75; // seconds // TODO: Reduce
+        public static final double kAlgaeOutakeDelay = 1;
 	}
 
 	public static class Climber {
