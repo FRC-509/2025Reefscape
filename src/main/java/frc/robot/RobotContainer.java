@@ -24,7 +24,7 @@ import com.redstorm509.stormkit.controllers.ThrustmasterJoystick.StickButton;
 
 public class RobotContainer {
 
-	private final PigeonWrapper pigeon = new PigeonWrapper(30, Constants.kCANIvore);
+	private final PigeonWrapper pigeon = new PigeonWrapper(0);
 	// private final Limelight baseLimelight = new Limelight(null);
 	// private final Limelight highLimelight = new Limelight(null);
 

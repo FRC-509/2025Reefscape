@@ -44,7 +44,7 @@ public class SwerveModule {
 		// Angle Encoder Config
 		CANcoderConfiguration canCoderConfiguration = new CANcoderConfiguration();
 		canCoderConfiguration.MagnetSensor.MagnetOffset = configs.steerEncoderOffset() / 360.0d;
-		this.steerEncoder = new CANcoder(configs.steerEncoderId(), Constants.kCANIvore);
+		this.steerEncoder = new CANcoder(configs.steerEncoderId(), Constants.kRio);
 		this.steerEncoder.getConfigurator().apply(canCoderConfiguration);
 
 		// Angle Motor Config
@@ -74,7 +74,7 @@ public class SwerveModule {
 		// encoders, we don't need to divide the steer motor's position by the gear
 		// ratio ourselves.
 
-		this.steerMotor = new TalonFX(configs.steerMotorId(), Constants.kCANIvore);
+		this.steerMotor = new TalonFX(configs.steerMotorId(), Constants.kRio);
 		this.steerMotor.getConfigurator().apply(steerMotorConfig);
 
 		// Drive Motor Config
@@ -90,7 +90,7 @@ public class SwerveModule {
 		driveMotorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 		driveMotorConfig.CurrentLimits.SupplyCurrentLimit = 35.0d;
 
-		this.driveMotor = new TalonFX(configs.driveMotorId(), Constants.kCANIvore);
+		this.driveMotor = new TalonFX(configs.driveMotorId(), Constants.kRio);
 		this.driveMotor.getConfigurator().apply(driveMotorConfig);
 
 		this.driveMotor.setPosition(0);

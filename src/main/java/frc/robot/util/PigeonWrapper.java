@@ -3,6 +3,7 @@ package frc.robot.util;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.Constants;
 
 public class PigeonWrapper {
 	private Pigeon2 device;
@@ -10,8 +11,8 @@ public class PigeonWrapper {
 	private double bootRoll;
 	private double bootPitch;
 
-	public PigeonWrapper(int deviceId, String bus) {
-		this.device = new Pigeon2(deviceId, bus);
+	public PigeonWrapper(int deviceId) {
+		this.device = new Pigeon2(deviceId, Constants.kRio);
 	}
 
 	// TODO: Make sure that getValueAsDouble() returns the same as old getValue() did (IE -180 to 180)

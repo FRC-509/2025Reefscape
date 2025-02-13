@@ -28,7 +28,7 @@ public final class Constants {
 		public static final double kStickDeadband = 0.1;
         public static final double kPrecisionMovementMultiplier = 0.3; // TODO: Tune to what feels good
 		public static final double kPrecisionRotationMultiplier = 0.3;
-		public static final double kTriggerDeadband = 0;
+		public static final double kTriggerDeadband = 0.15;
 	}
 
 	public static class Chassis {
@@ -132,19 +132,19 @@ public final class Constants {
 
 	public static class Intake { //TODO: Find Me
         public static final double kAlgaeIntakeVoltage = 0;
-		public static final double kCoralIntakeVoltage = 0;
+		public static final double kCoralIntakeVoltage = 6;
 
         public static final double kAlgaeTorqueCurrent = 0;
-		public static final double kCoralTorqueCurrent = 0;
+		public static final double kCoralTorqueCurrent = 22;
 
         public static final double kAlgaePassiveVoltage = 0;
-        public static final double kCoralPassiveVoltage = 0;
+        public static final double kCoralPassiveVoltage = 0.75;
 
         public static final double kAlgaeOutakeVoltage = 0;
         public static final double kCoralOutakeVoltage = 0;
 
 		public static final double kCoralOutakeDelay = 0.5; // seconds // TODO: Reduce
-        public static final double kAlgaeOutakeDelay = 0.2;
+        public static ay = 0.2;
 	}
 
 	public static class Climber {
@@ -158,34 +158,35 @@ public final class Constants {
 
 	public static class IDs {
 		// Swerve Drive
-		public static final int kFrontRightDrive = 0;
-		public static final int kFrontRightSteer = 0;
-		public static final int kFrontRightEncoder = 0;
+		public static final int kFrontRightDrive = 1;
+		public static final int kFrontRightSteer = 2;
+		public static final int kFrontRightEncoder = 9;
 
-		public static final int kFrontLeftDrive = 0;
-		public static final int kFrontLeftSteer = 0;
-		public static final int kFrontLeftEncoder = 0;
+		public static final int kFrontLeftDrive = 3;
+		public static final int kFrontLeftSteer = 4;
+		public static final int kFrontLeftEncoder = 10;
 		
-		public static final int kBackRightDrive = 0;
-		public static final int kBackRightSteer = 0;
-		public static final int kBackRightEncoder = 0;
+		public static final int kBackRightDrive = 5;
+		public static final int kBackRightSteer = 6;
+		public static final int kBackRightEncoder = 11;
 		
-		public static final int kBackLeftDrive = 0;
-		public static final int kBackLeftSteer = 0;
-		public static final int kBackLeftEncoder = 0;
+		public static final int kBackLeftDrive = 7;
+		public static final int kBackLeftSteer = 8;
+		public static final int kBackLeftEncoder = 12;
 
 		// Elevator
-		public static final int kExtensionLeader = 0;
-        public static final int kExtensionFollower = 0;
+		public static final int kExtensionLeader = 14; //Elevator left
+        public static final int kExtensionFollower = 13;
+        public static final int kExtensionEncoder = 18;
+        public static final int kRangeSensor = 20;
 
 		// Arm
-        public static final int kPivotMotor = 0;
-		public static final int kPivotEncoder = 0;
-		public static final int kIntakeMotor = 0;
+        public static final int kPivotMotor = 15;
+		public static final int kPivotEncoder = 19;
+		public static final int kIntakeMotor = 16;
 
-		public static final int kClimbMotor = 0;
-		public static final int kClimbSolenoid = 0;
-
+		public static final int kClimbMotor = 17;
+		public static final int kClimbSolenoid = 0; // not a can
 	}
 
 	public static class Vision {
@@ -233,8 +234,8 @@ public final class Constants {
 			public static final double kRotationI = 0.0;
 			public static final double kRotationD = 0.0;
 
-			public static final double kIntakeP = 0.0;
-			public static final double kIntakeI = 0.0;
+			public static final double kIntakeP = 0.03;
+			public static final double kIntakeI = 0.01;
 			public static final double kIntakeD = 0.0;
 		}
 

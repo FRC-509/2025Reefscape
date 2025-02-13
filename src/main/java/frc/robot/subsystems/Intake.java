@@ -13,7 +13,7 @@ import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {
     
-    private final TalonFX intakeMotor = new TalonFX(Constants.IDs.kIntakeMotor);
+    private final TalonFX intakeMotor = new TalonFX(Constants.IDs.kIntakeMotor, Constants.kCANIvore);
     private final VoltageOut intakeOpenLoop = new VoltageOut(0).withEnableFOC(false);
     
     public enum IntakingState {
@@ -38,10 +38,10 @@ public class Intake extends SubsystemBase {
         TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
 
         // Current limits
-		intakeConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-		intakeConfig.CurrentLimits.SupplyCurrentLimit = Constants.CurrentLimits.kIntakeSupply; 
-        intakeConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        intakeConfig.CurrentLimits.StatorCurrentLimit = Constants.CurrentLimits.kIntakeStator;
+		// intakeConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+		// intakeConfig.CurrentLimits.SupplyCurrentLimit = Constants.CurrentLimits.kIntakeSupply; 
+        // intakeConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        // intakeConfig.CurrentLimits.StatorCurrentLimit = Constants.CurrentLimits.kIntakeStator;
 
         // PID value assignment
 		intakeConfig.Slot0.kP = Constants.PIDConstants.Arm.kIntakeP;
@@ -54,13 +54,13 @@ public class Intake extends SubsystemBase {
 
     public void setState(IntakingState state){
         // If you go from Coral Intake -> Algae Intake, it is the operator attempting to outake
-        if (state.equals(IntakingState.ALGAE_INTAKE)
-            && (state.equals(IntakingState.CORAL_INTAKE) || state.equals(IntakingState.CORAL_PASSIVE)))
-            this.intakingState = IntakingState.CORAL_OUTAKE;
-        else if (state.equals(IntakingState.CORAL_OUTAKE)
-            && (state.equals(IntakingState.ALGAE_INTAKE) || state.equals(IntakingState.ALGAE_PASSIVE)))
-            this.intakingState = IntakingState.ALGAE_OUTAKE;
-        else this.intakingState = state;
+        // if (state.equals(IntakingState.ALGAE_INTAKE)
+        //     && (state.equals(IntakingState.CORAL_INTAKE) || state.equals(IntakingState.CORAL_PASSIVE)))
+        //     this.intakingState = IntakingState.CORAL_OUTAKE;
+        // else if (state.equals(IntakingState.CORAL_OUTAKE)
+        //     && (state.equals(IntakingState.ALGAE_INTAKE) || state.equals(IntakingState.ALGAE_PASSIVE)))
+        //     this.intakingState = IntakingState.ALGAE_OUTAKE;
+        this.intakingState = state;
     }
 
     public void outake(boolean coral){
