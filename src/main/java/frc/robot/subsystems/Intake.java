@@ -1,10 +1,13 @@
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -33,14 +36,17 @@ public class Intake extends SubsystemBase {
     private IntakingState intakingState;
     private IntakingState lastIntakingState;
     private boolean commandOutake;
-    private double[] lastTorqueCurrent;
-
+    private AlternatingValueCLock torqueValueClock;
+    
     public Intake() {
         this.intakingState = IntakingState.STOP;
         this.lastIntakingState = IntakingState.STOP;
         commandOutake = false;
-        this.lastTorqueCurrent = new double[10]; // holds last 5 values
-
+        this.torqueValueClock = new AlternatingValueCLock(
+            () -> intakeMotor.getTorqueCurrent().getValueAsDouble(),
+            Constants.Intake.kIntakeClockPeriod);
+        this.torqueValueClock.start();
+            
         TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
 
         // Current limits
@@ -87,26 +93,15 @@ public class Intake extends SubsystemBase {
         this.commandOutake = commandOutaking;
     }
 
-    public void updateTorqueCurrentLog(double newTorqueCurrent){
-        for (int i = 0; i < lastTorqueCurrent.length - 1; i++) lastTorqueCurrent[i+1] = lastTorqueCurrent[i];
-        lastTorqueCurrent[0] = newTorqueCurrent;
-    }
-
-    public boolean checkPrevTorqueCurrents(double comparison){
-        for (double torqueCurrent : lastTorqueCurrent) if (torqueCurrent > comparison) return true;
-        return false;
-    }
-
     @Override
     public void periodic() {
         dashboard();
+        double stallTorqueCurrent = torqueValueClock.get();
         if(commandOutake) return; 
-        double stallTorqueCurrent = intakeMotor.getTorqueCurrent().getValueAsDouble();
         if (intakingState.equals(IntakingState.ALGAE_INTAKE) && stallTorqueCurrent > Constants.Intake.kAlgaeTorqueCurrent){
             intakingState = IntakingState.ALGAE_PASSIVE;
         } else if (intakingState.equals(IntakingState.CORAL_INTAKE) 
-            && stallTorqueCurrent > Constants.Intake.kCoralTorqueCurrent
-            && checkPrevTorqueCurrents(Constants.Intake.kCoralTorqueCurrent)) {
+            && stallTorqueCurrent > Constants.Intake.kCoralTorqueCurrent) {
             System.out.println("SETTING CORAL PASSIVE HERE ANYWAYS");
             intakingState = IntakingState.CORAL_PASSIVE;
         }
@@ -115,7 +110,6 @@ public class Intake extends SubsystemBase {
             intakeMotor.setControl(intakeOpenLoop.withOutput(intakingState.voltageOut));
         
         lastIntakingState = intakingState;
-        updateTorqueCurrentLog(stallTorqueCurrent);
     }
 
     public void dashboard(){
@@ -137,5 +131,54 @@ public class Intake extends SubsystemBase {
 			Commands.runOnce(() -> intake.stop(), intake),
             Commands.runOnce(() -> intake.setCommandOutake(false), intake)
 		);
+    }
+
+    private class AlternatingValueCLock {
+        private double period;
+        private double first;
+        private double second;
+        private DoubleSupplier supplier;
+        private Timer timer1;
+        private Timer timer2;
+        private boolean firstPass;
+
+        // NOTE: COULD run into an issue with the distance between passes drifting due to the 20ms refresh
+        public AlternatingValueCLock(DoubleSupplier supplier, double period){
+            this.period = period;
+            this.first = supplier.getAsDouble();
+            this.second = supplier.getAsDouble();
+            this.timer1 = new Timer();
+            this.timer2 = new Timer();
+            this.firstPass = true;
+        }
+
+        private void start(){
+            timer1.reset();
+            timer2.reset();
+            timer1.start();
+            timer2.start();
+            firstPass = true;
+        }
+
+        private void updateFirst(){
+            timer1.reset();
+            first = supplier.getAsDouble();
+        }
+
+        private void updateSecond() {
+            timer2.reset();
+            second = supplier.getAsDouble();
+        }
+
+        public double get(){
+            if (Math.abs(timer1.get() - timer2.get()) < period/3) start(); // Possible drift midigation?
+            if (firstPass && timer2.get() > period/2) {
+                updateSecond();
+                firstPass = false;
+            }
+            if (timer1.get() >= period) updateFirst();
+            if (timer2.get() >= period) updateSecond();
+            return timer1.get() >= timer2.get() ? first : second;
+        }
     }
 }
