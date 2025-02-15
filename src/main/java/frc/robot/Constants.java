@@ -111,7 +111,7 @@ public final class Constants {
 		public static final double kRotorToSensorRatio = 1.0 / 12.0; //TODO: validate
         public static final double kSensorToMechanismRatio = 2 * Math.PI * Units.inchesToMeters(0.8);
 		public static final double kExtensionMagnetOffset = 0.0; // TODO: find later
-        public static final double kValidStateTolerance = 0.005; // meters
+        public static final double kValidStateTolerance = 0.3;
 		public static final double kMaxVelocity = 0; // Find desired units of setVelocity
         public static final double kMaxAcceleration = 0;
 		public static final Constraints kMotionProfileConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
@@ -121,24 +121,22 @@ public final class Constants {
 		public static final double kRotationGearRatio = 4.0 / 3.0;
 		public static final double kPivotMagnetOffset = 0.0;
 		
-		public static final double kIntakeSpeed = 0.15; // 0.0-1.0
-		public static final double kValidRotationTolerance = 0.01; // In degrees TODO: Tune
+		public static final double kValidRotationTolerance = 0.1; // In degrees TODO: Tune
         public static final double kSensorToMechanismRatio = 4 / 3;
         public static final double kRotorToSensorRatio = 12 * 84 / 24; // TODO: wrong
 		
-        public static final double kExtensionSafeAngle = 0;
-        public static final double kPassiveCoralSpeed = 0;
+        public static final double kExtensionSafeAngle = -6.843262;
 		public static final Constraints kMotionProfileConstraints = null;
 	}
 
 	public static class Intake { //TODO: Find Me
-        public static final double kAlgaeIntakeVoltage = 0;
+        public static final double kAlgaeIntakeVoltage = -0.75;
 		public static final double kCoralIntakeVoltage = 6;
 
-        public static final double kAlgaeTorqueCurrent = 0;
+        public static final double kAlgaeTorqueCurrent = 10;
 		public static final double kCoralTorqueCurrent = 28;
 
-        public static final double kAlgaePassiveVoltage = 0;
+        public static final double kAlgaePassiveVoltage = 0.3;
         public static final double kCoralPassiveVoltage = 0.75;
 
         public static final double kAlgaeOutakeVoltage = 0;
@@ -226,14 +224,14 @@ public final class Constants {
 		}
 
 		public static class Elevator {
-			public static final double kExtensionP = 0.125;
-			public static final double kExtensionI = 0.1;
+			public static final double kExtensionP = 1.2;
+			public static final double kExtensionI = 0.24;
 			public static final double kExtensionD = 0;
 		}
 
 		public static class Arm {
-			public static final double kRotationP = 0.12;
-			public static final double kRotationI = 0.0;
+			public static final double kRotationP = 2.8;
+			public static final double kRotationI = 0.32;
 			public static final double kRotationD = 0.0;
 
 			public static final double kIntakeP = 0.03;
@@ -255,14 +253,13 @@ public final class Constants {
 		public static final double kElevatorSupply = 35.0;
 		public static final double kElevatorStator = 120.0;
 		
-		public static final double kArmSupply = 0.0;
-		public static final double kArmStator = 0.0;
+		public static final double kArmSupply = 35.0;
+		public static final double kArmStator = 120.0;
 
-		public static final double kIntakeSupply = 0.0;
-		public static final double kIntakeStator = 0.0;
+		public static final double kIntakeSupply = 35.0;
+		public static final double kIntakeStator = 120.0;
 
         public static final double kClimbSupply = 0;
-
         public static final double kClimbStator = 0;
 	}
 

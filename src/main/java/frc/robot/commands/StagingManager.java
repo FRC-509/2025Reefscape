@@ -11,15 +11,15 @@ public class StagingManager {
 
     public static enum StagingState {
         // Defaults                               
-        ZEROED(0.0,0.0),
+        ZEROED(-0.432,-0.28),
 
         // Coral
-        CORAL_L4(0.0,0.0),
-        CORAL_L3(0.0,0.0),
-        CORAL_L2(0.0,0.0),
-        CORAL_L1(0.0,0.0),
-        CORAL_GROUND(0.0,0.0),
-        CORAL_STATION(0.0,0.0),
+        CORAL_L4(4.209,0.0),
+        CORAL_L3(4.209,-0.144),
+        CORAL_L2(3.714,-0.144),
+        CORAL_L1(3.714,0.28),
+        CORAL_GROUND(0.034,-0.170664),
+        CORAL_STATION(0.4,0.054),
 
         // Algae
         ALGAE_HIGH(0.0,0.0),

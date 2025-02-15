@@ -4,8 +4,6 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -19,13 +17,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.commands.StagingManager;
+import frc.robot.commands.StagingManager.StagingState;
 
 public class Elevator extends SubsystemBase {
     
     private final TalonFX extensionLeader = new TalonFX(Constants.IDs.kExtensionLeader, Constants.kCANIvore); // TODO: ID ME :(
-	private final TalonFX extensionFollower = new TalonFX(Constants.IDs.kExtensionFollower, Constants.kCANIvore);
+	// private final TalonFX extensionFollower = new TalonFX(Constants.IDs.kExtensionFollower, Constants.kCANIvore);
 
-    private CANcoder extensionEncoder = new CANcoder(Constants.IDs.kExtensionEncoder);
+    private CANcoder extensionEncoder = new CANcoder(Constants.IDs.kExtensionEncoder,  Constants.kCANIvore);
 
     private VoltageOut openLoop = new VoltageOut(0).withEnableFOC(false);
     private PositionDutyCycle closedLoopPosition = new PositionDutyCycle(0.0).withEnableFOC(false);
@@ -50,9 +49,9 @@ public class Elevator extends SubsystemBase {
         // Assigning encoder as feedback device
 		extensionLeaderConfig.Feedback.FeedbackRemoteSensorID = extensionEncoder.getDeviceID();
 		extensionLeaderConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-		extensionLeaderConfig.Feedback.RotorToSensorRatio = Constants.Elevator.kRotorToSensorRatio;
-        extensionLeaderConfig.Feedback.SensorToMechanismRatio = Constants.Elevator.kSensorToMechanismRatio;
-        extensionLeaderConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+		extensionLeaderConfig.Feedback.RotorToSensorRatio = 1;
+        extensionLeaderConfig.Feedback.SensorToMechanismRatio = 1;
+        extensionLeaderConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
 		extensionLeader.getConfigurator().apply(extensionLeaderConfig);
 
@@ -76,8 +75,8 @@ public class Elevator extends SubsystemBase {
 		extensionFollowerConfig.Feedback.RotorToSensorRatio = Constants.Elevator.kRotorToSensorRatio;
         extensionFollowerConfig.Feedback.SensorToMechanismRatio = Constants.Elevator.kSensorToMechanismRatio;
         extensionFollowerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-		extensionFollower.getConfigurator().apply(extensionFollowerConfig);
-		extensionFollower.setControl(new Follower(extensionLeader.getDeviceID(), true)); // TODO: Check design
+		// extensionFollower.getConfigurator().apply(extensionFollowerConfig);
+		// extensionFollower.setControl(new Follower(extensionLeader.getDeviceID(), true)); // TODO: Check design
 
 		CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
 		encoderConfig.MagnetSensor.MagnetOffset = (Constants.Elevator.kExtensionMagnetOffset) / 360.0;
@@ -122,10 +121,14 @@ public class Elevator extends SubsystemBase {
         extensionLeader.setControl(closedLoopPosition.withPosition(extensionLeader.getPosition().getValueAsDouble())); 
     }
 
+    public void setExtension(double state){
+        extensionLeader.setControl(closedLoopPosition.withPosition(state));
+    }
+
     public boolean isInwardsRotationSafe() {
         return MathUtil.isNear(
             StagingManager.StagingState.ZEROED.extension, 
-            getExtension(), 
+            getExtension(),
             Constants.Arm.kValidRotationTolerance);
     }
 
@@ -136,11 +139,15 @@ public class Elevator extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Leader Extension Position", extensionLeader.getPosition().getValueAsDouble());
-        SmartDashboard.putNumber("Leader Extension Rotor Position", extensionLeader.getRotorPosition().getValueAsDouble());
-        SmartDashboard.putNumber("FollowerExtensionPosition", extensionFollower.getPosition().getValueAsDouble());
-        
-        extendTo(SmartDashboard.getNumber("ExtendTo", extensionLeader.getRotorPosition().getValueAsDouble()));
+        dashboard();
+        // extendTo(SmartDashboard.getNumber("ExtendTo", extensionLeader.getRotorPosition().getValueAsDouble()));
         // SmartDashboard.putNumber("", extensionFollower.getPos);
+    }
+
+    private void dashboard(){
+        SmartDashboard.putBoolean("InwardsRotationSafe", isInwardsRotationSafe());
+        // SmartDashboard.putNumber("Leader Extension Position", extensionLeader.getPosition().getValueAsDouble());
+        SmartDashboard.putNumber("Leader Extension Rotor Position", extensionLeader.getRotorPosition().getValueAsDouble());
+        // SmartDashboard.putNumber("FollowerExtensionPosition", extensionFollower.getPosition().getValueAsDouble());
     }
 }

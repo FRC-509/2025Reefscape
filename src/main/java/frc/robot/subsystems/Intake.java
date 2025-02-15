@@ -65,14 +65,6 @@ public class Intake extends SubsystemBase {
     }
 
     public void setState(IntakingState state){
-        // If you go from Coral Intake -> Algae Intake, it is the operator attempting to outake
-        // if (state.equals(IntakingState.ALGAE_INTAKE)
-        //     && (state.equals(IntakingState.CORAL_INTAKE) || state.equals(IntakingState.CORAL_PASSIVE)))
-        //     this.intakingState = IntakingState.CORAL_OUTAKE;
-        // else if (state.equals(IntakingState.CORAL_OUTAKE)
-        //     && (state.equals(IntakingState.ALGAE_INTAKE) || state.equals(IntakingState.ALGAE_PASSIVE)))
-        //     this.intakingState = IntakingState.ALGAE_OUTAKE;
-        System.out.println("SETTING STATE");
         this.intakingState = state;
     }
 
@@ -84,7 +76,6 @@ public class Intake extends SubsystemBase {
 
     public void stop(){
         intakingState = IntakingState.STOP;
-        System.out.println("STOPPING :3");
         intakeMotor.setControl(intakeOpenLoop.withOutput(intakingState.voltageOut));
         lastIntakingState = intakingState;
     }
@@ -99,11 +90,11 @@ public class Intake extends SubsystemBase {
         double stallTorqueCurrent = torqueValueClock.get(intakeMotor.getTorqueCurrent().getValueAsDouble());
         // Collect torque before returning command so AlternatingValueClock can update properly
         if(commandOutake) return; 
-        if (intakingState.equals(IntakingState.ALGAE_INTAKE) && stallTorqueCurrent > Constants.Intake.kAlgaeTorqueCurrent){
+        if (intakingState.equals(IntakingState.ALGAE_INTAKE) 
+            && stallTorqueCurrent > Constants.Intake.kAlgaeTorqueCurrent){
             intakingState = IntakingState.ALGAE_PASSIVE;
         } else if (intakingState.equals(IntakingState.CORAL_INTAKE) 
             && stallTorqueCurrent > Constants.Intake.kCoralTorqueCurrent) {
-            System.out.println("SETTING CORAL PASSIVE HERE ANYWAYS");
             intakingState = IntakingState.CORAL_PASSIVE;
         }
 

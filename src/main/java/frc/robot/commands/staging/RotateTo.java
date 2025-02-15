@@ -43,10 +43,10 @@ public class RotateTo extends Command {
                 resetMotionProfile = false;
             }
             tpCurrent = trapezoidProfile.calculate(0.02, tpCurrent, tpGoal);
-            arm.setRotationVelocity(targetRotation); 
+            // arm.setRotationVelocity(targetRotation); 
         } else {
             resetMotionProfile = true;
-            arm.setRotationVelocity(0.0);
+            // arm.setRotationVelocity(0.0);
         }
     }
     
