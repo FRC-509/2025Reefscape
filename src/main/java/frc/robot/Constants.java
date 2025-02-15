@@ -82,28 +82,28 @@ public final class Constants {
 			IDs.kFrontRightEncoder,
 			IDs.kFrontRightSteer,
 			IDs.kFrontRightDrive,
-			154.423828);
+			118.337891);
 
 		public static final SwerveModuleConfiguration kFrontLeft = new SwerveModuleConfiguration(
 			1,
 			IDs.kFrontLeftEncoder,
 			IDs.kFrontLeftSteer,
 			IDs.kFrontLeftDrive,
-			101.337891);
+			153.337891);
 
 		public static final SwerveModuleConfiguration kBackLeft = new SwerveModuleConfiguration(
 			2,
 			IDs.kBackLeftEncoder,
 			IDs.kBackLeftSteer,
 			IDs.kBackLeftDrive,
-			178.066406);
+			104.066406);
 
 		public static final SwerveModuleConfiguration kBackRight = new SwerveModuleConfiguration(
 			3,
 			IDs.kBackRightEncoder,
 			IDs.kBackRightSteer,
 			IDs.kBackRightDrive,
-			258.925782);
+			137.925782);
 	}
 
 	public static class Elevator {
@@ -142,10 +142,10 @@ public final class Constants {
         public static final double kCoralPassiveVoltage = 0.75;
 
         public static final double kAlgaeOutakeVoltage = 0;
-        public static final double kCoralOutakeVoltage = -5;
+        public static final double kCoralOutakeVoltage = -6;
 
 		public static final double kCoralOutakeDelay = 0.75; // seconds // TODO: Reduce
-        public static final double kAlgaeOutakeDelay = 1;
+        public static final double kAlgaeOutakeDelay = 0.33;
         public static final double kIntakeClockPeriod = 0.5;// seconds
 	}
 

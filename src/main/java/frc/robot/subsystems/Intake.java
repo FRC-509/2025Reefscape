@@ -43,7 +43,7 @@ public class Intake extends SubsystemBase {
         this.lastIntakingState = IntakingState.STOP;
         commandOutake = false;
         this.torqueValueClock = new AlternatingValueCLock(
-            () -> intakeMotor.getTorqueCurrent().getValueAsDouble(),
+            intakeMotor.getTorqueCurrent().getValueAsDouble(),
             Constants.Intake.kIntakeClockPeriod);
         this.torqueValueClock.start();
             
@@ -96,7 +96,8 @@ public class Intake extends SubsystemBase {
     @Override
     public void periodic() {
         dashboard();
-        double stallTorqueCurrent = torqueValueClock.get();
+        double stallTorqueCurrent = torqueValueClock.get(intakeMotor.getTorqueCurrent().getValueAsDouble());
+        // Collect torque before returning command so AlternatingValueClock can update properly
         if(commandOutake) return; 
         if (intakingState.equals(IntakingState.ALGAE_INTAKE) && stallTorqueCurrent > Constants.Intake.kAlgaeTorqueCurrent){
             intakingState = IntakingState.ALGAE_PASSIVE;
@@ -121,6 +122,12 @@ public class Intake extends SubsystemBase {
         SmartDashboard.putBoolean("Has Intaken Gamepiece",
             intakingState.equals(IntakingState.ALGAE_INTAKE) && stallTorqueCurrent > Constants.Intake.kAlgaeTorqueCurrent
             || intakingState.equals(IntakingState.CORAL_INTAKE) && stallTorqueCurrent > Constants.Intake.kCoralTorqueCurrent);
+        
+        SmartDashboard.putString("CurrentTimer", torqueValueClock.timer1.get() > torqueValueClock.timer2.get() ? "Timer 1" : "Timer 2");
+        SmartDashboard.putNumber("delay1", torqueValueClock.timer1.get());
+        SmartDashboard.putNumber("delay2", torqueValueClock.timer2.get());
+        SmartDashboard.putNumber("difference", Math.abs(torqueValueClock.timer1.get() - torqueValueClock.timer2.get()));
+        SmartDashboard.putNumber("Torque Comparison Value", torqueValueClock.timer1.get() >= torqueValueClock.timer2.get() ? torqueValueClock.first : torqueValueClock.second);
     }
 
     public static SequentialCommandGroup outakeCommand(boolean coral, Intake intake) {
@@ -137,47 +144,42 @@ public class Intake extends SubsystemBase {
         private double period;
         private double first;
         private double second;
-        private DoubleSupplier supplier;
         private Timer timer1;
         private Timer timer2;
         private boolean firstPass;
 
-        // NOTE: COULD run into an issue with the distance between passes drifting due to the 20ms refresh
-        public AlternatingValueCLock(DoubleSupplier supplier, double period){
+        public AlternatingValueCLock(double initVal, double period){
             this.period = period;
-            this.first = supplier.getAsDouble();
-            this.second = supplier.getAsDouble();
+            this.first = initVal;
+            this.second = initVal;
             this.timer1 = new Timer();
             this.timer2 = new Timer();
             this.firstPass = true;
         }
 
         private void start(){
-            timer1.reset();
-            timer2.reset();
-            timer1.start();
-            timer2.start();
+            timer1.restart();
+            timer2.restart();
             firstPass = true;
         }
 
-        private void updateFirst(){
-            timer1.reset();
-            first = supplier.getAsDouble();
+        private void updateFirst(double value){
+            timer1.restart();
+            first = value;
         }
 
-        private void updateSecond() {
-            timer2.reset();
-            second = supplier.getAsDouble();
+        private void updateSecond(double value) {
+            timer2.restart();
+            second = value;
         }
 
-        public double get(){
-            if (Math.abs(timer1.get() - timer2.get()) < period/3) start(); // Possible drift midigation?
+        public double get(double value){
             if (firstPass && timer2.get() > period/2) {
-                updateSecond();
+                updateSecond(value);
                 firstPass = false;
             }
-            if (timer1.get() >= period) updateFirst();
-            if (timer2.get() >= period) updateSecond();
+            if (timer1.get() >= period) updateFirst(value);
+            if (timer2.get() >= period) updateSecond(value);
             return timer1.get() >= timer2.get() ? first : second;
         }
     }
