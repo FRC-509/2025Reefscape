@@ -232,7 +232,7 @@ public final class Constants {
 		}
 
 		public static class Arm {
-			public static final double kRotationP = 0.0;
+			public static final double kRotationP = 0.12;
 			public static final double kRotationI = 0.0;
 			public static final double kRotationD = 0.0;
 
