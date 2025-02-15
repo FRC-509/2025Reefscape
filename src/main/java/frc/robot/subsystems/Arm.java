@@ -65,7 +65,7 @@ public class Arm extends SubsystemBase {
      * @return The rotation of the arm from the starting configuration, in degrees 
      */
     public double getRotation(){
-        return pivotMotor.getRotorPosition().getValueAsDouble();
+        return pivotMotor.getPosition().getValueAsDouble();
     }
 
     /**

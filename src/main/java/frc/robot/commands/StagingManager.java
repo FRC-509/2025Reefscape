@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.staging.ExtendTo;
@@ -11,7 +12,7 @@ public class StagingManager {
 
     public static enum StagingState {
         // Defaults                               
-        ZEROED(-0.432,-0.28),
+        ZEROED(0.2,0.28),
 
         // Coral
         CORAL_L4(4.209,0.0),
@@ -76,6 +77,28 @@ public class StagingManager {
         return new ParallelCommandGroup(
             new RotateTo(level.rotation, () -> elevator.isInwardsRotationSafe(), arm),
             new ExtendTo(level.extension, () -> arm.isExtensionSafe(), elevator)
+        );
+    }
+
+    public static SequentialCommandGroup all(StagingState state, Elevator elevator, Arm arm){
+        return new SequentialCommandGroup(
+            Commands.runOnce(() -> arm.setRotation(state.rotation), elevator),
+            Commands.waitSeconds(0.3),
+            Commands.runOnce(() -> elevator.setExtension(state.extension), arm)
+        );
+    }
+
+    public static SequentialCommandGroup groundPickup(){
+        
+    }
+
+    public static SequentialCommandGroup zero(Elevator elevator, Arm arm){
+        return new SequentialCommandGroup(
+            Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_STATION.rotation), elevator),
+            Commands.waitSeconds(0.4),
+            Commands.runOnce(() -> elevator.setExtension(StagingState.ZEROED.extension), arm),
+            Commands.waitSeconds(0.4),
+            Commands.runOnce(() -> arm.setRotation(StagingState.ZEROED.rotation), elevator)
         );
     }
 }

@@ -125,7 +125,7 @@ public final class Constants {
         public static final double kSensorToMechanismRatio = 4 / 3;
         public static final double kRotorToSensorRatio = 12 * 84 / 24; // TODO: wrong
 		
-        public static final double kExtensionSafeAngle = -6.843262;
+        public static final double kExtensionSafeAngle = 0.09;
 		public static final Constraints kMotionProfileConstraints = null;
 	}
 

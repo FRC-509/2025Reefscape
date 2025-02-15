@@ -103,30 +103,30 @@ public class RobotContainer {
 		// OPERATOR ------------------------------------
 
 		// Elevator / Arm setpoint control
-		// operator.a().onTrue(StagingManager.PlaceCoral_L4(elevator, arm));
-		// operator.b().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L3, elevator, arm));
-		// operator.y().onTrue(StagingManager.PlaceCoral_Mid(StagingState.CORAL_L2, elevator, arm));
-		// operator.x().onTrue(StagingManager.GroundPickup(elevator, arm));
-		// operator.leftTrigger(Constants.Operator.kTriggerDeadband).onTrue(StagingManager.CoralStation(elevator, arm));
+		operator.x().onTrue(StagingManager.all(StagingState.CORAL_STATION, elevator, arm));
+		operator.y().onTrue(StagingManager.all(StagingState.CORAL_L2, elevator, arm));
+		operator.a().onTrue(StagingManager.all(StagingState.CORAL_GROUND, elevator, arm));
+		operator.b().onTrue(StagingManager.all(StagingState.CORAL_L3, elevator, arm));
 
-		// operator.a().onFalse(StagingManager.ZeroState(elevator, arm));
-		// operator.b().onFalse(StagingManager.ZeroState(elevator, arm));
-		// operator.y().onFalse(StagingManager.ZeroState(elevator, arm));
-		// operator.x().onFalse(StagingManager.ZeroState(elevator, arm));
-		// operator.leftTrigger(Constants.Operator.kTriggerDeadband).onFalse(StagingManager.ZeroState(elevator, arm));
-		operator.a().onTrue(Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_STATION.rotation), arm));
-		operator.b().onTrue(Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_GROUND.rotation), arm));
-		// operator.b().onTrue(Commands.runOnce(() -> arm.setRotation(StagingState), arm));
-		operator.y().onTrue(Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_GROUND.extension), elevator));
-		operator.x().onTrue(Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_L2.extension), elevator));
+		operator.x().onFalse(StagingManager.zero(elevator, arm));
+		operator.y().onFalse(StagingManager.zero(elevator, arm));
+		operator.a().onFalse(StagingManager.zero(elevator, arm));
+		operator.b().onFalse(StagingManager.zero(elevator, arm));
+
+
+		// operator.a().onTrue(Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_STATION.rotation), arm));
+		// operator.b().onTrue(Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_GROUND.rotation), arm));
+		// // operator.b().onTrue(Commands.runOnce(() -> arm.setRotation(StagingState), arm));
+		// operator.y().onTrue(Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_GROUND.extension), elevator));
+		// operator.x().onTrue(Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_STATION.extension), elevator));
 
 		// Coral Intake / outake on release
 		operator.leftBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake));
 		operator.leftBumper().onFalse(Intake.outakeCommand(true, intake));
 
 		// Algae Intake / outake on release
-		operator.leftBumper().onTrue(Commands.run(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));
-		operator.leftBumper().onFalse(Intake.outakeCommand(false, intake));
+		operator.rightBumper().onTrue(Commands.run(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));
+		operator.rightBumper().onFalse(Intake.outakeCommand(false, intake));
 
 		// climber.setDefaultCommand(new DefaultClimbCommand(
 		// 	() -> operator.getRightY(), 

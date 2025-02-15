@@ -126,10 +126,7 @@ public class Elevator extends SubsystemBase {
     }
 
     public boolean isInwardsRotationSafe() {
-        return MathUtil.isNear(
-            StagingManager.StagingState.ZEROED.extension, 
-            getExtension(),
-            Constants.Arm.kValidRotationTolerance);
+        return getExtension() < 0.138;
     }
 
     public void extendTo(double rotationPosition){
