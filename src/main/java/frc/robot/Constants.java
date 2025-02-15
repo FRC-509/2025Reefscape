@@ -226,8 +226,8 @@ public final class Constants {
 		}
 
 		public static class Elevator {
-			public static final double kExtensionP = 0;
-			public static final double kExtensionI = 0;
+			public static final double kExtensionP = 0.125;
+			public static final double kExtensionI = 0.1;
 			public static final double kExtensionD = 0;
 		}
 
@@ -252,8 +252,8 @@ public final class Constants {
 		public static final double kSwerveModuleSupply = 35.0d;
 		// SwerveStator ?
 
-		public static final double kElevatorSupply = 0.0;
-		public static final double kElevatorStator = 0.0;
+		public static final double kElevatorSupply = 35.0;
+		public static final double kElevatorStator = 120.0;
 		
 		public static final double kArmSupply = 0.0;
 		public static final double kArmStator = 0.0;
