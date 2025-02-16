@@ -12,20 +12,20 @@ public class StagingManager {
 
     public static enum StagingState {
         // Defaults                               
-        ZEROED(0.2,0.28),
+        ZEROED(0.17,0.29),
 
         // Coral
-        CORAL_L4(4.209,0.0),
-        CORAL_L3(4.209,-0.144),
-        CORAL_L2(3.714,-0.144),
-        CORAL_L1(3.714,0.28),
-        CORAL_GROUND(0.034,-0.170664),
-        CORAL_STATION(0.4,0.054),
+        CORAL_L4(4.627,-0.2),
+        CORAL_L3(4.627,-0.2),
+        CORAL_L2(3.2333,-0.2),
+        CORAL_L1(3.2333,-0.2),
+        CORAL_GROUND(0.5529,-0.1),
+        CORAL_STATION(1.84,0.06),
 
         // Algae
         ALGAE_HIGH(0.0,0.0),
         ALGAE_LOW(0.0,0.0),
-        ALGAE_GROUND(0.0,0.0);
+        ALGAE_GROUND(0.5,-0.28);
 
         public final double extension;
         public final double rotation;
@@ -82,14 +82,21 @@ public class StagingManager {
 
     public static SequentialCommandGroup all(StagingState state, Elevator elevator, Arm arm){
         return new SequentialCommandGroup(
+            Commands.runOnce(() -> elevator.setExtension(0.84), elevator),
             Commands.runOnce(() -> arm.setRotation(state.rotation), elevator),
             Commands.waitSeconds(0.3),
             Commands.runOnce(() -> elevator.setExtension(state.extension), arm)
         );
     }
 
-    public static SequentialCommandGroup groundPickup(){
-        
+    public static SequentialCommandGroup groundPickup(Elevator elevator, Arm arm){
+        return new SequentialCommandGroup(
+            Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_STATION.rotation), elevator),
+            Commands.waitSeconds(0.4),
+            Commands.runOnce(() -> elevator.setExtension(StagingState.ALGAE_GROUND.extension), arm),
+            Commands.waitSeconds(0.4),
+            Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_GROUND.rotation), elevator)
+        );
     }
 
     public static SequentialCommandGroup zero(Elevator elevator, Arm arm){

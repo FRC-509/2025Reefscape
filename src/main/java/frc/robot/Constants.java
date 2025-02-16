@@ -125,7 +125,7 @@ public final class Constants {
         public static final double kSensorToMechanismRatio = 4 / 3;
         public static final double kRotorToSensorRatio = 12 * 84 / 24; // TODO: wrong
 		
-        public static final double kExtensionSafeAngle = 0.09;
+        public static final double kExtensionSafeAngle = 0.87;
 		public static final Constraints kMotionProfileConstraints = null;
 	}
 
@@ -133,14 +133,14 @@ public final class Constants {
         public static final double kAlgaeIntakeVoltage = -0.75;
 		public static final double kCoralIntakeVoltage = 6;
 
-        public static final double kAlgaeTorqueCurrent = 10;
+        public static final double kAlgaeTorqueCurrent = 100;
 		public static final double kCoralTorqueCurrent = 28;
 
         public static final double kAlgaePassiveVoltage = 0.3;
         public static final double kCoralPassiveVoltage = 0.75;
 
-        public static final double kAlgaeOutakeVoltage = 0;
-        public static final double kCoralOutakeVoltage = -6;
+        public static final double kAlgaeOutakeVoltage = -2.5;
+        public static final double kCoralOutakeVoltage = 2.5;
 
 		public static final double kCoralOutakeDelay = 0.75; // seconds // TODO: Reduce
         public static final double kAlgaeOutakeDelay = 0.33;
@@ -224,8 +224,8 @@ public final class Constants {
 		}
 
 		public static class Elevator {
-			public static final double kExtensionP = 1.2;
-			public static final double kExtensionI = 0.24;
+			public static final double kExtensionP = 0.3;
+			public static final double kExtensionI = 0.32;
 			public static final double kExtensionD = 0;
 		}
 

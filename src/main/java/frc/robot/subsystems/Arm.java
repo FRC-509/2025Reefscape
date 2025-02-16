@@ -25,7 +25,7 @@ public class Arm extends SubsystemBase {
 
 	// private final PositionVoltage closedLoopPosition = new PositionVoltage(0).withEnableFOC(false);
     // private final VelocityVoltage closedLoopVelocity = new VelocityVoltage(0.0).withEnableFOC(false);
-    private final PositionDutyCycle ddd = new PositionDutyCycle(pivotMotor.getRotorPosition().getValueAsDouble());
+    private final PositionDutyCycle ddd = new PositionDutyCycle(pivotMotor.getPosition().getValueAsDouble());
 
     public Arm(){
         TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
@@ -104,7 +104,7 @@ public class Arm extends SubsystemBase {
     private void dashboard(){
         // SmartDashboard.putNumber("Arm Absolute positiion", pivotEncoder.getAbsolutePosition().getValueAsDouble());
         // SmartDashboard.putNumber("Arm positiion", pivotMotor.getPosition().getValueAsDouble());
-        SmartDashboard.putNumber("Arm rotor positiion", pivotMotor.getRotorPosition().getValueAsDouble());
+        SmartDashboard.putNumber("Arm rotor positiion", pivotMotor.getPosition().getValueAsDouble());
         SmartDashboard.putBoolean("Arm Extension Safe", isExtensionSafe());
     }
 }

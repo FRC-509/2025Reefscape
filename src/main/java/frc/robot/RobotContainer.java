@@ -105,13 +105,16 @@ public class RobotContainer {
 		// Elevator / Arm setpoint control
 		operator.x().onTrue(StagingManager.all(StagingState.CORAL_STATION, elevator, arm));
 		operator.y().onTrue(StagingManager.all(StagingState.CORAL_L2, elevator, arm));
-		operator.a().onTrue(StagingManager.all(StagingState.CORAL_GROUND, elevator, arm));
+		operator.a().onTrue(StagingManager.groundPickup(elevator, arm));
 		operator.b().onTrue(StagingManager.all(StagingState.CORAL_L3, elevator, arm));
 
 		operator.x().onFalse(StagingManager.zero(elevator, arm));
 		operator.y().onFalse(StagingManager.zero(elevator, arm));
 		operator.a().onFalse(StagingManager.zero(elevator, arm));
 		operator.b().onFalse(StagingManager.zero(elevator, arm));
+
+		// operator.a().onTrue(Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_GROUND.extension), elevator));
+		// operator.a().onFalse(Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_L2.extension), elevator));
 
 
 		// operator.a().onTrue(Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_STATION.rotation), arm));
@@ -121,12 +124,16 @@ public class RobotContainer {
 		// operator.x().onTrue(Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_STATION.extension), elevator));
 
 		// Coral Intake / outake on release
-		operator.leftBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake));
-		operator.leftBumper().onFalse(Intake.outakeCommand(true, intake));
+		// operator.leftBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake));
+		// operator.leftBumper().onFalse(Intake.outakeCommand(true, intake));
+		operator.leftBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_OUTAKE), intake));
+		operator.rightBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.CORAL_OUTAKE), intake));
+		operator.rightBumper().onFalse(Commands.runOnce(() -> intake.setState(IntakingState.STOP), intake));
+		operator.leftBumper().onFalse(Commands.runOnce(() -> intake.setState(IntakingState.STOP), intake));
 
 		// Algae Intake / outake on release
-		operator.rightBumper().onTrue(Commands.run(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));
-		operator.rightBumper().onFalse(Intake.outakeCommand(false, intake));
+		// operator.rightBumper().onTrue(Commands.run(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));
+		// operator.rightBumper().onFalse(Intake.outakeCommand(false, intake));
 
 		// climber.setDefaultCommand(new DefaultClimbCommand(
 		// 	() -> operator.getRightY(), 

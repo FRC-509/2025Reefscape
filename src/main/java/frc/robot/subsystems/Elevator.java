@@ -6,6 +6,7 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -22,9 +23,10 @@ import frc.robot.commands.StagingManager.StagingState;
 public class Elevator extends SubsystemBase {
     
     private final TalonFX extensionLeader = new TalonFX(Constants.IDs.kExtensionLeader, Constants.kCANIvore); // TODO: ID ME :(
-	// private final TalonFX extensionFollower = new TalonFX(Constants.IDs.kExtensionFollower, Constants.kCANIvore);
+	private final TalonFX extensionFollower = new TalonFX(Constants.IDs.kExtensionFollower, Constants.kCANIvore);
 
     private CANcoder extensionEncoder = new CANcoder(Constants.IDs.kExtensionEncoder,  Constants.kCANIvore);
+    private CANrange rangeSensor = new CANrange(20, Constants.kCANIvore);
 
     private VoltageOut openLoop = new VoltageOut(0).withEnableFOC(false);
     private PositionDutyCycle closedLoopPosition = new PositionDutyCycle(0.0).withEnableFOC(false);
@@ -36,7 +38,7 @@ public class Elevator extends SubsystemBase {
 
         // Current limits
 		extensionLeaderConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-		extensionLeaderConfig.CurrentLimits.SupplyCurrentLimit = Constants.CurrentLimits.kElevatorSupply; 
+		extensionLeaderConfig.CurrentLimits.SupplyCurrentLimit = Constants.CurrentLimits.kElevatorSupply;
         extensionLeaderConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         extensionLeaderConfig.CurrentLimits.StatorCurrentLimit = Constants.CurrentLimits.kElevatorStator;
 
@@ -58,33 +60,31 @@ public class Elevator extends SubsystemBase {
         TalonFXConfiguration extensionFollowerConfig = new TalonFXConfiguration();
 
         // Current limits
-		extensionFollowerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-		extensionFollowerConfig.CurrentLimits.SupplyCurrentLimit = Constants.CurrentLimits.kElevatorSupply; 
-        extensionFollowerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        extensionFollowerConfig.CurrentLimits.StatorCurrentLimit = Constants.CurrentLimits.kElevatorStator;
+		extensionLeaderConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+		extensionLeaderConfig.CurrentLimits.SupplyCurrentLimit = Constants.CurrentLimits.kElevatorSupply;
+        extensionLeaderConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        extensionLeaderConfig.CurrentLimits.StatorCurrentLimit = Constants.CurrentLimits.kElevatorStator;
 
         // PID value assignment
-		extensionFollowerConfig.Slot0.kP = Constants.PIDConstants.Elevator.kExtensionP;
-		extensionFollowerConfig.Slot0.kI = Constants.PIDConstants.Elevator.kExtensionI;
-		extensionFollowerConfig.Slot0.kD = Constants.PIDConstants.Elevator.kExtensionD;
-		extensionFollowerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+		extensionLeaderConfig.Slot0.kP = Constants.PIDConstants.Elevator.kExtensionP;
+		extensionLeaderConfig.Slot0.kI = Constants.PIDConstants.Elevator.kExtensionI;
+		extensionLeaderConfig.Slot0.kD = Constants.PIDConstants.Elevator.kExtensionD;
+		extensionLeaderConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
         // Assigning encoder as feedback device
-		extensionFollowerConfig.Feedback.FeedbackRemoteSensorID = extensionEncoder.getDeviceID();
-		extensionFollowerConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-		extensionFollowerConfig.Feedback.RotorToSensorRatio = Constants.Elevator.kRotorToSensorRatio;
-        extensionFollowerConfig.Feedback.SensorToMechanismRatio = Constants.Elevator.kSensorToMechanismRatio;
-        extensionFollowerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-		// extensionFollower.getConfigurator().apply(extensionFollowerConfig);
-		// extensionFollower.setControl(new Follower(extensionLeader.getDeviceID(), true)); // TODO: Check design
+		extensionLeaderConfig.Feedback.FeedbackRemoteSensorID = extensionEncoder.getDeviceID();
+		extensionLeaderConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+		extensionLeaderConfig.Feedback.RotorToSensorRatio = 1;
+        extensionLeaderConfig.Feedback.SensorToMechanismRatio = 1;
+        extensionLeaderConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+		extensionFollower.getConfigurator().apply(extensionFollowerConfig);
+		extensionFollower.setControl(new Follower(extensionLeader.getDeviceID(), true)); // TODO: Check design
 
 		CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
 		encoderConfig.MagnetSensor.MagnetOffset = (Constants.Elevator.kExtensionMagnetOffset) / 360.0;
 		encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
         encoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5;
 		extensionEncoder.getConfigurator().apply(encoderConfig);
-
-        SmartDashboard.putNumber("ExtendTo", extensionLeader.getRotorPosition().getValueAsDouble());
     }
 
     public void rawExtension(double extension){ 
@@ -122,6 +122,7 @@ public class Elevator extends SubsystemBase {
     }
 
     public void setExtension(double state){
+        SmartDashboard.putNumber("Adressed Extension", state);
         extensionLeader.setControl(closedLoopPosition.withPosition(state));
     }
 
@@ -144,7 +145,7 @@ public class Elevator extends SubsystemBase {
     private void dashboard(){
         SmartDashboard.putBoolean("InwardsRotationSafe", isInwardsRotationSafe());
         // SmartDashboard.putNumber("Leader Extension Position", extensionLeader.getPosition().getValueAsDouble());
-        SmartDashboard.putNumber("Leader Extension Rotor Position", extensionLeader.getRotorPosition().getValueAsDouble());
+        SmartDashboard.putNumber("Extension Position", extensionLeader.getPosition().getValueAsDouble());
         // SmartDashboard.putNumber("FollowerExtensionPosition", extensionFollower.getPosition().getValueAsDouble());
     }
 }
