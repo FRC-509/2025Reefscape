@@ -115,6 +115,7 @@ public final class Constants {
 		public static final double kMaxVelocity = 0; // Find desired units of setVelocity
         public static final double kMaxAcceleration = 0;
 		public static final Constraints kMotionProfileConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
+        public static final double kInwardsRotationSafeExtension = 0.138;
 	}
 
 	public static class Arm {

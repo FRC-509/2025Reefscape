@@ -146,6 +146,7 @@ public class Intake extends SubsystemBase {
             this.timer1 = new Timer();
             this.timer2 = new Timer();
             this.firstPass = true;
+            start();
         }
 
         private void start(){
@@ -169,6 +170,8 @@ public class Intake extends SubsystemBase {
                 updateSecond(value);
                 firstPass = false;
             }
+            if (!firstPass && Math.abs(timer1.get() - timer2.get()) < period/3) start();
+
             if (timer1.get() >= period) updateFirst(value);
             if (timer2.get() >= period) updateSecond(value);
             return timer1.get() >= timer2.get() ? first : second;

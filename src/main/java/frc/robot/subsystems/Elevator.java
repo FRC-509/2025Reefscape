@@ -33,6 +33,9 @@ public class Elevator extends SubsystemBase {
 	// private PositionVoltage closedLoopPosition = new PositionVoltage(0).withEnableFOC(false);
     // private VelocityVoltage closedLoopVelocity = new VelocityVoltage(0).withEnableFOC(false);
 
+    private double lastPos;
+    private double lastVel;
+
     public Elevator(){
         TalonFXConfiguration extensionLeaderConfig = new TalonFXConfiguration();
 
@@ -104,7 +107,8 @@ public class Elevator extends SubsystemBase {
      * @return The current extension of the elevator from the ground, in meters
      */
     public double getExtension(){
-        return extensionLeader.getRotorPosition().getValueAsDouble() * 1.0; // TODO: rotor Position to extension m conversion
+        return rangeSensor.getDistance().getValueAsDouble();
+        // return extensionLeader.getRotorPosition().getValueAsDouble() * 1.0;
     }
 
     /**
@@ -127,7 +131,7 @@ public class Elevator extends SubsystemBase {
     }
 
     public boolean isInwardsRotationSafe() {
-        return getExtension() < 0.138;
+        return getExtension() < Constants.Elevator.kInwardsRotationSafeExtension;
     }
 
     public void extendTo(double rotationPosition){
@@ -138,6 +142,7 @@ public class Elevator extends SubsystemBase {
     @Override
     public void periodic() {
         dashboard();
+        SmartDashboard.putNumber("range sensor", rangeSensor.getDistance().getValueAsDouble());
         // extendTo(SmartDashboard.getNumber("ExtendTo", extensionLeader.getRotorPosition().getValueAsDouble()));
         // SmartDashboard.putNumber("", extensionFollower.getPos);
     }
@@ -148,4 +153,16 @@ public class Elevator extends SubsystemBase {
         SmartDashboard.putNumber("Extension Position", extensionLeader.getPosition().getValueAsDouble());
         // SmartDashboard.putNumber("FollowerExtensionPosition", extensionFollower.getPosition().getValueAsDouble());
     }
+
+    // public class Accumulator {
+    //     private double currentPos;
+    //     private double lastPos;
+    //     public Accumulator(double current){
+    //         this.current = current;
+    //         this.last = current;
+    //     }
+    //     public update(double newPos){
+    //         this.last = 0.0;
+    //     }
+    // }
 }
