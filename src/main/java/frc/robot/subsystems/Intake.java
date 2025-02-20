@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -69,7 +70,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void outake(boolean coral){
-        intakingState = !coral ? IntakingState.CORAL_OUTAKE : IntakingState.ALGAE_OUTAKE;
+        intakingState = coral ? IntakingState.CORAL_OUTAKE : IntakingState.ALGAE_OUTAKE;
         intakeMotor.setControl(intakeOpenLoop.withOutput(intakingState.voltageOut));
         lastIntakingState = intakingState;
     }
@@ -87,14 +88,24 @@ public class Intake extends SubsystemBase {
     @Override
     public void periodic() {
         dashboard();
-        double stallTorqueCurrent = torqueValueClock.get(intakeMotor.getTorqueCurrent().getValueAsDouble());
+        
+        Pair<Double,Double> stallTorqueCurrent = torqueValueClock.get(intakeMotor.getTorqueCurrent().getValueAsDouble());
+        boolean atAlgaeTorque = 
+            Math.abs(stallTorqueCurrent.getFirst()) > Constants.Intake.kAlgaeTorqueCurrent 
+            && Math.abs(stallTorqueCurrent.getSecond()) > Constants.Intake.kAlgaeTorqueCurrent;
+        
+        boolean atCoralTorque = 
+            Math.abs(stallTorqueCurrent.getFirst()) > Constants.Intake.kCoralTorqueCurrent 
+            && Math.abs(stallTorqueCurrent.getSecond()) > Constants.Intake.kCoralTorqueCurrent;
+        
+        SmartDashboard.putBoolean("At Algae Torque", atAlgaeTorque);
+        SmartDashboard.putBoolean("At Coral Torque", atCoralTorque);
         // Collect torque before returning command so AlternatingValueClock can update properly
+        
         if(commandOutake) return; 
-        if (intakingState.equals(IntakingState.ALGAE_INTAKE) 
-            && stallTorqueCurrent > Constants.Intake.kAlgaeTorqueCurrent){
+        if (intakingState.equals(IntakingState.ALGAE_INTAKE) && atAlgaeTorque){
             intakingState = IntakingState.ALGAE_PASSIVE;
-        } else if (intakingState.equals(IntakingState.CORAL_INTAKE) 
-            && stallTorqueCurrent > Constants.Intake.kCoralTorqueCurrent) {
+        } else if (intakingState.equals(IntakingState.CORAL_INTAKE) && atCoralTorque) {
             intakingState = IntakingState.CORAL_PASSIVE;
         }
 
@@ -109,12 +120,12 @@ public class Intake extends SubsystemBase {
         SmartDashboard.putNumber("VoltageOutIntakeSigma", intakeMotor.getVelocity().getValueAsDouble());
         SmartDashboard.putString("Intaking State", intakingState.toString());
         SmartDashboard.putString("Last Intaking State", lastIntakingState.toString());
-        SmartDashboard.putNumber("Stall Torque Current", stallTorqueCurrent);
+        SmartDashboard.putNumber("Torque Current", stallTorqueCurrent);
         SmartDashboard.putBoolean("Has Intaken Gamepiece",
             intakingState.equals(IntakingState.ALGAE_INTAKE) && stallTorqueCurrent > Constants.Intake.kAlgaeTorqueCurrent
             || intakingState.equals(IntakingState.CORAL_INTAKE) && stallTorqueCurrent > Constants.Intake.kCoralTorqueCurrent);
         
-        SmartDashboard.putString("CurrentTimer", torqueValueClock.timer1.get() > torqueValueClock.timer2.get() ? "Timer 1" : "Timer 2");
+        // SmartDashboard.putString("CurrentTimer", torqueValueClock.timer1.get() > torqueValueClock.timer2.get() ? "Timer 1" : "Timer 2");
         SmartDashboard.putNumber("delay1", torqueValueClock.timer1.get());
         SmartDashboard.putNumber("delay2", torqueValueClock.timer2.get());
         SmartDashboard.putNumber("difference", Math.abs(torqueValueClock.timer1.get() - torqueValueClock.timer2.get()));
@@ -165,7 +176,7 @@ public class Intake extends SubsystemBase {
             second = value;
         }
 
-        public double get(double value){
+        public Pair<Double,Double> get(double value){
             if (firstPass && timer2.get() > period/2) {
                 updateSecond(value);
                 firstPass = false;
@@ -174,7 +185,7 @@ public class Intake extends SubsystemBase {
 
             if (timer1.get() >= period) updateFirst(value);
             if (timer2.get() >= period) updateSecond(value);
-            return timer1.get() >= timer2.get() ? first : second;
+            return new Pair<Double,Double>(timer1.get() >= timer2.get() ? first : second, timer1.get() < timer2.get() ? first : second);
         }
     }
 }

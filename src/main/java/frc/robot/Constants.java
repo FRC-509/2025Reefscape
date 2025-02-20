@@ -131,21 +131,23 @@ public final class Constants {
 	}
 
 	public static class Intake { //TODO: Find Me
-        public static final double kAlgaeIntakeVoltage = -0.75;
+        public static final double kAlgaeIntakeVoltage = -5.5;
 		public static final double kCoralIntakeVoltage = 6;
 
-        public static final double kAlgaeTorqueCurrent = 100;
+        public static final double kAlgaeTorqueCurrent = 36;
 		public static final double kCoralTorqueCurrent = 28;
 
-        public static final double kAlgaePassiveVoltage = 0.3;
+        public static final double kAlgaePassiveVoltage = -0.47;
         public static final double kCoralPassiveVoltage = 0.75;
 
-        public static final double kAlgaeOutakeVoltage = -2.5;
-        public static final double kCoralOutakeVoltage = 2.5;
+        public static final double kAlgaeOutakeVoltage = 7;
+        public static final double kCoralOutakeVoltage = -8.5;
 
 		public static final double kCoralOutakeDelay = 0.75; // seconds // TODO: Reduce
         public static final double kAlgaeOutakeDelay = 0.33;
-        public static final double kIntakeClockPeriod = 0.5;// seconds
+		
+        public static final double kIntakeClockPeriod = 0.2; // seconds
+        public static final double kTorqueStablePeriod = 0.1; // seconds
 	}
 
 	public static class Climber {

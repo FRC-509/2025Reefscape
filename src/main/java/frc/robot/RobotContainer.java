@@ -132,8 +132,11 @@ public class RobotContainer {
 		// operator.leftBumper().onFalse(Commands.runOnce(() -> intake.setState(IntakingState.STOP), intake));
 
 		// Algae Intake / outake on release
-		operator.rightBumper().onTrue(Commands.run(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));
+		operator.rightBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));
 		operator.rightBumper().onFalse(Intake.outakeCommand(false, intake));
+
+		operator.leftBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake));
+		operator.leftBumper().onFalse(Intake.outakeCommand(true, intake));
 
 		// climber.setDefaultCommand(new DefaultClimbCommand(
 		// 	() -> operator.getRightY(), 
