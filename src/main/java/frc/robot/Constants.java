@@ -119,18 +119,15 @@ public final class Constants {
 	}
 
 	public static class Arm {
-		public static final double kRotationGearRatio = 4.0 / 3.0;
-		public static final double kPivotMagnetOffset = 0.0;
-		
-		public static final double kValidRotationTolerance = 0.1; // In degrees TODO: Tune
-        public static final double kSensorToMechanismRatio = 4 / 3;
-        public static final double kRotorToSensorRatio = 12 * 84 / 24; // TODO: wrong
-		
         public static final double kExtensionSafeAngle = 0.87;
-		public static final Constraints kMotionProfileConstraints = null;
+		public static final double kValidRotationTolerance = 0.05;
+		
+		public static final double kRotationGearRatio = 4.0 / 3.0;
+        public static final double kSensorToMechanismRatio = 4 / 3;
+        public static final double kRotorToSensorRatio = 12 * 84 / 24;
 	}
 
-	public static class Intake { //TODO: Find Me
+	public static class Intake {
         public static final double kAlgaeIntakeVoltage = -5.5;
 		public static final double kCoralIntakeVoltage = 6;
 
@@ -143,7 +140,7 @@ public final class Constants {
         public static final double kAlgaeOutakeVoltage = 7;
         public static final double kCoralOutakeVoltage = -8.5;
 
-		public static final double kCoralOutakeDelay = 0.75; // seconds // TODO: Reduce
+		public static final double kCoralOutakeDelay = 0.75; // seconds
         public static final double kAlgaeOutakeDelay = 0.33;
 		
         public static final double kIntakeClockPeriod = 0.2; // seconds
