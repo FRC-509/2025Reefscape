@@ -40,9 +40,6 @@ public class Arm extends SubsystemBase {
 		pivotMotor.getConfigurator().apply(pivotConfig);
     }
 
-    /**
-     * @return The rotation of the arm from the starting configuration, in degrees 
-     */
     public double getRotation(){
         return pivotMotor.getPosition().getValueAsDouble();
     }

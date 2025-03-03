@@ -22,7 +22,7 @@ import frc.robot.util.math.Conversions;
  */
 public final class Constants {
 	public static final String kRio = "rio";
-	public static final String kCANIvore = "509CANIvore"; //TODO: Make sure to flash 
+	public static final String kCANIvore = "509CANIvore";
 
 	public static class Operator {
 		public static final double kStickDeadband = 0.1;
@@ -32,7 +32,7 @@ public final class Constants {
 	}
 
 	public static class Chassis {
-		public static final double kRobotWeight = 100.0d; // kg, incl bumpers and battery
+		public static final double kRobotWeight = 100.0d; // kg, incl bumpers and battery TODO:
 		public static final double kMOI = 4.4659;
 		public static final double kOffsetToSwerveModule = Units.inchesToMeters(10.375);
 		public static final double kKrakenFreeSpeedRPM = 6000.0d;
@@ -43,7 +43,7 @@ public final class Constants {
 		public static class MK4I { // MK4i level 2s
 			public static final double kWheelRadius = Units.inchesToMeters(2.0);
 			public static final double kWheelCircumference = 2 * kWheelRadius * Math.PI; // 0.3192 meters
-			public static final double kDriveGearRatio = 6.75 / 1; // TODO: Change
+			public static final double kDriveGearRatio = 6.75 / 1;
 			public static final double kAngleGearRatio = 150.0d / 7.0d;
 			public static final double kCouplingRatio = 25.0d / 7.0d;
 			public static final double wheelCOF = 1.0; // default placeholder value
@@ -107,7 +107,7 @@ public final class Constants {
 	}
 
 	public static class Elevator {
-		// Gear ratio between the rotation of the motor and the rotation extending the elevator 
+		// Gear ratio between the rotation of the motor and the rotation extending the elevator
 		public static final double kRotorToSensorRatio = 1.0 / 12.0; //TODO: validate
         public static final double kSensorToMechanismRatio = 2 * Math.PI * Units.inchesToMeters(0.8);
 		public static final double kExtensionMagnetOffset = 0.0; // TODO: find later
@@ -121,7 +121,7 @@ public final class Constants {
 	public static class Arm {
         public static final double kExtensionSafeAngle = 0.87;
 		public static final double kValidRotationTolerance = 0.05;
-		
+
 		public static final double kRotationGearRatio = 4.0 / 3.0;
         public static final double kSensorToMechanismRatio = 4 / 3;
         public static final double kRotorToSensorRatio = 12 * 84 / 24;

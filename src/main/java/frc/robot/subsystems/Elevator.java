@@ -13,16 +13,13 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.commands.StagingManager;
-import frc.robot.commands.StagingManager.StagingState;
 
 public class Elevator extends SubsystemBase {
     
-    private final TalonFX extensionLeader = new TalonFX(Constants.IDs.kExtensionLeader, Constants.kCANIvore); // TODO: ID ME :(
+    private final TalonFX extensionLeader = new TalonFX(Constants.IDs.kExtensionLeader, Constants.kCANIvore);
 	private final TalonFX extensionFollower = new TalonFX(Constants.IDs.kExtensionFollower, Constants.kCANIvore);
 
     private CANcoder extensionEncoder = new CANcoder(Constants.IDs.kExtensionEncoder,  Constants.kCANIvore);
@@ -30,11 +27,7 @@ public class Elevator extends SubsystemBase {
 
     private VoltageOut openLoop = new VoltageOut(0).withEnableFOC(false);
     private PositionDutyCycle closedLoopPosition = new PositionDutyCycle(0.0).withEnableFOC(false);
-	// private PositionVoltage closedLoopPosition = new PositionVoltage(0).withEnableFOC(false);
     // private VelocityVoltage closedLoopVelocity = new VelocityVoltage(0).withEnableFOC(false);
-
-    private double lastPos;
-    private double lastVel;
 
     public Elevator(){
         TalonFXConfiguration extensionLeaderConfig = new TalonFXConfiguration();
@@ -90,8 +83,8 @@ public class Elevator extends SubsystemBase {
 		extensionEncoder.getConfigurator().apply(encoderConfig);
     }
 
-    public void rawExtension(double extension){ 
-        extensionLeader.setControl(openLoop.withOutput(12 * extension));
+    public void rawExtension(double voltage){ 
+        extensionLeader.setControl(openLoop.withOutput(voltage));
     }
 
     public void setPositionControl(double position){
@@ -100,15 +93,14 @@ public class Elevator extends SubsystemBase {
     }
 
     public void setExtendingVelocity(double velocity){
-        //extensionLeader.setControl(closedLoopVelocity.withVelocity(velocity));
+        // extensionLeader.setControl(closedLoopVelocity.withVelocity(velocity));
     }
 
     /**
-     * @return The current extension of the elevator from the ground, in meters
+     * @return The current extension of the elevator from the base of the elevator, in meters
      */
     public double getExtension(){
         return rangeSensor.getDistance().getValueAsDouble();
-        // return extensionLeader.getRotorPosition().getValueAsDouble() * 1.0;
     }
 
     /**
@@ -142,27 +134,11 @@ public class Elevator extends SubsystemBase {
     @Override
     public void periodic() {
         dashboard();
-        SmartDashboard.putNumber("range sensor", rangeSensor.getDistance().getValueAsDouble());
-        // extendTo(SmartDashboard.getNumber("ExtendTo", extensionLeader.getRotorPosition().getValueAsDouble()));
-        // SmartDashboard.putNumber("", extensionFollower.getPos);
     }
 
     private void dashboard(){
+        SmartDashboard.putNumber("range sensor", rangeSensor.getDistance().getValueAsDouble());
         SmartDashboard.putBoolean("InwardsRotationSafe", isInwardsRotationSafe());
-        // SmartDashboard.putNumber("Leader Extension Position", extensionLeader.getPosition().getValueAsDouble());
         SmartDashboard.putNumber("Extension Position", extensionLeader.getPosition().getValueAsDouble());
-        // SmartDashboard.putNumber("FollowerExtensionPosition", extensionFollower.getPosition().getValueAsDouble());
     }
-
-    // public class Accumulator {
-    //     private double currentPos;
-    //     private double lastPos;
-    //     public Accumulator(double current){
-    //         this.current = current;
-    //         this.last = current;
-    //     }
-    //     public update(double newPos){
-    //         this.last = 0.0;
-    //     }
-    // }
 }

@@ -180,10 +180,8 @@ public class VisionFieldAlignment extends Command {
 
 	@Override
 	public boolean isFinished() {
-		if (DriverStation.isAutonomous() && limelight.getTX() < 0.5d) {
-			return true;
-		}
-		
+		if (DriverStation.isAutonomous() && limelight.getTX() < 0.5d) return true;
+
 		return MathUtil.isNear(0, outputTranslation.getX(), Constants.Vision.kAlignmentTranslationTolerance) &&
 			MathUtil.isNear(0, outputTranslation.getY(), Constants.Vision.kAlignmentTranslationTolerance) &&
 			MathUtil.isNear(getAlignmentOffset(targetTagID).getRotation().getDegrees(), swerve.getYaw().getDegrees(), Constants.Vision.kAlignmentRotationTolerance);
