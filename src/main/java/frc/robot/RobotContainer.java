@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.commands.*;
 import frc.robot.commands.StagingManager.StagingState;
-import frc.robot.commands.staging.RotateTo;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
@@ -19,8 +18,6 @@ import frc.robot.subsystems.Intake.IntakingState;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.PigeonWrapper;
-
-import java.util.function.BooleanSupplier;
 
 import com.redstorm509.stormkit.controllers.ThrustmasterJoystick;
 import com.redstorm509.stormkit.controllers.ThrustmasterJoystick.StickButton;
@@ -112,24 +109,6 @@ public class RobotContainer {
 		operator.y().onFalse(StagingManager.zero(elevator, arm));
 		operator.a().onFalse(StagingManager.zero(elevator, arm));
 		operator.b().onFalse(StagingManager.zero(elevator, arm));
-
-		// operator.a().onTrue(Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_GROUND.extension), elevator));
-		// operator.a().onFalse(Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_L2.extension), elevator));
-
-
-		// operator.a().onTrue(Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_STATION.rotation), arm));
-		// operator.b().onTrue(Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_GROUND.rotation), arm));
-		// // operator.b().onTrue(Commands.runOnce(() -> arm.setRotation(StagingState), arm));
-		// operator.y().onTrue(Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_GROUND.extension), elevator));
-		// operator.x().onTrue(Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_STATION.extension), elevator));
-
-		// Coral Intake / outake on release
-		// operator.leftBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake));
-		// operator.leftBumper().onFalse(Intake.outakeCommand(true, intake));
-		// operator.leftBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_OUTAKE), intake));
-		// operator.rightBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.CORAL_OUTAKE), intake));
-		// operator.rightBumper().onFalse(Commands.runOnce(() -> intake.setState(IntakingState.STOP), intake));
-		// operator.leftBumper().onFalse(Commands.runOnce(() -> intake.setState(IntakingState.STOP), intake));
 
 		// Algae Intake / outake on release
 		operator.rightBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));
