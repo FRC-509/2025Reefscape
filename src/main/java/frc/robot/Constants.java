@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -38,8 +39,10 @@ public final class Constants {
 		public static final double kKrakenFreeSpeedRPM = 6000.0d;
 		public static final double kKrakenFreeSpeedRPS = kKrakenFreeSpeedRPM / 60.0d;
 		public static final double kMaxSpeed = Conversions.falconToMPS(kKrakenFreeSpeedRPS, MK4I.kWheelCircumference,
-			MK4I.kDriveGearRatio); // allegedly 4.7244 
-
+			MK4I.kDriveGearRatio); // allegedly 4.7244
+		public static final double kMaxAcceleration = 0.0; // TODO: FIND REAL VALUES
+		public static final double kMaxAngularAcceleration = 0.0;
+		
 		public static class MK4I { // MK4i level 2s
 			public static final double kWheelRadius = Units.inchesToMeters(2.0);
 			public static final double kWheelCircumference = 2 * kWheelRadius * Math.PI; // 0.3192 meters
@@ -68,6 +71,12 @@ public final class Constants {
 			kKrakenDcMotorProfile,
 			Constants.CurrentLimits.kSwerveModuleSupply, 
 			4);
+
+		public static final PathConstraints constraints = new PathConstraints(
+			kMaxSpeed, 
+			kMaxAcceleration, 
+			kMaxAngularVelocity, 
+			kMaxAngularAcceleration);
 
 		public static record SwerveModuleConfiguration(
 			int moduleNumber,

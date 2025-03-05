@@ -9,6 +9,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.autonomous.Leave;
 import frc.robot.commands.*;
 import frc.robot.commands.StagingManager.StagingState;
 import frc.robot.subsystems.Arm;
@@ -112,9 +113,9 @@ public class RobotContainer {
 
 		// Algae Intake / outake on release
 		operator.rightBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));
-		operator.rightBumper().onFalse(Intake.outakeCommand(false, intake));
-
 		operator.leftBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake));
+
+		operator.rightBumper().onFalse(Intake.outakeCommand(false, intake));
 		operator.leftBumper().onFalse(Intake.outakeCommand(true, intake));
 
 		// climber.setDefaultCommand(new DefaultClimbCommand(
@@ -125,6 +126,7 @@ public class RobotContainer {
 
 	private void addAutonomousRoutines() {
 		chooser.addOption("\"Go AFK\" (Null)", new InstantCommand());
+		chooser.addOption("Leave", new Leave(0.3, 1.0, swerve));
 		SmartDashboard.putData("Auto Mode", chooser);
 
 		if (RobotBase.isSimulation()) {
