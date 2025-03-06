@@ -85,7 +85,7 @@ public class Actions {
                 ),
                 Commands.sequence(
                     new WaitCommand(waitExtensionSeconds),
-                    StagingManager.CoralStation(elevator, arm),
+                    StagingManager.all(StagingState.CORAL_STATION, elevator, arm),
                     Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake)));
     }
 
@@ -107,7 +107,7 @@ public class Actions {
                 ),
                 Commands.sequence(
                     new WaitCommand(waitExtensionSeconds),
-                    StagingManager.CoralStation(elevator, arm),
+                    StagingManager.all(StagingState.CORAL_STATION, elevator, arm),
                     Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake)));
     }
     

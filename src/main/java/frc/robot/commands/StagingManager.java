@@ -1,16 +1,128 @@
 package frc.robot.commands;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.Intake;
-import frc.robot.commands.staging.ExtendTo;
-import frc.robot.commands.staging.RotateTo;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Elevator;
 
 public class StagingManager {
+
+    private class StagingTrigger {
+        BooleanSupplier booleanSupplier;
+        boolean last; 
+        Runnable onTrue; 
+        Runnable onFalse;
+
+        public StagingTrigger(BooleanSupplier booleanSupplier, boolean last, Runnable onTrue, Runnable onFalse){
+            this.booleanSupplier = booleanSupplier;
+            this.last = last;
+            this.onTrue = onTrue;
+            this.onFalse = onFalse;
+        }
+    }
+
+    private final StagingTrigger L4_StagingTrigger;
+    private final StagingTrigger L3_StagingTrigger;
+    private final StagingTrigger L2_StagingTrigger;
+    private final StagingTrigger L1_StagingTrigger;
+
+    private final StagingTrigger coralStation_StagingTrigger;
+    
+    private final StagingTrigger coralGround_StagingTrigger;
+    private final StagingTrigger algaeGround_StagingTrigger; 
+
+    private final DoubleSupplier extensionSupplier;
+
+    private Runnable quedStage;
+
+    public StagingManager(
+        Elevator elevator,
+        Arm arm,
+        Intake intake,
+        BooleanSupplier L4_Supplier,
+        BooleanSupplier L3_Supplier,
+        BooleanSupplier L2_Supplier,
+        BooleanSupplier L1_Supplier,
+        BooleanSupplier coralStation_Supplier,
+        BooleanSupplier coralGround_Supplier,
+        BooleanSupplier algaeGround_Supplier,
+        DoubleSupplier extensionSupplier
+    ){
+        this.L4_StagingTrigger = new StagingTrigger(
+            L4_Supplier,
+            false, 
+            () -> L4_Rising(elevator, arm).schedule(), 
+            () -> L4_Falling(elevator, arm, intake).schedule());
+
+        this.L3_StagingTrigger = new StagingTrigger(
+            L3_Supplier,
+            false, 
+            () -> all(StagingState.CORAL_L3, elevator, arm).schedule(), 
+            () -> zero(elevator, arm).schedule());
+
+        this.L2_StagingTrigger = new StagingTrigger(
+            L2_Supplier,
+            false, 
+            () -> all(StagingState.CORAL_L2, elevator, arm).schedule(), 
+            () -> zero(elevator, arm).schedule());
+
+        this.L1_StagingTrigger = new StagingTrigger(
+            L1_Supplier,
+            false,
+            () -> all(StagingState.CORAL_L1, elevator, arm).schedule(), 
+            () -> zero(elevator, arm).schedule());
+
+        this.coralStation_StagingTrigger = new StagingTrigger(
+            coralStation_Supplier,
+            false, 
+            () -> all(StagingState.CORAL_STATION, elevator, arm).schedule(), 
+            () -> zero(elevator, arm).schedule());
+
+        this.coralGround_StagingTrigger = new StagingTrigger(
+            coralGround_Supplier,
+            false, 
+            () -> all(StagingState.CORAL_GROUND, elevator, arm).schedule(), 
+            () -> zero(elevator, arm).schedule());
+
+        this.algaeGround_StagingTrigger = new StagingTrigger(
+            algaeGround_Supplier,
+            false, 
+            () -> all(StagingState.ALGAE_GROUND, elevator, arm).schedule(), 
+            () -> zero(elevator, arm).schedule());
+        
+        this.extensionSupplier = extensionSupplier;
+        this.quedStage = null;
+    }
+
+    public void update(){
+        onChange(L3_StagingTrigger);
+        onChange(L2_StagingTrigger);
+        onChange(L1_StagingTrigger);
+
+        onChange(coralStation_StagingTrigger);
+        onChange(coralGround_StagingTrigger);
+        onChange(algaeGround_StagingTrigger);
+
+        onChange(L4_StagingTrigger);
+
+        if (quedStage != null && extensionSupplier.getAsDouble() < StagingManager.StagingState.ALGAE_GROUND.extension){
+            quedStage.run();
+            quedStage = null;
+        }
+    }
+
+    void onChange(StagingTrigger trigger) {
+        if (!trigger.last && trigger.booleanSupplier.getAsBoolean()){ // on true
+            quedStage = trigger.onTrue;
+        } else if (trigger.last && !trigger.booleanSupplier.getAsBoolean()) { // on false
+            trigger.onFalse.run();
+        }
+        trigger.last = trigger.booleanSupplier.getAsBoolean(); 
+    }
 
     public static enum StagingState {
         // Defaults                               
@@ -38,50 +150,6 @@ public class StagingManager {
             this.extension = extension;
             this.rotation = rotation;
         }
-    }
-
-    public static SequentialCommandGroup ZeroState(Elevator elevator, Arm arm){
-        return new SequentialCommandGroup(
-            new ParallelCommandGroup(
-                new RotateTo(StagingState.ALGAE_HIGH.rotation, () -> elevator.isInwardsRotationSafe(), arm),
-                new ExtendTo(StagingState.ZEROED.extension, () -> arm.isExtensionSafe(), elevator)),
-            new RotateTo(StagingState.ZEROED.rotation, () -> elevator.isInwardsRotationSafe(), arm)
-        );
-    }
-
-    public static ParallelCommandGroup PlaceCoral_L4(Elevator elevator, Arm arm){
-        return new ParallelCommandGroup(
-            new RotateTo(StagingState.CORAL_L4.rotation, () -> elevator.isInwardsRotationSafe(), arm),
-            new ExtendTo(StagingState.CORAL_L4.extension, () -> arm.isExtensionSafe(), elevator)
-        );
-    }
-
-    public static ParallelCommandGroup PlaceCoral_Mid(StagingState state,Elevator elevator, Arm arm){
-        return new ParallelCommandGroup(
-            new RotateTo(state.rotation, () -> elevator.isInwardsRotationSafe(), arm),
-            new ExtendTo(state.extension, () -> arm.isExtensionSafe(), elevator)
-        );
-    }
-
-    public static ParallelCommandGroup GroundPickup(Elevator elevator, Arm arm){
-        return new ParallelCommandGroup(
-            new RotateTo(StagingState.CORAL_GROUND.rotation, () -> elevator.isInwardsRotationSafe(), arm),
-            new ExtendTo(StagingState.CORAL_GROUND.extension, () -> arm.isExtensionSafe(), elevator)
-        );
-    }
-
-    public static ParallelCommandGroup CoralStation(Elevator elevator, Arm arm){
-        return new ParallelCommandGroup(
-            new RotateTo(StagingState.CORAL_GROUND.rotation, () -> elevator.isInwardsRotationSafe(), arm),
-            new ExtendTo(StagingState.CORAL_GROUND.extension, () -> arm.isExtensionSafe(), elevator)
-        );
-    }
-
-    public static ParallelCommandGroup AlgaePickup(StagingState level, Elevator elevator, Arm arm){
-        return new ParallelCommandGroup(
-            new RotateTo(level.rotation, () -> elevator.isInwardsRotationSafe(), arm),
-            new ExtendTo(level.extension, () -> arm.isExtensionSafe(), elevator)
-        );
     }
 
     public static SequentialCommandGroup all(StagingState state, Elevator elevator, Arm arm){
