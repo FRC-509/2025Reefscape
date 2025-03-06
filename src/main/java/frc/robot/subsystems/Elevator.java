@@ -31,6 +31,8 @@ public class Elevator extends SubsystemBase {
     private PositionDutyCycle closedLoopPosition = new PositionDutyCycle(0.0).withEnableFOC(false);
     // private VelocityVoltage closedLoopVelocity = new VelocityVoltage(0).withEnableFOC(false);
 
+    private double initialRotation;
+
     public Elevator(){
         TalonFXConfiguration extensionLeaderConfig = new TalonFXConfiguration();
 
@@ -89,49 +91,23 @@ public class Elevator extends SubsystemBase {
         extensionLeader.setControl(openLoop.withOutput(voltage));
     }
 
-    public void setPositionControl(double position){
-        // Process input
-        extensionLeader.setControl(closedLoopPosition.withPosition(position));
-    }
-
-    public void setExtendingVelocity(double velocity){
-        // extensionLeader.setControl(closedLoopVelocity.withVelocity(velocity));
-    }
-
-    /**
-     * @return The current extension of the elevator from the base of the elevator, in meters
-     */
     public double getExtension(){
-        return rangeSensor.getDistance().getValueAsDouble();
+        return extensionLeader.getPosition().getValueAsDouble() + initialRotation;
     }
 
-    /**
-     * @return The current velocity of the elevator away from the ground, in meters per second
-     */
-    public double getExtendingVelocity() {
-        return extensionLeader.getVelocity().getValueAsDouble() * 1.0; // TODO: rotor velocity to extension m/s conversion
-    }
-
-    /**
-     * Sets the elevator to maintain it's current position with a seperate PID profile
-     */
-    public void maintainExntension() {
-        extensionLeader.setControl(closedLoopPosition.withPosition(extensionLeader.getPosition().getValueAsDouble())); 
-    }
-
-    public void setExtension(double state){
-        SmartDashboard.putNumber("Adressed Extension", state);
-        extensionLeader.setControl(closedLoopPosition.withPosition(state));
+    public void setExtension(double extension){
+        extension += initialRotation;
+        SmartDashboard.putNumber("Adressed Extension", extension);
+        extensionLeader.setControl(closedLoopPosition.withPosition(extension));
     }
 
     public boolean isInwardsRotationSafe() {
         return getExtension() < Constants.Elevator.kInwardsRotationSafeExtension;
     }
 
-    public void extendTo(double rotationPosition){
-        extensionLeader.setControl(closedLoopPosition.withPosition(rotationPosition));
+    public void setInitializationRotation(){
+        this.initialRotation = extensionLeader.getPosition().getValueAsDouble();
     }
-
 
     @Override
     public void periodic() {

@@ -3,60 +3,35 @@ package frc.robot.commands.staging;
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.commands.StagingManager;
 import frc.robot.subsystems.Elevator;
 
 public class ExtendTo extends Command {
-    public final Elevator elevator;
-    public final BooleanSupplier extensionSafe;
-    public final double targetExtension;
+    private final Elevator elevator;
+    private final BooleanSupplier extensionSafe;
+    private final double targetExtension;
+    private final boolean extendsPast; 
 
-    public TrapezoidProfile trapezoidProfile;
-    private State tpGoal;
-    private State tpCurrent;
-    private boolean resetMotionProfile;
-
-    public ExtendTo(double extension, BooleanSupplier extensionSafe, Elevator elevator) {
+    public ExtendTo(double extension, BooleanSupplier inwardsRotationSafe, Elevator elevator) {
         this.targetExtension = extension;
-        this.extensionSafe = extensionSafe;
+        this.extensionSafe = inwardsRotationSafe;
         this.elevator = elevator;
-        this.trapezoidProfile = new TrapezoidProfile(Constants.Elevator.kMotionProfileConstraints);
+        this.extendsPast = extension > Constants.Elevator.kInwardsRotationSafeExtension;
         addRequirements(elevator);
     }
 
     @Override
-    public void initialize() {
-        tpGoal = new State(targetExtension, 0.0);
-        tpCurrent = new State(elevator.getExtension(), elevator.getExtendingVelocity());
-        resetMotionProfile = false;
-    }
-
-    @Override
     public void execute() {
-        if (extensionSafe.getAsBoolean()) {
-            if (resetMotionProfile) {
-                trapezoidProfile = new TrapezoidProfile(Constants.Elevator.kMotionProfileConstraints);
-                tpCurrent = new State(elevator.getExtension(), elevator.getExtendingVelocity());
-                resetMotionProfile = false;
-            }
-            tpCurrent = trapezoidProfile.calculate(0.02, tpCurrent, tpGoal);
-            elevator.setExtendingVelocity(tpCurrent.velocity); 
-        } else {
-            resetMotionProfile = true;
-            elevator.setExtendingVelocity(0.0);
-        }
+        elevator.setExtension( 
+            extendsPast && !extensionSafe.getAsBoolean() 
+            ? StagingManager.StagingState.ZEROED.extension
+            : targetExtension); 
     }
     
     @Override
     public boolean isFinished() {
-        return MathUtil.isNear(targetExtension, elevator.getExtension(), Constants.Elevator.kValidStateTolerance);
-    }
-
-    @Override
-    public void end(boolean interrupted) {
-        if (!interrupted) elevator.maintainExntension();
+        return MathUtil.isNear(targetExtension, elevator.getExtension(), Constants.Elevator.kValidExtensionTolerance);
     }
 }

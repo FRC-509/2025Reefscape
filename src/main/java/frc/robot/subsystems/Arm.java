@@ -5,6 +5,7 @@ import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.core.CoreCANcoder;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -17,46 +18,51 @@ public class Arm extends SubsystemBase {
     private final CANcoder pivotEncoder = new CANcoder(Constants.IDs.kPivotEncoder, Constants.kCANIvore);
     private final PositionDutyCycle closedLoopPosition = new PositionDutyCycle(pivotMotor.getPosition().getValueAsDouble());
     private final VoltageOut openLoop = new VoltageOut(0.0).withEnableFOC(false);
+    private double initialRotation;
 
     public Arm(){
         TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
 
         // Current limits
-		pivotConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-		pivotConfig.CurrentLimits.SupplyCurrentLimit = Constants.CurrentLimits.kArmSupply; 
+        pivotConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        pivotConfig.CurrentLimits.SupplyCurrentLimit = Constants.CurrentLimits.kArmSupply; 
         pivotConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         pivotConfig.CurrentLimits.StatorCurrentLimit = Constants.CurrentLimits.kArmStator;
 
         // PID value assignment
-		pivotConfig.Slot0.kP = Constants.PIDConstants.Arm.kRotationP;
-		pivotConfig.Slot0.kI = Constants.PIDConstants.Arm.kRotationI;
-		pivotConfig.Slot0.kD = Constants.PIDConstants.Arm.kRotationD;
-		pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        pivotConfig.Slot0.kP = Constants.PIDConstants.Arm.kRotationP;
+        pivotConfig.Slot0.kI = Constants.PIDConstants.Arm.kRotationI;
+        pivotConfig.Slot0.kD = Constants.PIDConstants.Arm.kRotationD;
+        pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
         // Assigning encoder as feedback device
-		pivotConfig.Feedback.FeedbackRemoteSensorID = pivotEncoder.getDeviceID();
-		pivotConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-		pivotConfig.Feedback.RotorToSensorRatio = Constants.Arm.kRotorToSensorRatio;
+        pivotConfig.Feedback.FeedbackRemoteSensorID = pivotEncoder.getDeviceID();
+        pivotConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+        pivotConfig.Feedback.RotorToSensorRatio = Constants.Arm.kRotorToSensorRatio;
         pivotConfig.Feedback.SensorToMechanismRatio = Constants.Arm.kSensorToMechanismRatio;
 
-		pivotMotor.getConfigurator().apply(pivotConfig);
+        pivotMotor.getConfigurator().apply(pivotConfig);
     }
 
     public double getRotation(){
-        return pivotMotor.getPosition().getValueAsDouble();
+        return pivotMotor.getPosition().getValueAsDouble() + initialRotation;
     }
 
     public void setRotation(double position){
+        position += initialRotation;
         pivotMotor.setControl(closedLoopPosition.withPosition(position));
     }
 
     public boolean isExtensionSafe(){
-        // Outwards rotation is negative
         return getRotation() < Constants.Arm.kExtensionSafeAngle;
     }
 
     public void setCoast(){
         pivotMotor.setControl(openLoop.withOutput(0.0));
+    }
+
+    public void setInitializationRotation(){
+        this.initialRotation = pivotMotor.getPosition().getValueAsDouble();
     }
 
     @Override

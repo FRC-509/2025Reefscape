@@ -150,6 +150,8 @@ public class RobotContainer {
 
 	public void onRobotEnable() {
 		pigeon.onEnable();
+		elevator.setInitializationRotation();
+		arm.setInitializationRotation();
 	}
 
 	public void onTeleopEntry() {
