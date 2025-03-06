@@ -100,19 +100,22 @@ public class RobotContainer {
 		// OPERATOR ------------------------------------
 
 		// Elevator / Arm setpoint control
-		operator.a().onTrue(StagingManager.L4_Rising(elevator, arm));
-		operator.b().onTrue(StagingManager.all(StagingState.CORAL_L3, elevator, arm));
-		operator.y().onTrue(StagingManager.all(StagingState.CORAL_L2, elevator, arm));
-		operator.x().onTrue(StagingManager.all(StagingState.CORAL_L1, elevator, arm));
+		// operator.a().onTrue(StagingManager.L4_Rising(elevator, arm));
+		// operator.b().onTrue(StagingManager.all(StagingState.CORAL_L3, elevator, arm));
+		// operator.y().onTrue(StagingManager.all(StagingState.CORAL_L2, elevator, arm));
+		// operator.x().onTrue(StagingManager.all(StagingState.CORAL_L1, elevator, arm));
 		
-		operator.a().onFalse(StagingManager.L4_Falling(elevator, arm, intake));
-		operator.x().onFalse(StagingManager.zero(elevator, arm));
-		operator.y().onFalse(StagingManager.zero(elevator, arm));
-		operator.b().onFalse(StagingManager.zero(elevator, arm));
+		// operator.a().onFalse(StagingManager.L4_Falling(elevator, arm, intake));
+		// operator.x().onFalse(StagingManager.zero(elevator, arm));
+		// operator.y().onFalse(StagingManager.zero(elevator, arm));
+		// operator.b().onFalse(StagingManager.zero(elevator, arm));
 		
-		// operator.b().onTrue(Commands.runOnce(()->{
-		// 	elevator.setExtension(4);
-		// 	arm.setRotation(-0.08);}, arm, elevator));
+		operator.b().onTrue(Commands.runOnce(()->{
+			elevator.setExtension(StagingState.CORAL_L2.extension);
+			arm.setRotation(-0.15008);}, arm, elevator));
+		operator.a().onTrue(Commands.runOnce(()->{
+			elevator.setExtension(StagingState.CORAL_L3.extension);
+			arm.setRotation(-0.15008);}, arm, elevator));
 		// operator.a().onTrue(Commands.runOnce(()->{
 		// 	elevator.setExtension(3);
 		// 	arm.setRotation(-0.08);}, arm, elevator));

@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import java.util.function.DoubleSupplier;
-
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -85,7 +83,7 @@ public class Intake extends SubsystemBase {
         this.commandOutake = commandOutaking;
     }
 
-    public void l4Outake(){
+    public void L4Outake(){
         intakeMotor.setControl(intakeOpenLoop.withOutput(Constants.Intake.kCoralOutakeVoltage/3));
     }
 
@@ -128,11 +126,6 @@ public class Intake extends SubsystemBase {
         SmartDashboard.putBoolean("Has Intaken Gamepiece",
             intakingState.equals(IntakingState.ALGAE_INTAKE) && stallTorqueCurrent > Constants.Intake.kAlgaeTorqueCurrent
             || intakingState.equals(IntakingState.CORAL_INTAKE) && stallTorqueCurrent > Constants.Intake.kCoralTorqueCurrent);
-        
-        // SmartDashboard.putString("CurrentTimer", torqueValueClock.timer1.get() > torqueValueClock.timer2.get() ? "Timer 1" : "Timer 2");
-        SmartDashboard.putNumber("delay1", torqueValueClock.timer1.get());
-        SmartDashboard.putNumber("delay2", torqueValueClock.timer2.get());
-        SmartDashboard.putNumber("difference", Math.abs(torqueValueClock.timer1.get() - torqueValueClock.timer2.get()));
         SmartDashboard.putNumber("Torque Comparison Value", torqueValueClock.timer1.get() >= torqueValueClock.timer2.get() ? torqueValueClock.first : torqueValueClock.second);
     }
 

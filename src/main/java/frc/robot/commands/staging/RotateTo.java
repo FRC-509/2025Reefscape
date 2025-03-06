@@ -5,6 +5,7 @@ import java.util.function.BooleanSupplier;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.commands.StagingManager;
 import frc.robot.subsystems.Arm;
 
 public class RotateTo extends Command {
@@ -17,7 +18,7 @@ public class RotateTo extends Command {
         this.targetRotation = rotation;
         this.inwardsRotationSafe = inwardsRotationSafe;
         this.arm = arm;
-        this.rotatesInwards = rotation > Constants.Arm.kExtensionSafeAngle;
+        this.rotatesInwards = rotation > StagingManager.kExtensionSafeRotation;
         addRequirements(arm);
     }
 
@@ -26,7 +27,9 @@ public class RotateTo extends Command {
         // if the arm wants to rotate inwards, but it is currently unsafe to do so, it will
         // rotate to the closest safe position
         if (rotatesInwards && !inwardsRotationSafe.getAsBoolean()){
-	        arm.setRotation(Constants.Arm.kExtensionSafeAngle - Constants.Arm.kValidRotationTolerance*10);
+	        arm.setRotation(StagingManager.kExtensionSafeRotation - Constants.Arm.kValidRotationTolerance*10);
+        } else if(targetRotation > StagingManager.kGroundRotation){
+            arm.setRotation(StagingManager.StagingState.SAFE.rotation);
         } else { // otherwise, it is safe to rotate to any orientation
 	        arm.setRotation(targetRotation);
         }

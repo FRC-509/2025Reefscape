@@ -18,7 +18,7 @@ public class ExtendTo extends Command {
         this.targetExtension = extension;
         this.extensionSafe = inwardsRotationSafe;
         this.elevator = elevator;
-        this.extendsPast = extension > Constants.Elevator.kInwardsRotationSafeExtension;
+        this.extendsPast = extension > StagingManager.kRotationSafeExtension;
         addRequirements(elevator);
     }
 

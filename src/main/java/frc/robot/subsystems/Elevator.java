@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.commands.StagingManager;
 
 public class Elevator extends SubsystemBase {
     
@@ -92,7 +93,7 @@ public class Elevator extends SubsystemBase {
     }
 
     public double getExtension(){
-        return extensionLeader.getPosition().getValueAsDouble() + initialRotation;
+        return extensionLeader.getPosition().getValueAsDouble() - initialRotation;
     }
 
     public void setExtension(double extension){
@@ -102,7 +103,7 @@ public class Elevator extends SubsystemBase {
     }
 
     public boolean isInwardsRotationSafe() {
-        return getExtension() < Constants.Elevator.kInwardsRotationSafeExtension;
+        return getExtension() < StagingManager.kRotationSafeExtension;
     }
 
     public void setInitializationRotation(){
@@ -112,12 +113,16 @@ public class Elevator extends SubsystemBase {
     @Override
     public void periodic() {
         dashboard();
+        if (limitSwitch.get()) setInitializationRotation();
         // if (limitSwitch.get()) extensionLeader.setControl(closedLoopPosition.withPosition(extensionLeader.getPosition().getValueAsDouble() + 0.01));
     }
 
     private void dashboard(){
         SmartDashboard.putNumber("range sensor", rangeSensor.getDistance().getValueAsDouble());
         SmartDashboard.putBoolean("InwardsRotationSafe", isInwardsRotationSafe());
-        SmartDashboard.putNumber("Extension Position", extensionLeader.getPosition().getValueAsDouble());
+
+        SmartDashboard.putNumber("initialRotation", initialRotation);
+        SmartDashboard.putNumber("ExtensionDelta", extensionLeader.getPosition().getValueAsDouble() - initialRotation);
+        SmartDashboard.putBoolean("ElevatorLimitSwitch", limitSwitch.get());
     }
 }

@@ -120,16 +120,14 @@ public final class Constants {
 		public static final double kRotorToSensorRatio = 1.0 / 12.0; //TODO: validate
         public static final double kSensorToMechanismRatio = 2 * Math.PI * Units.inchesToMeters(0.8);
 		public static final double kExtensionMagnetOffset = 0.0; // TODO: find later
-        public static final double kValidStateTolerance = 0.3;
-		public static final double kMaxVelocity = 0; // Find desired units of setVelocity
-        public static final double kMaxAcceleration = 0;
-		public static final Constraints kMotionProfileConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
-        public static final double kInwardsRotationSafeExtension = 0.138;
+		// public static final double kMaxVelocity = 0; // Find desired units of setVelocity
+        // public static final double kMaxAcceleration = 0;
+		// public static final Constraints kMotionProfileConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
+
         public static final double kValidExtensionTolerance = 0.05;
 	}
 
 	public static class Arm {
-        public static final double kExtensionSafeAngle = 0.87;
 		public static final double kValidRotationTolerance = 0.05;
 
 		public static final double kRotationGearRatio = 4.0 / 3.0;

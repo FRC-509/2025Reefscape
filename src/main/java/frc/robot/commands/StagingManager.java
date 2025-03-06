@@ -124,15 +124,23 @@ public class StagingManager {
         trigger.last = trigger.booleanSupplier.getAsBoolean(); 
     }
 
+
+    // static staging states
+
+    public static final double kRotationSafeExtension = 0.138;
+    public static final double kGroundRotation = 0.0;
+    public static final double kExtensionSafeRotation = 0.0;
+
     public static enum StagingState {
         // Defaults                               
         ZEROED(0.4392,1.31),
+        SAFE(0,0),
 
         // Coral
-        CORAL_L4(5.09375,0.82342),
-        CORAL_L3(5.218,0.82342),
-        CORAL_L2(3.854,0.809804),
-        CORAL_L1(2.69402,0.82342),
+        CORAL_L4(4.7802,0.82342),
+        CORAL_L3(4.7802,0.82342),
+        CORAL_L2(3.4148,0.809804),
+        CORAL_L1(2.25482,0.82342),
 
         ALGAE_GROUND(0.654541,0.83618),
         CORAL_GROUND(0.654541,0.83618),
@@ -178,7 +186,7 @@ public class StagingManager {
         return new SequentialCommandGroup(
             Commands.runOnce(() -> elevator.setExtension(4.3435), elevator),
             Commands.runOnce(() -> intake.setCommandOutake(true), intake),
-            Commands.runOnce(() -> intake.l4Outake(), intake),
+            Commands.runOnce(() -> intake.L4Outake(), intake),
             Commands.runOnce(() -> arm.setCoast(), arm),
             Commands.waitSeconds(1.6), // 0.4
             Commands.runOnce(() -> arm.setRotation(1.108), elevator),
@@ -204,8 +212,7 @@ public class StagingManager {
             Commands.runOnce(() -> arm.setRotation(1.108), arm),
             Commands.waitSeconds(0.4),
             Commands.runOnce(() -> elevator.setExtension(StagingState.ZEROED.extension), elevator),
-            Commands.waitSeconds(0.8
-            ),
+            Commands.waitSeconds(0.8),
             Commands.runOnce(() -> arm.setRotation(StagingState.ZEROED.rotation), arm)
         );
     }

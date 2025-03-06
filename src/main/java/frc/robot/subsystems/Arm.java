@@ -8,16 +8,22 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.core.CoreCANcoder;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.commands.StagingManager;
 
 public class Arm extends SubsystemBase {
     
     private final TalonFX pivotMotor = new TalonFX(Constants.IDs.kPivotMotor, Constants.kCANIvore);
     private final CANcoder pivotEncoder = new CANcoder(Constants.IDs.kPivotEncoder, Constants.kCANIvore);
+    private final DigitalInput limitSwitch = new DigitalInput(2); // ID ME
+    
     private final PositionDutyCycle closedLoopPosition = new PositionDutyCycle(pivotMotor.getPosition().getValueAsDouble());
     private final VoltageOut openLoop = new VoltageOut(0.0).withEnableFOC(false);
+    
     private double initialRotation;
 
     public Arm(){
@@ -54,7 +60,7 @@ public class Arm extends SubsystemBase {
     }
 
     public boolean isExtensionSafe(){
-        return getRotation() < Constants.Arm.kExtensionSafeAngle;
+        return getRotation() < StagingManager.kExtensionSafeRotation;
     }
 
     public void setCoast(){
@@ -71,7 +77,10 @@ public class Arm extends SubsystemBase {
     }
 
     private void dashboard(){
-        SmartDashboard.putNumber("Arm rotor positiion", pivotMotor.getPosition().getValueAsDouble());
         SmartDashboard.putBoolean("Arm Extension Safe", isExtensionSafe());
+
+        SmartDashboard.putNumber("initialOffset", initialRotation);
+        SmartDashboard.putNumber("RotationDelta", pivotMotor.getPosition().getValueAsDouble() - initialRotation);
+        SmartDashboard.putBoolean("Arm Limit Switch", limitSwitch.get());
     }
 }

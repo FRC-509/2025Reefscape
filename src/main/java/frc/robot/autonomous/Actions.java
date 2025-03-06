@@ -20,52 +20,52 @@ import frc.robot.subsystems.drive.SwerveDrive;
 
 public class Actions {
     
-    public SequentialCommandGroup DriveToAndPlaceL4Coral(
-            String pathName,
-            double waitExtensionSeconds,
-            SwerveDrive swerve,
-            Elevator elevator,
-            Arm arm,
-            Intake intake){
-        PathValidation path = new PathValidation(pathName);
-        return new SequentialCommandGroup(
-            path.errorCancel,
-            Commands.parallel(
-                Commands.sequence(
-                    path.pathCommand,
-                    Commands.runOnce(() -> swerve.stopModules(), swerve))
-                ),
-                Commands.sequence(
-                    new WaitCommand(waitExtensionSeconds),
-                    StagingManager.PlaceCoral_L4(elevator, arm)),
-                    Commands.runOnce(() -> intake.outake(true), intake),
-                    Commands.waitSeconds(Constants.Intake.kCoralOutakeDelay),
-                    Commands.runOnce(() -> intake.stop(), intake));
-    }
+    // public SequentialCommandGroup DriveToAndPlaceL4Coral(
+    //         String pathName,
+    //         double waitExtensionSeconds,
+    //         SwerveDrive swerve,
+    //         Elevator elevator,
+    //         Arm arm,
+    //         Intake intake){
+    //     PathValidation path = new PathValidation(pathName);
+    //     return new SequentialCommandGroup(
+    //         path.errorCancel,
+    //         Commands.parallel(
+    //             Commands.sequence(
+    //                 path.pathCommand,
+    //                 Commands.runOnce(() -> swerve.stopModules(), swerve))
+    //             ),
+    //             Commands.sequence(
+    //                 new WaitCommand(waitExtensionSeconds),
+    //                 StagingManager.PlaceCoral_L4(elevator, arm)),
+    //                 Commands.runOnce(() -> intake.outake(true), intake),
+    //                 Commands.waitSeconds(Constants.Intake.kCoralOutakeDelay),
+    //                 Commands.runOnce(() -> intake.stop(), intake));
+    // }
     
-    public SequentialCommandGroup DriveToAndPlaceMidLevelCoral(
-            String pathName,
-            double waitExtensionSeconds,
-            StagingState level,
-            SwerveDrive swerve,
-            Elevator elevator,
-            Arm arm,
-            Intake intake){
-        PathValidation path = new PathValidation(pathName);
-        return new SequentialCommandGroup(
-            path.errorCancel,
-            Commands.parallel(
-                Commands.sequence(
-                    path.pathCommand,
-                    Commands.runOnce(() -> swerve.stopModules(), swerve))
-                ),
-                Commands.sequence(
-                    new WaitCommand(waitExtensionSeconds),
-                    StagingManager.PlaceCoral_Mid(level, elevator, arm)),
-            Commands.runOnce(() -> intake.outake(true), intake),
-            Commands.waitSeconds(Constants.Intake.kCoralOutakeDelay),
-            Commands.runOnce(() -> intake.stop(), intake));
-    }
+    // public SequentialCommandGroup DriveToAndPlaceMidLevelCoral(
+    //         String pathName,
+    //         double waitExtensionSeconds,
+    //         StagingState level,
+    //         SwerveDrive swerve,
+    //         Elevator elevator,
+    //         Arm arm,
+    //         Intake intake){
+    //     PathValidation path = new PathValidation(pathName);
+    //     return new SequentialCommandGroup(
+    //         path.errorCancel,
+    //         Commands.parallel(
+    //             Commands.sequence(
+    //                 path.pathCommand,
+    //                 Commands.runOnce(() -> swerve.stopModules(), swerve))
+    //             ),
+    //             Commands.sequence(
+    //                 new WaitCommand(waitExtensionSeconds),
+    //                 StagingManager.PlaceCoral_Mid(level, elevator, arm)),
+    //         Commands.runOnce(() -> intake.outake(true), intake),
+    //         Commands.waitSeconds(Constants.Intake.kCoralOutakeDelay),
+    //         Commands.runOnce(() -> intake.stop(), intake));
+    // }
 
     public SequentialCommandGroup DriveToAndCoralStation(
             String pathName,
