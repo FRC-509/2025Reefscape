@@ -123,6 +123,7 @@ public class Elevator extends SubsystemBase {
 
         SmartDashboard.putNumber("initialRotation", initialRotation);
         SmartDashboard.putNumber("ExtensionDelta", extensionLeader.getPosition().getValueAsDouble() - initialRotation);
+        SmartDashboard.putNumber("GetExtension", getExtension());
         SmartDashboard.putBoolean("ElevatorLimitSwitch", limitSwitch.get());
     }
 }

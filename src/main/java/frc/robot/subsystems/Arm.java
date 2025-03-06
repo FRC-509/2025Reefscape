@@ -5,7 +5,6 @@ import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.hardware.core.CoreCANcoder;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -19,7 +18,7 @@ public class Arm extends SubsystemBase {
     
     private final TalonFX pivotMotor = new TalonFX(Constants.IDs.kPivotMotor, Constants.kCANIvore);
     private final CANcoder pivotEncoder = new CANcoder(Constants.IDs.kPivotEncoder, Constants.kCANIvore);
-    private final DigitalInput limitSwitch = new DigitalInput(2); // ID ME
+    private final DigitalInput limitSwitch = new DigitalInput(0); // ID ME
     
     private final PositionDutyCycle closedLoopPosition = new PositionDutyCycle(pivotMotor.getPosition().getValueAsDouble());
     private final VoltageOut openLoop = new VoltageOut(0.0).withEnableFOC(false);
@@ -51,16 +50,16 @@ public class Arm extends SubsystemBase {
     }
 
     public double getRotation(){
-        return pivotMotor.getPosition().getValueAsDouble() + initialRotation;
+        return initialRotation - pivotMotor.getPosition().getValueAsDouble();
     }
 
     public void setRotation(double position){
-        position += initialRotation;
+        position = initialRotation - position;
         pivotMotor.setControl(closedLoopPosition.withPosition(position));
     }
 
     public boolean isExtensionSafe(){
-        return getRotation() < StagingManager.kExtensionSafeRotation;
+        return getRotation() > StagingManager.kExtensionSafeRotation;
     }
 
     public void setCoast(){
@@ -74,13 +73,15 @@ public class Arm extends SubsystemBase {
     @Override
     public void periodic() {
         dashboard();
+        if (limitSwitch.get()) setInitializationRotation();
     }
 
     private void dashboard(){
         SmartDashboard.putBoolean("Arm Extension Safe", isExtensionSafe());
 
+        SmartDashboard.putNumber("ActualArmRotation", pivotMotor.getPosition().getValueAsDouble());
         SmartDashboard.putNumber("initialOffset", initialRotation);
-        SmartDashboard.putNumber("RotationDelta", pivotMotor.getPosition().getValueAsDouble() - initialRotation);
+        SmartDashboard.putNumber("RotationDelta", initialRotation - pivotMotor.getPosition().getValueAsDouble());
         SmartDashboard.putBoolean("Arm Limit Switch", limitSwitch.get());
     }
 }

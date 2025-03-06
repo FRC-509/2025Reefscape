@@ -139,8 +139,8 @@ public final class Constants {
         public static final double kAlgaeIntakeVoltage = -5.5;
 		public static final double kCoralIntakeVoltage = 6;
 
-        public static final double kAlgaeTorqueCurrent = 36;
-		public static final double kCoralTorqueCurrent = 28;
+        public static final double kAlgaeTorqueCurrent = 20;
+		public static final double kCoralTorqueCurrent = 22;
 
         public static final double kAlgaePassiveVoltage = -0.47;
         public static final double kCoralPassiveVoltage = 0.75;

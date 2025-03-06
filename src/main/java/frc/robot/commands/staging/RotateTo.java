@@ -18,7 +18,7 @@ public class RotateTo extends Command {
         this.targetRotation = rotation;
         this.inwardsRotationSafe = inwardsRotationSafe;
         this.arm = arm;
-        this.rotatesInwards = rotation > StagingManager.kExtensionSafeRotation;
+        this.rotatesInwards = rotation < StagingManager.kExtensionSafeRotation;
         addRequirements(arm);
     }
 
@@ -27,7 +27,7 @@ public class RotateTo extends Command {
         // if the arm wants to rotate inwards, but it is currently unsafe to do so, it will
         // rotate to the closest safe position
         if (rotatesInwards && !inwardsRotationSafe.getAsBoolean()){
-	        arm.setRotation(StagingManager.kExtensionSafeRotation - Constants.Arm.kValidRotationTolerance*10);
+	        arm.setRotation(StagingManager.StagingState.SAFE.rotation);
         } else if(targetRotation > StagingManager.kGroundRotation){
             arm.setRotation(StagingManager.StagingState.SAFE.rotation);
         } else { // otherwise, it is safe to rotate to any orientation

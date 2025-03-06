@@ -4,8 +4,11 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.Intake;
+import frc.robot.commands.staging.ExtendTo;
+import frc.robot.commands.staging.RotateTo;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Elevator;
 
@@ -127,29 +130,29 @@ public class StagingManager {
 
     // static staging states
 
-    public static final double kRotationSafeExtension = 0.138;
-    public static final double kGroundRotation = 0.0;
-    public static final double kExtensionSafeRotation = 0.0;
+    public static final double kRotationSafeExtension = 0.1579;
+    public static final double kGroundRotation = 0.432617;
+    public static final double kExtensionSafeRotation = 0.20148;
 
     public static enum StagingState {
         // Defaults                               
-        ZEROED(0.4392,1.31),
-        SAFE(0,0),
+        ZEROED(0.111523,0.0),
+        SAFE(0.061523,0.247803),
 
         // Coral
-        CORAL_L4(4.7802,0.82342),
-        CORAL_L3(4.7802,0.82342),
-        CORAL_L2(3.4148,0.809804),
-        CORAL_L1(2.25482,0.82342),
+        CORAL_L4(4.777822,0.1440143),
+        CORAL_L3(4.828,0.48338),
+        CORAL_L2(3.387207,0.48338),
+        CORAL_L1(1.8645,0.426),
 
-        ALGAE_GROUND(0.654541,0.83618),
-        CORAL_GROUND(0.654541,0.83618),
+        ALGAE_GROUND(0.3322,0.474609),
+        CORAL_GROUND(0.3828,0.462402),
         
-        CORAL_STATION(2.60278,1.0205),
+        CORAL_STATION(1.938,0.304195),
 
         // Algae
-        ALGAE_HIGH(5.218,0.82342),
-        ALGAE_LOW(3.854,0.809804);
+        ALGAE_HIGH(3.387207,0.48338),
+        ALGAE_LOW(3.387207,0.48338);
 
         public final double extension;
         public final double rotation;
@@ -162,8 +165,8 @@ public class StagingManager {
 
     public static SequentialCommandGroup all(StagingState state, Elevator elevator, Arm arm){
         return new SequentialCommandGroup(
-            Commands.runOnce(() -> elevator.setExtension(0.39), elevator),
-            Commands.runOnce(() -> arm.setRotation(1.108), arm),
+            Commands.runOnce(() -> elevator.setExtension(StagingState.SAFE.extension), elevator),
+            Commands.runOnce(() -> arm.setRotation(StagingState.SAFE.rotation), arm),
             Commands.waitSeconds(0.5),
             Commands.runOnce(() -> elevator.setExtension(state.extension), elevator),
             Commands.waitSeconds(0.3),
@@ -173,8 +176,8 @@ public class StagingManager {
 
     public static SequentialCommandGroup L4_Rising(Elevator elevator, Arm arm){
         return new SequentialCommandGroup(
-            Commands.runOnce(() -> elevator.setExtension(0.39), elevator),
-            Commands.runOnce(() -> arm.setRotation(1.108), arm),
+            Commands.runOnce(() -> elevator.setExtension(StagingState.SAFE.extension), elevator),
+            Commands.runOnce(() -> arm.setRotation(StagingState.SAFE.rotation), arm),
             Commands.waitSeconds(0.6), // 0.4
             Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_L4.extension), elevator),
             Commands.waitSeconds(1.2), // 0.4
@@ -184,12 +187,12 @@ public class StagingManager {
 
     public static SequentialCommandGroup L4_Falling(Elevator elevator, Arm arm, Intake intake){
         return new SequentialCommandGroup(
-            Commands.runOnce(() -> elevator.setExtension(4.3435), elevator),
+            Commands.runOnce(() -> elevator.setExtension(4), elevator),
             Commands.runOnce(() -> intake.setCommandOutake(true), intake),
             Commands.runOnce(() -> intake.L4Outake(), intake),
             Commands.runOnce(() -> arm.setCoast(), arm),
             Commands.waitSeconds(1.6), // 0.4
-            Commands.runOnce(() -> arm.setRotation(1.108), elevator),
+            Commands.runOnce(() -> arm.setRotation(StagingState.SAFE.rotation), elevator),
             Commands.waitSeconds(0.4),
             Commands.runOnce(() -> elevator.setExtension(StagingState.ZEROED.extension), arm),
             Commands.waitSeconds(2),
@@ -199,7 +202,7 @@ public class StagingManager {
 
     public static SequentialCommandGroup groundPickup(Elevator elevator, Arm arm){
         return new SequentialCommandGroup(
-            Commands.runOnce(() -> arm.setRotation(1.108), elevator),
+            Commands.runOnce(() -> arm.setRotation(StagingState.SAFE.rotation), elevator),
             Commands.waitSeconds(0.5),
             Commands.runOnce(() -> elevator.setExtension(StagingState.ALGAE_GROUND.extension), arm),
             Commands.waitSeconds(0.5),
@@ -209,11 +212,18 @@ public class StagingManager {
 
     public static SequentialCommandGroup zero(Elevator elevator, Arm arm){
         return new SequentialCommandGroup(
-            Commands.runOnce(() -> arm.setRotation(1.108), arm),
+            Commands.runOnce(() -> arm.setRotation(StagingState.SAFE.rotation), arm),
             Commands.waitSeconds(0.4),
             Commands.runOnce(() -> elevator.setExtension(StagingState.ZEROED.extension), elevator),
             Commands.waitSeconds(0.8),
             Commands.runOnce(() -> arm.setRotation(StagingState.ZEROED.rotation), arm)
+        );
+    }
+
+    public static ParallelCommandGroup allCC(StagingState state, Elevator elevator, Arm arm){
+        return new ParallelCommandGroup(
+            new RotateTo(state.rotation, () -> elevator.isInwardsRotationSafe(), arm),
+            new ExtendTo(state.extension, () -> arm.isExtensionSafe(), elevator)
         );
     }
 }

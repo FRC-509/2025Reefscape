@@ -15,6 +15,7 @@ import frc.robot.commands.StagingManager.StagingState;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Intake.IntakingState;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.PigeonWrapper;
@@ -28,9 +29,10 @@ public class RobotContainer {
 	// private final Limelight baseLimelight = new Limelight(null);
 	// private final Limelight highLimelight = new Limelight(null);
 
-	private ThrustmasterJoystick driverLeft = new ThrustmasterJoystick(0);
-	private ThrustmasterJoystick driverRight = new ThrustmasterJoystick(1);
-	private CommandXboxController operator = new CommandXboxController(2);
+	private final ThrustmasterJoystick driverLeft = new ThrustmasterJoystick(0);
+	private final ThrustmasterJoystick driverRight = new ThrustmasterJoystick(1);
+	private final CommandXboxController operator = new CommandXboxController(2);
+	public StagingManager stagingManager;
 
 	private final SwerveDrive swerve;
 	private final Elevator elevator;
@@ -99,6 +101,20 @@ public class RobotContainer {
 
 		// OPERATOR ------------------------------------
 
+		// this.stagingManager = new StagingManager(
+		// 	elevator, 
+		// 	arm, 
+		// 	intake, 
+		// 	() -> false,
+		// 	() -> operator.a().getAsBoolean(),
+		// 	() -> operator.b().getAsBoolean(),
+		// 	() -> false,
+		// 	() -> false,
+		// 	() -> false,
+		// 	() -> false, 
+		// 	() -> elevator.getExtension());
+
+
 		// Elevator / Arm setpoint control
 		// operator.a().onTrue(StagingManager.L4_Rising(elevator, arm));
 		// operator.b().onTrue(StagingManager.all(StagingState.CORAL_L3, elevator, arm));
@@ -109,23 +125,27 @@ public class RobotContainer {
 		// operator.x().onFalse(StagingManager.zero(elevator, arm));
 		// operator.y().onFalse(StagingManager.zero(elevator, arm));
 		// operator.b().onFalse(StagingManager.zero(elevator, arm));
+
+		operator.x().onTrue(StagingManager.allCC(StagingState.CORAL_L1, elevator, arm));
+		operator.x().onFalse(StagingManager.allCC(StagingState.ZEROED, elevator, arm));
+
 		
-		operator.b().onTrue(Commands.runOnce(()->{
-			elevator.setExtension(StagingState.CORAL_L2.extension);
-			arm.setRotation(-0.15008);}, arm, elevator));
-		operator.a().onTrue(Commands.runOnce(()->{
-			elevator.setExtension(StagingState.CORAL_L3.extension);
-			arm.setRotation(-0.15008);}, arm, elevator));
+		// operator.b().onTrue(Commands.runOnce(()->{
+		// 	elevator.setExtension(1.938);}, elevator));
+		// operator.a().onTrue(Commands.runOnce(()->{
+		// 		arm.setRotation(0.304199);}, arm));
+		// operator.a().onTrue(Commands.runOnce(()->{
+		// 	elevator.setExtension(StagingState.CORAL_L3.extension);
+		// 	arm.setRotation(-0.15008);}, arm, elevator));
 		// operator.a().onTrue(Commands.runOnce(()->{
 		// 	elevator.setExtension(3);
 		// 	arm.setRotation(-0.08);}, arm, elevator));
 		// operator.a().onFalse(Commands.runOnce(()->elevator.setExtension(1), elevator));
 		// operator.b().onFalse(Commands.runOnce(()->elevator.setExtension(1), elevator));
 
-
 		// // Algae Intake / outake on release
-		// operator.rightBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));
-		// operator.leftBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake));
+		operator.rightBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));
+		operator.leftBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake));
 
 		operator.rightBumper().onFalse(Intake.outakeCommand(false, intake));
 		operator.leftBumper().onFalse(Intake.outakeCommand(true, intake));
@@ -152,8 +172,6 @@ public class RobotContainer {
 
 	public void onRobotEnable() {
 		pigeon.onEnable();
-		elevator.setInitializationRotation();
-		arm.setInitializationRotation();
 	}
 
 	public void onTeleopEntry() {
