@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
@@ -15,6 +16,7 @@ public class Arm extends SubsystemBase {
     private final TalonFX pivotMotor = new TalonFX(Constants.IDs.kPivotMotor, Constants.kCANIvore);
     private final CANcoder pivotEncoder = new CANcoder(Constants.IDs.kPivotEncoder, Constants.kCANIvore);
     private final PositionDutyCycle closedLoopPosition = new PositionDutyCycle(pivotMotor.getPosition().getValueAsDouble());
+    private final VoltageOut openLoop = new VoltageOut(0.0).withEnableFOC(false);
 
     public Arm(){
         TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
@@ -51,6 +53,10 @@ public class Arm extends SubsystemBase {
     public boolean isExtensionSafe(){
         // Outwards rotation is negative
         return getRotation() < Constants.Arm.kExtensionSafeAngle;
+    }
+
+    public void setCoast(){
+        pivotMotor.setControl(openLoop.withOutput(0.0));
     }
 
     @Override

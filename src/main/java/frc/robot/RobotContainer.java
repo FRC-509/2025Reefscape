@@ -101,19 +101,29 @@ public class RobotContainer {
 		// OPERATOR ------------------------------------
 
 		// Elevator / Arm setpoint control
-		operator.x().onTrue(StagingManager.all(StagingState.CORAL_STATION, elevator, arm));
-		operator.y().onTrue(StagingManager.all(StagingState.CORAL_L2, elevator, arm));
-		operator.a().onTrue(StagingManager.groundPickup(elevator, arm));
+		operator.a().onTrue(StagingManager.L4_Rising(elevator, arm));
 		operator.b().onTrue(StagingManager.all(StagingState.CORAL_L3, elevator, arm));
-
+		operator.y().onTrue(StagingManager.all(StagingState.CORAL_L2, elevator, arm));
+		operator.x().onTrue(StagingManager.all(StagingState.CORAL_L1, elevator, arm));
+		
+		operator.a().onFalse(StagingManager.L4_Falling(elevator, arm, intake));
 		operator.x().onFalse(StagingManager.zero(elevator, arm));
 		operator.y().onFalse(StagingManager.zero(elevator, arm));
-		operator.a().onFalse(StagingManager.zero(elevator, arm));
 		operator.b().onFalse(StagingManager.zero(elevator, arm));
+		
+		// operator.b().onTrue(Commands.runOnce(()->{
+		// 	elevator.setExtension(4);
+		// 	arm.setRotation(-0.08);}, arm, elevator));
+		// operator.a().onTrue(Commands.runOnce(()->{
+		// 	elevator.setExtension(3);
+		// 	arm.setRotation(-0.08);}, arm, elevator));
+		// operator.a().onFalse(Commands.runOnce(()->elevator.setExtension(1), elevator));
+		// operator.b().onFalse(Commands.runOnce(()->elevator.setExtension(1), elevator));
 
-		// Algae Intake / outake on release
-		operator.rightBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));
-		operator.leftBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake));
+
+		// // Algae Intake / outake on release
+		// operator.rightBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));
+		// operator.leftBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake));
 
 		operator.rightBumper().onFalse(Intake.outakeCommand(false, intake));
 		operator.leftBumper().onFalse(Intake.outakeCommand(true, intake));

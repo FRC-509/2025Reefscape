@@ -3,6 +3,8 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.robot.subsystems.Intake;
 import frc.robot.commands.staging.ExtendTo;
 import frc.robot.commands.staging.RotateTo;
 import frc.robot.subsystems.Arm;
@@ -12,20 +14,22 @@ public class StagingManager {
 
     public static enum StagingState {
         // Defaults                               
-        ZEROED(0.17,0.29),
+        ZEROED(0.4392,1.31),
 
         // Coral
-        CORAL_L4(4.627,-0.2),
-        CORAL_L3(4.627,-0.2),
-        CORAL_L2(3.2333,-0.2),
-        CORAL_L1(3.2333,-0.2),
-        CORAL_GROUND(0.5529,-0.1),
-        CORAL_STATION(1.84,0.06),
+        CORAL_L4(5.09375,0.82342),
+        CORAL_L3(5.218,0.82342),
+        CORAL_L2(3.854,0.809804),
+        CORAL_L1(2.69402,0.82342),
+
+        ALGAE_GROUND(0.654541,0.83618),
+        CORAL_GROUND(0.654541,0.83618),
+        
+        CORAL_STATION(2.60278,1.0205),
 
         // Algae
-        ALGAE_HIGH(0.0,0.0),
-        ALGAE_LOW(0.0,0.0),
-        ALGAE_GROUND(0.5,-0.28);
+        ALGAE_HIGH(5.218,0.82342),
+        ALGAE_LOW(3.854,0.809804);
 
         public final double extension;
         public final double rotation;
@@ -82,30 +86,59 @@ public class StagingManager {
 
     public static SequentialCommandGroup all(StagingState state, Elevator elevator, Arm arm){
         return new SequentialCommandGroup(
-            Commands.runOnce(() -> elevator.setExtension(0.84), elevator),
-            Commands.runOnce(() -> arm.setRotation(state.rotation), elevator),
+            Commands.runOnce(() -> elevator.setExtension(0.39), elevator),
+            Commands.runOnce(() -> arm.setRotation(1.108), arm),
+            Commands.waitSeconds(0.5),
+            Commands.runOnce(() -> elevator.setExtension(state.extension), elevator),
             Commands.waitSeconds(0.3),
-            Commands.runOnce(() -> elevator.setExtension(state.extension), arm)
+            Commands.runOnce(() -> arm.setRotation(state.rotation), arm)
+        );
+    }
+
+    public static SequentialCommandGroup L4_Rising(Elevator elevator, Arm arm){
+        return new SequentialCommandGroup(
+            Commands.runOnce(() -> elevator.setExtension(0.39), elevator),
+            Commands.runOnce(() -> arm.setRotation(1.108), arm),
+            Commands.waitSeconds(0.6), // 0.4
+            Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_L4.extension), elevator),
+            Commands.waitSeconds(1.2), // 0.4
+            Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_L4.rotation), arm)
+        );
+    }
+
+    public static SequentialCommandGroup L4_Falling(Elevator elevator, Arm arm, Intake intake){
+        return new SequentialCommandGroup(
+            Commands.runOnce(() -> elevator.setExtension(4.3435), elevator),
+            Commands.runOnce(() -> intake.setCommandOutake(true), intake),
+            Commands.runOnce(() -> intake.l4Outake(), intake),
+            Commands.runOnce(() -> arm.setCoast(), arm),
+            Commands.waitSeconds(1.6), // 0.4
+            Commands.runOnce(() -> arm.setRotation(1.108), elevator),
+            Commands.waitSeconds(0.4),
+            Commands.runOnce(() -> elevator.setExtension(StagingState.ZEROED.extension), arm),
+            Commands.waitSeconds(2),
+            Commands.runOnce(() -> arm.setRotation(StagingState.ZEROED.rotation), elevator)
         );
     }
 
     public static SequentialCommandGroup groundPickup(Elevator elevator, Arm arm){
         return new SequentialCommandGroup(
-            Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_STATION.rotation), elevator),
-            Commands.waitSeconds(0.4),
+            Commands.runOnce(() -> arm.setRotation(1.108), elevator),
+            Commands.waitSeconds(0.5),
             Commands.runOnce(() -> elevator.setExtension(StagingState.ALGAE_GROUND.extension), arm),
-            Commands.waitSeconds(0.4),
+            Commands.waitSeconds(0.5),
             Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_GROUND.rotation), elevator)
         );
     }
 
     public static SequentialCommandGroup zero(Elevator elevator, Arm arm){
         return new SequentialCommandGroup(
-            Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_STATION.rotation), elevator),
+            Commands.runOnce(() -> arm.setRotation(1.108), arm),
             Commands.waitSeconds(0.4),
-            Commands.runOnce(() -> elevator.setExtension(StagingState.ZEROED.extension), arm),
-            Commands.waitSeconds(0.4),
-            Commands.runOnce(() -> arm.setRotation(StagingState.ZEROED.rotation), elevator)
+            Commands.runOnce(() -> elevator.setExtension(StagingState.ZEROED.extension), elevator),
+            Commands.waitSeconds(0.8
+            ),
+            Commands.runOnce(() -> arm.setRotation(StagingState.ZEROED.rotation), arm)
         );
     }
 }

@@ -125,6 +125,7 @@ public final class Constants {
         public static final double kMaxAcceleration = 0;
 		public static final Constraints kMotionProfileConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
         public static final double kInwardsRotationSafeExtension = 0.138;
+        public static final double kValidExtensionTolerance = 0.05;
 	}
 
 	public static class Arm {
@@ -233,8 +234,8 @@ public final class Constants {
 		}
 
 		public static class Elevator {
-			public static final double kExtensionP = 0.3;
-			public static final double kExtensionI = 0.32;
+			public static final double kExtensionP = 1.9;
+			public static final double kExtensionI = 1.0;
 			public static final double kExtensionD = 0;
 		}
 

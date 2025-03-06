@@ -13,6 +13,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -24,6 +25,7 @@ public class Elevator extends SubsystemBase {
 
     private CANcoder extensionEncoder = new CANcoder(Constants.IDs.kExtensionEncoder,  Constants.kCANIvore);
     private CANrange rangeSensor = new CANrange(20, Constants.kCANIvore);
+    private DigitalInput limitSwitch = new DigitalInput(1);
 
     private VoltageOut openLoop = new VoltageOut(0).withEnableFOC(false);
     private PositionDutyCycle closedLoopPosition = new PositionDutyCycle(0.0).withEnableFOC(false);
@@ -134,6 +136,7 @@ public class Elevator extends SubsystemBase {
     @Override
     public void periodic() {
         dashboard();
+        // if (limitSwitch.get()) extensionLeader.setControl(closedLoopPosition.withPosition(extensionLeader.getPosition().getValueAsDouble() + 0.01));
     }
 
     private void dashboard(){

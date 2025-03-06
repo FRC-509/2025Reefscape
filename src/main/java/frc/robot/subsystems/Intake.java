@@ -85,6 +85,10 @@ public class Intake extends SubsystemBase {
         this.commandOutake = commandOutaking;
     }
 
+    public void l4Outake(){
+        intakeMotor.setControl(intakeOpenLoop.withOutput(Constants.Intake.kCoralOutakeVoltage/3));
+    }
+
     @Override
     public void periodic() {
         dashboard();
