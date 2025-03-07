@@ -30,7 +30,6 @@ public class Elevator extends SubsystemBase {
 
     private VoltageOut openLoop = new VoltageOut(0).withEnableFOC(false);
     private PositionDutyCycle closedLoopPosition = new PositionDutyCycle(0.0).withEnableFOC(false);
-    // private VelocityVoltage closedLoopVelocity = new VelocityVoltage(0).withEnableFOC(false);
 
     private double initialRotation;
 
@@ -94,6 +93,10 @@ public class Elevator extends SubsystemBase {
 
     public double getExtension(){
         return extensionLeader.getPosition().getValueAsDouble() - initialRotation;
+    }
+
+    public double getDistanceOffGround(){
+        return rangeSensor.getDistance().getValueAsDouble();
     }
 
     public void setExtension(double extension){

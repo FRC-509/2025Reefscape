@@ -149,7 +149,7 @@ public final class Constants {
         public static final double kCoralOutakeVoltage = -8.5;
 
 		public static final double kCoralOutakeDelay = 0.75; // seconds
-        public static final double kAlgaeOutakeDelay = 0.1;
+        public static final double kAlgaeOutakeDelay = 0.5;
 		
         public static final double kIntakeClockPeriod = 0.2; // seconds
         public static final double kTorqueStablePeriod = 0.1; // seconds

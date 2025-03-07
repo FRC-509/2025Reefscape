@@ -112,10 +112,17 @@ public class RobotContainer {
 			() -> driverLeft.getJoystickButton(StickButton.Right).getAsBoolean(),
 			() -> driverRight.getJoystickButton(StickButton.Right).getAsBoolean(),
 			() -> driverRight.getJoystickButton(StickButton.Left).getAsBoolean(),
-			() -> elevator.getExtension());
+			() -> (driverLeft.getPOV(0) == 0),
+			() -> (driverLeft.getPOV(0) == 90),
+			() -> (driverLeft.getPOV(0) == 180));
 
-		(new Trigger(() -> driverRight.getPOV(0) == 0))
-			.onTrue(StagingManager.zero(elevator, arm, intake));
+		// (new Trigger(() -> driverLeft.getPOV(0) == 0))
+		// 	.onTrue(StagingManager.zero(elevator, arm, intake));
+
+		// (new Trigger(() -> driverLeft.getPOV(0) == 90))
+		// 	.onTrue(StagingManager.softResetSuperstructure(elevator, arm));
+		// (new Trigger(() -> driverLeft.getPOV(0) == 180))
+		// 	.onTrue(StagingManager.hardstopSuperstructure(elevator, arm));
 
 		
 		// Elevator / Arm setpoint control

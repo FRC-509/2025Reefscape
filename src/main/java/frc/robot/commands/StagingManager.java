@@ -63,11 +63,21 @@ public class StagingManager {
     private final StagingTrigger algaeGround_StagingTrigger; 
 
     private final DoubleSupplier extensionSupplier;
+    private final DoubleSupplier extensionDistance;
 
     private Runnable quedStage;
     private Runnable safeZero;
+    private Runnable relaxElevator;
+    private boolean buttonIsPressed;
 
     private Timer noInputTimer;
+
+    private StagingTrigger manualZero_StagingTrigger;
+    private BooleanSupplier softResetSupplier;
+    private BooleanSupplier hardResetSupplier;
+    private Runnable softReset;
+    private Runnable hardReset;
+    private boolean reseting;
 
     public StagingManager(
         Elevator elevator,
@@ -80,7 +90,9 @@ public class StagingManager {
         BooleanSupplier coralStation_Supplier,
         BooleanSupplier coralGround_Supplier,
         BooleanSupplier algaeGround_Supplier,
-        DoubleSupplier extensionSupplier
+        BooleanSupplier manualZeroSupplier,
+        BooleanSupplier softResetSupplier,
+        BooleanSupplier hardResetSupplier
     ){
         this.L4_StagingTrigger = new StagingTrigger(
             L4_Supplier,
@@ -119,21 +131,28 @@ public class StagingManager {
 
         this.coralGround_StagingTrigger = new StagingTrigger(
             coralGround_Supplier, 
-            () -> all(StagingState.CORAL_GROUND, elevator, arm).schedule(), 
-            () -> zero(elevator, arm, intake).schedule());
+            () -> all(StagingState.CORAL_GROUND, elevator, arm).schedule(),
+            () -> zero(elevator, arm, intake).schedule(),
+            () -> all(StagingState.LOLIPOP, elevator, arm).schedule(),
+            () -> {
+                return intake.getIntakingState().equals(IntakingState.ALGAE_INTAKE)
+                    || intake.getIntakingState().equals(IntakingState.ALGAE_PASSIVE);
+            });
 
         this.algaeGround_StagingTrigger = new StagingTrigger(
             algaeGround_Supplier,
             () -> all(StagingState.ALGAE_GROUND, elevator, arm).schedule(),
             () -> zero(elevator, arm, intake).schedule(),
-            () -> allSafe(StagingState.PROCESSOR, elevator, arm).schedule(),
+            () -> all(StagingState.PROCESSOR, elevator, arm).schedule(),
             () -> {
                 return intake.getIntakingState().equals(IntakingState.ALGAE_PASSIVE)
                     || intake.getIntakingState().equals(IntakingState.ALGAE_OUTAKE);
             });
         
-        this.extensionSupplier = extensionSupplier;
+        this.extensionSupplier = () -> elevator.getExtension();
+        this.extensionDistance = () -> elevator.getDistanceOffGround();
         this.quedStage = null;
+        this.buttonIsPressed = false;
         this.safeZero = new Runnable() {
             @Override
             public void run() {
@@ -143,11 +162,49 @@ public class StagingManager {
                 )).schedule();
             }
         };
+        this.relaxElevator = new Runnable() {
+            @Override
+            public void run() {
+                elevator.setCoast();
+            }
+        };
+        
+        this.manualZero_StagingTrigger = new StagingTrigger(
+            manualZeroSupplier, 
+            () -> zero(elevator, arm, intake).schedule(),
+            () -> { reseting = false; });            
+        this.softReset = new Runnable() {
+            @Override
+            public void run() {
+                softResetSuperstructure(elevator, arm).schedule();
+            }
+        };
+        this.hardReset = new Runnable() {
+            @Override
+            public void run() {
+                hardstopSuperstructure(elevator, arm).schedule();
+            }
+        };
+        this.softResetSupplier = softResetSupplier;
+        this.hardResetSupplier = hardResetSupplier;
         this.noInputTimer = new Timer();
         noInputTimer.start();
     }
 
     public void update(){
+        onChange(manualZero_StagingTrigger);
+        if (softResetSupplier.getAsBoolean()) {
+            softReset.run();
+            reseting = true;
+            return;
+        }
+        if (hardResetSupplier.getAsBoolean()) {
+            hardReset.run();
+            reseting = true;
+            return;
+        }
+        if (reseting) return;
+
         onChange(L3_StagingTrigger);
         onChange(L2_StagingTrigger);
         onChange(L1_StagingTrigger);
@@ -164,15 +221,17 @@ public class StagingManager {
             || L1_StagingTrigger.booleanSupplier.getAsBoolean()
             || coralStation_StagingTrigger.booleanSupplier.getAsBoolean()
             || coralGround_StagingTrigger.booleanSupplier.getAsBoolean()
-            || algaeGround_StagingTrigger.booleanSupplier.getAsBoolean())
-            noInputTimer.restart();
+            || algaeGround_StagingTrigger.booleanSupplier.getAsBoolean()){
+                noInputTimer.restart();
+                buttonIsPressed = true;
+            } else buttonIsPressed = false;
         // if (noInputTimer.get() > 0.5 && extensionSupplier.getAsDouble() > StagingManager.StagingState.ALGAE_GROUND.extension) 
         //     safeZero.run();
 
         if (quedStage != null && extensionSupplier.getAsDouble() < StagingManager.StagingState.ALGAE_GROUND.extension){
             quedStage.run();
             quedStage = null;
-        }
+        } else if (quedStage != null && extensionDistance.getAsDouble() < 0.07 && !buttonIsPressed) relaxElevator.run();
     }
 
     void onChange(StagingTrigger trigger) {
@@ -204,17 +263,17 @@ public class StagingManager {
         CORAL_L1(1.8645,0.426),
 
         // Algae
-        ALGAE_HIGH(3.867207,0.48338),
-        ALGAE_LOW(2.1645,0.48338),
+        ALGAE_HIGH(3.967207,0.48338),
+        ALGAE_LOW(2.9645,0.48338),
 
         // Ground Pickup
         ALGAE_GROUND(0.3322,0.474609),
         CORAL_GROUND(0.3828,0.448402),
-        LOLIPOP(0.4322,0.474609),
+        LOLIPOP(1.43,0.474609),
 
         // Field Elements
         CORAL_STATION(1.938,0.304195),
-        PROCESSOR(0.4022,0.474609);
+        PROCESSOR(1.022,0.474609);
 
 
         public final double extension;
@@ -293,14 +352,20 @@ public class StagingManager {
     }
 
     // make these uninterruptable
-    public static SequentialCommandGroup softResetSuperstructure(Elevator elevator, Arm arm){
-        return new SequentialCommandGroup(
-            Commands.runOnce(() -> arm.setCoast(), arm),
-            Commands.runOnce(() -> elevator.setCoast(), elevator),
-            Commands.waitSeconds(3),
-            Commands.runOnce(() -> arm.setRawVoltageOut(0.35), arm),
-            new WaitUntilCommand(() -> arm.isZeroed()),
-            new WaitUntilCommand(() -> elevator.isZeroed())
+    public static ParallelCommandGroup softResetSuperstructure(Elevator elevator, Arm arm){
+        return new ParallelCommandGroup(
+            Commands.sequence( // Arm reset
+                Commands.runOnce(() -> arm.setCoast(), arm),
+                Commands.waitSeconds(4),
+                Commands.runOnce(() -> arm.setRawVoltageOut(0.525), arm),
+                new WaitUntilCommand(() -> arm.isZeroed()),
+                Commands.runOnce(() -> arm.setCoast(), arm)
+            ),
+            Commands.sequence( // Elevator reset
+                Commands.runOnce(() -> elevator.setCoast(), elevator),
+                new WaitUntilCommand(() -> arm.isZeroed()),
+                Commands.runOnce(() -> elevator.setCoast(), elevator)
+            )
         );
     }
 
