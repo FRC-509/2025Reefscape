@@ -101,44 +101,34 @@ public class RobotContainer {
 
 		// OPERATOR ------------------------------------
 
-		// this.stagingManager = new StagingManager(
-		// 	elevator, 
-		// 	arm, 
-		// 	intake, 
-		// 	() -> false,
-		// 	() -> operator.a().getAsBoolean(),
-		// 	() -> operator.b().getAsBoolean(),
-		// 	() -> false,
-		// 	() -> false,
-		// 	() -> false,
-		// 	() -> false, 
-		// 	() -> elevator.getExtension());
+		this.stagingManager = new StagingManager(
+			elevator, 
+			arm, 
+			intake, 
+			() -> operator.a().getAsBoolean(),
+			() -> operator.b().getAsBoolean(),
+			() -> operator.y().getAsBoolean(),
+			() -> operator.x().getAsBoolean(),
+			() -> driverLeft.getJoystickButton(StickButton.Right).getAsBoolean(),
+			() -> driverRight.getJoystickButton(StickButton.Right).getAsBoolean(),
+			() -> driverRight.getJoystickButton(StickButton.Left).getAsBoolean(),
+			() -> elevator.getExtension());
 
+		(new Trigger(() -> driverRight.getPOV(0) == 0))
+			.onTrue(StagingManager.zero(elevator, arm, intake));
 
+		
 		// Elevator / Arm setpoint control
-		operator.a().onTrue(StagingManager.L4_Rising(elevator, arm));
-		operator.b().onTrue(StagingManager.all(StagingState.CORAL_L3, elevator, arm));
-		operator.y().onTrue(StagingManager.all(StagingState.CORAL_L2, elevator, arm));
-		operator.x().onTrue(StagingManager.all(StagingState.CORAL_L1, elevator, arm));
-		
-		operator.a().onFalse(StagingManager.L4_Falling(elevator, arm, intake));
-		operator.x().onFalse(StagingManager.zero(elevator, arm, intake));
-		operator.y().onFalse(StagingManager.zero(elevator, arm, intake));
-		operator.b().onFalse(StagingManager.zero(elevator, arm, intake));
 
+		// operator.a().onTrue(StagingManager.L4_Rising(elevator, arm));
+		// operator.b().onTrue(StagingManager.all(StagingState.CORAL_L3, elevator, arm));
+		// operator.y().onTrue(StagingManager.all(StagingState.CORAL_L2, elevator, arm));
+		// operator.x().onTrue(StagingManager.all(StagingState.CORAL_L1, elevator, arm));
 		
-		// operator.b().onTrue(Commands.runOnce(()->{
-		// 	elevator.setExtension(1.938);}, elevator));
-		// operator.a().onTrue(Commands.runOnce(()->{
-		// 		arm.setRotation(0.304199);}, arm));
-		// operator.a().onTrue(Commands.runOnce(()->{
-		// 	elevator.setExtension(StagingState.CORAL_L3.extension);
-		// 	arm.setRotation(-0.15008);}, arm, elevator));
-		// operator.a().onTrue(Commands.runOnce(()->{
-		// 	elevator.setExtension(3);
-		// 	arm.setRotation(-0.08);}, arm, elevator));
-		// operator.a().onFalse(Commands.runOnce(()->elevator.setExtension(1), elevator));
-		// operator.b().onFalse(Commands.runOnce(()->elevator.setExtension(1), elevator));
+		// operator.a().onFalse(StagingManager.L4_Falling(elevator, arm, intake));
+		// operator.x().onFalse(StagingManager.zero(elevator, arm, intake));
+		// operator.y().onFalse(StagingManager.zero(elevator, arm, intake));
+		// operator.b().onFalse(StagingManager.zero(elevator, arm, intake));
 
 		// // Algae Intake / outake on release
 		operator.rightBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));
@@ -169,6 +159,10 @@ public class RobotContainer {
 
 	public void onRobotEnable() {
 		pigeon.onEnable();
+	}
+
+	public void robotPeriodic(){
+		stagingManager.update();
 	}
 
 	public void onTeleopEntry() {

@@ -12,7 +12,7 @@ public class RotateTo extends Command {
     private final Arm arm;
     private final BooleanSupplier inwardsRotationSafe;
     private final double targetRotation;
-    private final boolean rotatesInwards; 
+    private final boolean rotatesInwards;
 
     public RotateTo(double rotation, BooleanSupplier inwardsRotationSafe, Arm arm) {
         this.targetRotation = rotation;
@@ -28,8 +28,8 @@ public class RotateTo extends Command {
         // rotate to the closest safe position
         if (rotatesInwards && !inwardsRotationSafe.getAsBoolean()){
 	        arm.setRotation(StagingManager.StagingState.SAFE.rotation);
-        } else if(targetRotation > StagingManager.kGroundRotation){
-            arm.setRotation(StagingManager.StagingState.SAFE.rotation);
+        // } else if(targetRotation > StagingManager.kGroundRotation){
+        //     arm.setRotation(StagingManager.StagingState.SAFE.rotation);
         } else { // otherwise, it is safe to rotate to any orientation
 	        arm.setRotation(targetRotation);
         }

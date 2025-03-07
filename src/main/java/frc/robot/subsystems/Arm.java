@@ -74,6 +74,10 @@ public class Arm extends SubsystemBase {
         this.initialRotation = pivotMotor.getPosition().getValueAsDouble();
     }
 
+    public boolean isZeroed() {
+        return limitSwitch.get();
+    }
+
     @Override
     public void periodic() {
         dashboard();
