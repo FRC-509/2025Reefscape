@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.autonomous.Leave;
 import frc.robot.commands.*;
-import frc.robot.commands.StagingManager.StagingState;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
@@ -115,27 +114,6 @@ public class RobotContainer {
 			() -> (driverLeft.getPOV(0) == 0),
 			() -> (driverLeft.getPOV(0) == 90),
 			() -> (driverLeft.getPOV(0) == 180));
-
-		// (new Trigger(() -> driverLeft.getPOV(0) == 0))
-		// 	.onTrue(StagingManager.zero(elevator, arm, intake));
-
-		// (new Trigger(() -> driverLeft.getPOV(0) == 90))
-		// 	.onTrue(StagingManager.softResetSuperstructure(elevator, arm));
-		// (new Trigger(() -> driverLeft.getPOV(0) == 180))
-		// 	.onTrue(StagingManager.hardstopSuperstructure(elevator, arm));
-
-		
-		// Elevator / Arm setpoint control
-
-		// operator.a().onTrue(StagingManager.L4_Rising(elevator, arm));
-		// operator.b().onTrue(StagingManager.all(StagingState.CORAL_L3, elevator, arm));
-		// operator.y().onTrue(StagingManager.all(StagingState.CORAL_L2, elevator, arm));
-		// operator.x().onTrue(StagingManager.all(StagingState.CORAL_L1, elevator, arm));
-		
-		// operator.a().onFalse(StagingManager.L4_Falling(elevator, arm, intake));
-		// operator.x().onFalse(StagingManager.zero(elevator, arm, intake));
-		// operator.y().onFalse(StagingManager.zero(elevator, arm, intake));
-		// operator.b().onFalse(StagingManager.zero(elevator, arm, intake));
 
 		// // Algae Intake / outake on release
 		operator.rightBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));

@@ -3,7 +3,6 @@ package frc.robot.commands;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -52,6 +51,7 @@ public class StagingManager {
         }
     }
 
+    // Stage Triggers
     private final StagingTrigger L4_StagingTrigger;
     private final StagingTrigger L3_StagingTrigger;
     private final StagingTrigger L2_StagingTrigger;
@@ -66,17 +66,16 @@ public class StagingManager {
     private final DoubleSupplier extensionDistance;
 
     private Runnable quedStage;
-    private Runnable safeZero;
-    private Runnable relaxElevator;
+    private final Runnable safeZero;
+    private final Runnable relaxElevator;
     private boolean buttonIsPressed;
 
-    private Timer noInputTimer;
-
-    private StagingTrigger manualZero_StagingTrigger;
-    private BooleanSupplier softResetSupplier;
-    private BooleanSupplier hardResetSupplier;
-    private Runnable softReset;
-    private Runnable hardReset;
+    // Manual override
+    private final StagingTrigger manualZero_StagingTrigger;
+    private final BooleanSupplier softResetSupplier;
+    private final BooleanSupplier hardResetSupplier;
+    private final Runnable softReset;
+    private final Runnable hardReset;
     private boolean reseting;
 
     public StagingManager(
@@ -187,8 +186,6 @@ public class StagingManager {
         };
         this.softResetSupplier = softResetSupplier;
         this.hardResetSupplier = hardResetSupplier;
-        this.noInputTimer = new Timer();
-        noInputTimer.start();
     }
 
     public void update(){
@@ -222,12 +219,8 @@ public class StagingManager {
             || coralStation_StagingTrigger.booleanSupplier.getAsBoolean()
             || coralGround_StagingTrigger.booleanSupplier.getAsBoolean()
             || algaeGround_StagingTrigger.booleanSupplier.getAsBoolean()){
-                noInputTimer.restart();
                 buttonIsPressed = true;
             } else buttonIsPressed = false;
-        // if (noInputTimer.get() > 0.5 && extensionSupplier.getAsDouble() > StagingManager.StagingState.ALGAE_GROUND.extension) 
-        //     safeZero.run();
-
         if (quedStage != null && extensionSupplier.getAsDouble() < StagingManager.StagingState.ALGAE_GROUND.extension){
             quedStage.run();
             quedStage = null;
@@ -351,7 +344,6 @@ public class StagingManager {
         );
     }
 
-    // make these uninterruptable
     public static ParallelCommandGroup softResetSuperstructure(Elevator elevator, Arm arm){
         return new ParallelCommandGroup(
             Commands.sequence( // Arm reset

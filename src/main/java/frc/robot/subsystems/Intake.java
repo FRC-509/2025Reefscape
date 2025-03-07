@@ -49,10 +49,10 @@ public class Intake extends SubsystemBase {
         TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
 
         // Current limits
-		// intakeConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-		// intakeConfig.CurrentLimits.SupplyCurrentLimit = Constants.CurrentLimits.kIntakeSupply; 
-        // intakeConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        // intakeConfig.CurrentLimits.StatorCurrentLimit = Constants.CurrentLimits.kIntakeStator;
+		intakeConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+		intakeConfig.CurrentLimits.SupplyCurrentLimit = Constants.CurrentLimits.kIntakeSupply; 
+        intakeConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        intakeConfig.CurrentLimits.StatorCurrentLimit = Constants.CurrentLimits.kIntakeStator;
 
         // PID value assignment
 		intakeConfig.Slot0.kP = Constants.PIDConstants.Arm.kIntakeP;
@@ -107,9 +107,6 @@ public class Intake extends SubsystemBase {
         boolean atCoralTorque = 
             Math.abs(stallTorqueCurrent.getFirst()) > Constants.Intake.kCoralTorqueCurrent 
             && Math.abs(stallTorqueCurrent.getSecond()) > Constants.Intake.kCoralTorqueCurrent;
-        
-        SmartDashboard.putBoolean("At Algae Torque", atAlgaeTorque);
-        SmartDashboard.putBoolean("At Coral Torque", atCoralTorque);
         // Collect torque before returning command so AlternatingValueClock can update properly
         
         if(commandOutake) return; 
@@ -127,9 +124,7 @@ public class Intake extends SubsystemBase {
 
     public void dashboard(){
         double stallTorqueCurrent = intakeMotor.getTorqueCurrent().getValueAsDouble();
-        SmartDashboard.putNumber("VoltageOutIntakeSigma", intakeMotor.getVelocity().getValueAsDouble());
         SmartDashboard.putString("Intaking State", intakingState.toString());
-        SmartDashboard.putString("Last Intaking State", lastIntakingState.toString());
         SmartDashboard.putNumber("Torque Current", stallTorqueCurrent);
         SmartDashboard.putBoolean("Has Intaken Gamepiece",
             intakingState.equals(IntakingState.ALGAE_INTAKE) && stallTorqueCurrent > Constants.Intake.kAlgaeTorqueCurrent

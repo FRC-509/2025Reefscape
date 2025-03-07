@@ -18,7 +18,7 @@ public class Arm extends SubsystemBase {
     
     private final TalonFX pivotMotor = new TalonFX(Constants.IDs.kPivotMotor, Constants.kCANIvore);
     private final CANcoder pivotEncoder = new CANcoder(Constants.IDs.kPivotEncoder, Constants.kCANIvore);
-    private final DigitalInput limitSwitch = new DigitalInput(0); // ID ME
+    private final DigitalInput limitSwitch = new DigitalInput(0);
     
     private final PositionDutyCycle closedLoopPosition = new PositionDutyCycle(pivotMotor.getPosition().getValueAsDouble());
     private final VoltageOut openLoop = new VoltageOut(0.0).withEnableFOC(false);
@@ -86,9 +86,6 @@ public class Arm extends SubsystemBase {
 
     private void dashboard(){
         SmartDashboard.putBoolean("Arm Extension Safe", isExtensionSafe());
-
-        SmartDashboard.putNumber("ActualArmRotation", pivotMotor.getPosition().getValueAsDouble());
-        SmartDashboard.putNumber("initialOffset", initialRotation);
         SmartDashboard.putNumber("RotationDelta", initialRotation - pivotMotor.getPosition().getValueAsDouble());
         SmartDashboard.putBoolean("Arm Limit Switch", limitSwitch.get());
     }
