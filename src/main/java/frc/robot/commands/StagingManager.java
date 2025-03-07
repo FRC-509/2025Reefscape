@@ -6,6 +6,7 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.Intake;
 import frc.robot.commands.staging.ExtendTo;
 import frc.robot.commands.staging.RotateTo;
@@ -65,37 +66,37 @@ public class StagingManager {
             L3_Supplier,
             false, 
             () -> all(StagingState.CORAL_L3, elevator, arm).schedule(), 
-            () -> zero(elevator, arm).schedule());
+            () -> zero(elevator, arm, intake).schedule());
 
         this.L2_StagingTrigger = new StagingTrigger(
             L2_Supplier,
             false, 
             () -> all(StagingState.CORAL_L2, elevator, arm).schedule(), 
-            () -> zero(elevator, arm).schedule());
+            () -> zero(elevator, arm, intake).schedule());
 
         this.L1_StagingTrigger = new StagingTrigger(
             L1_Supplier,
             false,
             () -> all(StagingState.CORAL_L1, elevator, arm).schedule(), 
-            () -> zero(elevator, arm).schedule());
+            () -> zero(elevator, arm, intake).schedule());
 
         this.coralStation_StagingTrigger = new StagingTrigger(
             coralStation_Supplier,
             false, 
             () -> all(StagingState.CORAL_STATION, elevator, arm).schedule(), 
-            () -> zero(elevator, arm).schedule());
+            () -> zero(elevator, arm, intake).schedule());
 
         this.coralGround_StagingTrigger = new StagingTrigger(
             coralGround_Supplier,
             false, 
             () -> all(StagingState.CORAL_GROUND, elevator, arm).schedule(), 
-            () -> zero(elevator, arm).schedule());
+            () -> zero(elevator, arm, intake).schedule());
 
         this.algaeGround_StagingTrigger = new StagingTrigger(
             algaeGround_Supplier,
             false, 
             () -> all(StagingState.ALGAE_GROUND, elevator, arm).schedule(), 
-            () -> zero(elevator, arm).schedule());
+            () -> zero(elevator, arm, intake).schedule());
         
         this.extensionSupplier = extensionSupplier;
         this.quedStage = null;
@@ -137,12 +138,13 @@ public class StagingManager {
     public static enum StagingState {
         // Defaults                               
         ZEROED(0.111523,0.0),
-        SAFE(0.061523,0.247803),
+        SAFE(0.061523,0.257803),
+        ALGAE_SAFE(0.061523, 0.2233887),
 
         // Coral
         CORAL_L4(4.777822,0.1440143),
-        CORAL_L3(4.828,0.48338),
-        CORAL_L2(3.387207,0.48338),
+        CORAL_L3(4.628,0.426),
+        CORAL_L2(3.387207,0.426),
         CORAL_L1(1.8645,0.426),
 
         ALGAE_GROUND(0.3322,0.474609),
@@ -163,67 +165,57 @@ public class StagingManager {
         }
     }
 
-    public static SequentialCommandGroup all(StagingState state, Elevator elevator, Arm arm){
-        return new SequentialCommandGroup(
-            Commands.runOnce(() -> elevator.setExtension(StagingState.SAFE.extension), elevator),
-            Commands.runOnce(() -> arm.setRotation(StagingState.SAFE.rotation), arm),
-            Commands.waitSeconds(0.5),
-            Commands.runOnce(() -> elevator.setExtension(state.extension), elevator),
-            Commands.waitSeconds(0.3),
-            Commands.runOnce(() -> arm.setRotation(state.rotation), arm)
-        );
-    }
-
     public static SequentialCommandGroup L4_Rising(Elevator elevator, Arm arm){
         return new SequentialCommandGroup(
-            Commands.runOnce(() -> elevator.setExtension(StagingState.SAFE.extension), elevator),
-            Commands.runOnce(() -> arm.setRotation(StagingState.SAFE.rotation), arm),
-            Commands.waitSeconds(0.6), // 0.4
+            all(StagingState.SAFE, elevator, arm),
+            Commands.waitSeconds(0.3),
             Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_L4.extension), elevator),
-            Commands.waitSeconds(1.2), // 0.4
+            Commands.waitSeconds(0.6),
             Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_L4.rotation), arm)
         );
     }
 
     public static SequentialCommandGroup L4_Falling(Elevator elevator, Arm arm, Intake intake){
         return new SequentialCommandGroup(
-            Commands.runOnce(() -> elevator.setExtension(4), elevator),
+            Commands.runOnce(() -> elevator.setExtension(4.0307), elevator),
             Commands.runOnce(() -> intake.setCommandOutake(true), intake),
             Commands.runOnce(() -> intake.L4Outake(), intake),
-            Commands.runOnce(() -> arm.setCoast(), arm),
-            Commands.waitSeconds(1.6), // 0.4
-            Commands.runOnce(() -> arm.setRotation(StagingState.SAFE.rotation), elevator),
-            Commands.waitSeconds(0.4),
-            Commands.runOnce(() -> elevator.setExtension(StagingState.ZEROED.extension), arm),
-            Commands.waitSeconds(2),
-            Commands.runOnce(() -> arm.setRotation(StagingState.ZEROED.rotation), elevator)
+            Commands.runOnce(() -> arm.setRawVoltageOut(-0.2), arm),
+            new WaitUntilCommand(() -> (arm.getRotation() > 0.28418)),
+            Commands.runOnce(() -> intake.stop(), intake),
+            Commands.runOnce(() -> intake.setCommandOutake(false), intake),
+            all(StagingState.ZEROED, elevator, arm)
         );
     }
 
-    public static SequentialCommandGroup groundPickup(Elevator elevator, Arm arm){
-        return new SequentialCommandGroup(
-            Commands.runOnce(() -> arm.setRotation(StagingState.SAFE.rotation), elevator),
-            Commands.waitSeconds(0.5),
-            Commands.runOnce(() -> elevator.setExtension(StagingState.ALGAE_GROUND.extension), arm),
-            Commands.waitSeconds(0.5),
-            Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_GROUND.rotation), elevator)
-        );
-    }
-
-    public static SequentialCommandGroup zero(Elevator elevator, Arm arm){
-        return new SequentialCommandGroup(
-            Commands.runOnce(() -> arm.setRotation(StagingState.SAFE.rotation), arm),
-            Commands.waitSeconds(0.4),
-            Commands.runOnce(() -> elevator.setExtension(StagingState.ZEROED.extension), elevator),
-            Commands.waitSeconds(0.8),
-            Commands.runOnce(() -> arm.setRotation(StagingState.ZEROED.rotation), arm)
-        );
-    }
-
-    public static ParallelCommandGroup allCC(StagingState state, Elevator elevator, Arm arm){
+    public static ParallelCommandGroup all(StagingState state, Elevator elevator, Arm arm){
         return new ParallelCommandGroup(
             new RotateTo(state.rotation, () -> elevator.isInwardsRotationSafe(), arm),
             new ExtendTo(state.extension, () -> arm.isExtensionSafe(), elevator)
+        );
+    }
+
+    public static SequentialCommandGroup zero(Elevator elevator, Arm arm, Intake intake){
+        ParallelCommandGroup hasAlgae = !intake.hasAlgae()
+            ? new ParallelCommandGroup(
+                new RotateTo(StagingState.ZEROED.rotation, () -> elevator.isInwardsRotationSafe(), arm),
+                new ExtendTo(StagingState.ZEROED.extension, () -> arm.isExtensionSafe(), elevator))
+            : new ParallelCommandGroup(
+                new RotateTo(StagingState.ALGAE_SAFE.rotation, () -> elevator.isInwardsRotationSafe(), arm),
+                new ExtendTo(StagingState.ALGAE_SAFE.extension, () -> arm.isExtensionSafe(), elevator));
+        
+        return new SequentialCommandGroup(
+            hasAlgae,
+            Commands.runOnce(() -> elevator.setCoast(), elevator)
+        );
+    }
+
+    public static SequentialCommandGroup shotput(Elevator elevator, Arm arm){
+        return new SequentialCommandGroup(
+            Commands.sequence(
+                new RotateTo(StagingState.CORAL_L1.rotation, () -> elevator.isInwardsRotationSafe(), arm),
+                new ExtendTo(StagingState.CORAL_L1.extension, () -> arm.isExtensionSafe(), elevator)),
+            Commands.runOnce(() -> elevator.setCoast(), elevator)
         );
     }
 }

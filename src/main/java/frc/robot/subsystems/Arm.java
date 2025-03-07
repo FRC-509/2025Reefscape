@@ -66,6 +66,10 @@ public class Arm extends SubsystemBase {
         pivotMotor.setControl(openLoop.withOutput(0.0));
     }
 
+    public void setRawVoltageOut(double voltage){
+        pivotMotor.setControl(openLoop.withOutput(voltage));
+    }
+
     public void setInitializationRotation(){
         this.initialRotation = pivotMotor.getPosition().getValueAsDouble();
     }

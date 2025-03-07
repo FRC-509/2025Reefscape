@@ -87,6 +87,10 @@ public class Intake extends SubsystemBase {
         intakeMotor.setControl(intakeOpenLoop.withOutput(Constants.Intake.kCoralOutakeVoltage/3));
     }
 
+    public boolean hasAlgae(){
+        return intakingState.equals(IntakingState.ALGAE_INTAKE) || intakingState.equals(IntakingState.ALGAE_PASSIVE);
+    }
+
     @Override
     public void periodic() {
         dashboard();

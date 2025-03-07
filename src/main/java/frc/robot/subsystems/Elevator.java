@@ -114,7 +114,6 @@ public class Elevator extends SubsystemBase {
     public void periodic() {
         dashboard();
         if (limitSwitch.get()) setInitializationRotation();
-        // if (limitSwitch.get()) extensionLeader.setControl(closedLoopPosition.withPosition(extensionLeader.getPosition().getValueAsDouble() + 0.01));
     }
 
     private void dashboard(){
@@ -125,5 +124,9 @@ public class Elevator extends SubsystemBase {
         SmartDashboard.putNumber("ExtensionDelta", extensionLeader.getPosition().getValueAsDouble() - initialRotation);
         SmartDashboard.putNumber("GetExtension", getExtension());
         SmartDashboard.putBoolean("ElevatorLimitSwitch", limitSwitch.get());
+    }
+
+    public void setCoast() {
+        extensionLeader.setControl(openLoop.withOutput(0.0));
     }
 }

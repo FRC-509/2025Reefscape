@@ -116,18 +116,15 @@ public class RobotContainer {
 
 
 		// Elevator / Arm setpoint control
-		// operator.a().onTrue(StagingManager.L4_Rising(elevator, arm));
-		// operator.b().onTrue(StagingManager.all(StagingState.CORAL_L3, elevator, arm));
-		// operator.y().onTrue(StagingManager.all(StagingState.CORAL_L2, elevator, arm));
-		// operator.x().onTrue(StagingManager.all(StagingState.CORAL_L1, elevator, arm));
+		operator.a().onTrue(StagingManager.L4_Rising(elevator, arm));
+		operator.b().onTrue(StagingManager.all(StagingState.CORAL_L3, elevator, arm));
+		operator.y().onTrue(StagingManager.all(StagingState.CORAL_L2, elevator, arm));
+		operator.x().onTrue(StagingManager.all(StagingState.CORAL_L1, elevator, arm));
 		
-		// operator.a().onFalse(StagingManager.L4_Falling(elevator, arm, intake));
-		// operator.x().onFalse(StagingManager.zero(elevator, arm));
-		// operator.y().onFalse(StagingManager.zero(elevator, arm));
-		// operator.b().onFalse(StagingManager.zero(elevator, arm));
-
-		operator.x().onTrue(StagingManager.allCC(StagingState.CORAL_L1, elevator, arm));
-		operator.x().onFalse(StagingManager.allCC(StagingState.ZEROED, elevator, arm));
+		operator.a().onFalse(StagingManager.L4_Falling(elevator, arm, intake));
+		operator.x().onFalse(StagingManager.zero(elevator, arm, intake));
+		operator.y().onFalse(StagingManager.zero(elevator, arm, intake));
+		operator.b().onFalse(StagingManager.zero(elevator, arm, intake));
 
 		
 		// operator.b().onTrue(Commands.runOnce(()->{
