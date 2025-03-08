@@ -136,4 +136,8 @@ public class Elevator extends SubsystemBase {
         SmartDashboard.putNumber("GetExtension", getExtension());
         SmartDashboard.putBoolean("ElevatorLimitSwitch", limitSwitch.get());
     }
+
+    public void setRawVoltageOut(double voltage) {
+        extensionLeader.setControl(openLoop.withOutput(voltage));
+    }
 }

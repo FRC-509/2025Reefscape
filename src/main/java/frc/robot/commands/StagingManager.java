@@ -305,12 +305,8 @@ public class StagingManager {
         return coralSupplier.getAsBoolean()
             ? new SequentialCommandGroup(
                 Commands.runOnce(() -> elevator.setExtension(4.0307), elevator),
-                Commands.runOnce(() -> intake.setCommandOutake(true), intake),
-                Commands.runOnce(() -> intake.L4Outake(), intake),
                 Commands.runOnce(() -> arm.setRawVoltageOut(-0.2), arm),
                 new WaitUntilCommand(() -> (arm.getRotation() > 0.28418)),
-                Commands.runOnce(() -> intake.stop(), intake),
-                Commands.runOnce(() -> intake.setCommandOutake(false), intake),
                 zero(elevator, arm, intake))
             : new SequentialCommandGroup(
                 Commands.parallel(
@@ -362,27 +358,24 @@ public class StagingManager {
         );
     }
 
-    public static ParallelCommandGroup softResetSuperstructure(Elevator elevator, Arm arm){
-        return new ParallelCommandGroup(
-            Commands.sequence( // Arm reset
-                Commands.runOnce(() -> arm.setCoast(), arm),
-                Commands.waitSeconds(1),
-                Commands.runOnce(() -> arm.setRawVoltageOut(0.525), arm),
-                new WaitUntilCommand(() -> arm.isZeroed()),
-                Commands.runOnce(() -> arm.setCoast(), arm)
-            ),
-            Commands.sequence( // Elevator reset
-                Commands.runOnce(() -> elevator.setCoast(), elevator),
-                new WaitUntilCommand(() -> arm.isZeroed()),
-                Commands.runOnce(() -> elevator.setCoast(), elevator)
-            )
+    public static SequentialCommandGroup softResetSuperstructure(Elevator elevator, Arm arm){
+        return new SequentialCommandGroup(
+            Commands.runOnce(() -> arm.setRawVoltageOut(0.725), arm),
+            Commands.waitSeconds(1),
+            Commands.runOnce(() -> arm.setCoast(), arm),
+            hardstopSuperstructure(elevator, arm)
         );
     }
 
     public static SequentialCommandGroup hardstopSuperstructure(Elevator elevator, Arm arm){
         return new SequentialCommandGroup(
             Commands.runOnce(() -> arm.setCoast(), arm),
-            Commands.runOnce(() -> elevator.setCoast(), elevator)
+            Commands.runOnce(() -> elevator.setRawVoltageOut(-1.25), elevator),
+            Commands.waitUntil(() -> elevator.isZeroed()),
+            Commands.runOnce(() -> elevator.setCoast(), elevator),
+            Commands.runOnce(() -> arm.setRawVoltageOut(0.725), arm),
+            Commands.waitUntil(() -> arm.isZeroed()),
+            Commands.runOnce(() -> arm.setCoast(), arm)
         );
     }
 }

@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -140,6 +142,22 @@ public class Intake extends SubsystemBase {
 			Commands.runOnce(() -> intake.stop(), intake),
             Commands.runOnce(() -> intake.setCommandOutake(false), intake)
 		);
+    }
+
+    public static SequentialCommandGroup outakeCommand(boolean coral, BooleanSupplier l4_Supplier, Intake intake) {
+        return l4_Supplier.getAsBoolean() 
+            ? new SequentialCommandGroup(
+                Commands.runOnce(() -> intake.setCommandOutake(true), intake),
+                Commands.runOnce(() -> intake.outake(coral), intake),
+			    Commands.waitSeconds(coral ? Constants.Intake.kCoralOutakeDelay : Constants.Intake.kAlgaeOutakeDelay),
+			    Commands.runOnce(() -> intake.stop(), intake),
+                Commands.runOnce(() -> intake.setCommandOutake(false), intake))
+            : new SequentialCommandGroup(
+                Commands.runOnce(() -> intake.setCommandOutake(true), intake),
+                Commands.runOnce(() -> intake.L4Outake(), intake),
+			    Commands.waitSeconds(coral ? Constants.Intake.kCoralOutakeDelay : Constants.Intake.kAlgaeOutakeDelay),
+			    Commands.runOnce(() -> intake.stop(), intake),
+                Commands.runOnce(() -> intake.setCommandOutake(false), intake));
     }
 
     private class AlternatingValueCLock {

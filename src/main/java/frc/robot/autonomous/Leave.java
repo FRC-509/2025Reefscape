@@ -15,6 +15,11 @@ public class Leave extends SequentialCommandGroup {
 			    0.0d,
                 false),
             Commands.waitSeconds(wait),
-            Commands.runOnce(() -> swerve.stopModules(), swerve)));
+            new DefaultDriveCommand(
+                swerve, 
+                0.0d, 
+                0.0d,
+			    0.0d,
+                false)));
 	}
 }
