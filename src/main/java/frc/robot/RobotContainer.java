@@ -121,10 +121,7 @@ public class RobotContainer {
 		operator.leftBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake));
 
 		operator.rightBumper().onFalse(Intake.outakeCommand(false, intake));
-		operator.leftBumper().onFalse(Intake.outakeCommand(
-			true, 
-			() -> (elevator.getExtension() > 3.9 && arm.getRotation() < 0.28418), 
-			intake));
+		operator.leftBumper().onFalse(Intake.outakeCommand(true, intake));
 
 		// climber.setDefaultCommand(new DefaultClimbCommand(
 		// 	() -> operator.getRightY(), 
