@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -10,14 +11,17 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.commands.StagingManager;
 
 public class Climber extends SubsystemBase {
     
     private final TalonFX climbMotor = new TalonFX(Constants.IDs.kClimbMotor);
     private final PositionVoltage rotationClosedLoop = new PositionVoltage(climbMotor.getPosition().getValueAsDouble()).withEnableFOC(false);
+    private final VoltageOut openLoop = new VoltageOut(0).withEnableFOC(false);
 
 	private Solenoid lockSolenoid = new Solenoid(PneumaticsModuleType.REVPH, Constants.IDs.kClimbSolenoid);
     private boolean lockClimb;
+    private double initialRotation;
 
     public Climber() {
         lockClimb = false;
@@ -49,41 +53,43 @@ public class Climber extends SubsystemBase {
         climbMotor.setControl(rotationClosedLoop.withPosition(Constants.Climber.kClimbPositionDegrees));
     }
 
-    /**
-     * @param rotationDeriv The desired rate of change of the climber's postion,
-     *                      represented as a value from 0.0 to 1.0, with 1.0 being 
-     *                      the maximum rotational speed of the climber 
-     */
-    public void pivot(double rotationDeriv){
-        setPivotDegrees(getPivotDegrees() + Constants.Climber.kMaxRotationalSpeed * rotationDeriv);
-    }
-
     public double getPivotDegrees() {
 		return climbMotor.getPosition().getValueAsDouble() * 360.0;
 	}
 
-	public void setPivotDegrees(double targetDegrees) {
-		double delta = (targetDegrees - getPivotDegrees()) % 360;
+    public double getRotation(){
+        return initialRotation - climbMotor.getPosition().getValueAsDouble();
+    }
 
-		if (delta > 180.0d) {
-			delta -= 360.0d;
-		} else if (delta < -180.0d) {
-			delta += 360.0d;
-		}
+    public void setRotation(double position){
+        position = initialRotation - position;
+        climbMotor.setControl(rotationClosedLoop.withPosition(position));
+    }
 
-		double target = getPivotDegrees() + delta;
-		double ticks = target / 360.0d;
+    public boolean isExtensionSafe(){
+        return getRotation() > StagingManager.kExtensionSafeRotation;
+    }
 
-		climbMotor.setControl(rotationClosedLoop.withPosition(ticks));
-	}
+    public void setCoast(){
+
+    }
+
+    public void setInitializationRotation(){
+        this.initialRotation = climbMotor.getPosition().getValueAsDouble();
+    }
+
+    // public boolean isZeroed() {
+    //     return limitSwitch.get();
+    // }
 
     public void toggleLockClimb(){
         lockClimb = !lockClimb;
         lockSolenoid.set(lockClimb);
     }
 
-    public void overideLock(boolean lock){
+    public void overrideLock(boolean lock){
         lockSolenoid.set(lock);
         lockClimb = lock;
     }
+
 }

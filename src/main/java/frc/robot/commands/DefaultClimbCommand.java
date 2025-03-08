@@ -35,7 +35,7 @@ public class DefaultClimbCommand extends Command {
         }
         
         if (Math.abs(pivotSupplier.getAsDouble()) > Constants.Operator.kStickDeadband){
-            climber.pivot(pivotSupplier.getAsDouble());
+            // climber.pivot(pivotSupplier.getAsDouble());
             autoPivoting = false;
         } else {
             if (autoPivoting && !alreadySetPivot
