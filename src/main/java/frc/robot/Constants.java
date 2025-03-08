@@ -152,7 +152,7 @@ public final class Constants {
 
 	public static class Climber {
 		public static final double kRotationGearRatio = 4.0 / 3.0;		
-		public static final double kValidRotationTolerance = 0.01;
+		public static final double kValidRotationTolerance = 0.0075;
 		public static final double kMaxRotationalSpeed = 0;
 		public static final double kClimbPositionDegrees = 0;
 		public static final double kMinimumPositionDegrees = 0;
