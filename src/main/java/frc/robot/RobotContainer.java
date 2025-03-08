@@ -112,6 +112,7 @@ public class RobotContainer {
 			() -> driverRight.getJoystickButton(StickButton.Right).getAsBoolean(),
 			() -> driverRight.getJoystickButton(StickButton.Left).getAsBoolean(),
 			() -> (driverLeft.getPOV(0) == 0),
+			() -> (driverLeft.getPOV(0) == 270),
 			() -> (driverLeft.getPOV(0) == 90),
 			() -> (driverLeft.getPOV(0) == 180));
 

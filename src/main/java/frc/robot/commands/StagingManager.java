@@ -72,6 +72,7 @@ public class StagingManager {
 
     // Manual override
     private final StagingTrigger manualZero_StagingTrigger;
+    private final StagingTrigger manualSafeZero_StagingTrigger;
     private final BooleanSupplier softResetSupplier;
     private final BooleanSupplier hardResetSupplier;
     private final Runnable softReset;
@@ -91,6 +92,7 @@ public class StagingManager {
         BooleanSupplier coralGround_Supplier,
         BooleanSupplier algaeGround_Supplier,
         BooleanSupplier manualZeroSupplier,
+        BooleanSupplier manualSafeZeroSupplier,
         BooleanSupplier softResetSupplier,
         BooleanSupplier hardResetSupplier
     ){
@@ -177,13 +179,17 @@ public class StagingManager {
         this.manualZero_StagingTrigger = new StagingTrigger(
             manualZeroSupplier, 
             () -> zero(elevator, arm, intake).schedule(),
-            () -> { reseting = false; });            
+            () -> { reseting = false; });           
+        this.manualSafeZero_StagingTrigger = new StagingTrigger(
+                manualZeroSupplier, 
+                () -> safeZero.run(),
+                () -> { reseting = false; });     
         this.softReset = new Runnable() {
             @Override
             public void run() {
                 softResetSuperstructure(elevator, arm).schedule();
             }
-        };
+        };        
         this.hardReset = new Runnable() {
             @Override
             public void run() {
@@ -196,6 +202,7 @@ public class StagingManager {
 
     public void update(){
         onChange(manualZero_StagingTrigger);
+        onChange(manualSafeZero_StagingTrigger);
         if (softResetSupplier.getAsBoolean()) {
             softReset.run();
             reseting = true;
