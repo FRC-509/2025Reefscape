@@ -8,7 +8,6 @@ import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.util.math.Conversions;
@@ -27,7 +26,7 @@ public final class Constants {
 
 	public static class Operator {
 		public static final double kStickDeadband = 0.1;
-        public static final double kPrecisionMovementMultiplier = 0.3; // TODO: Tune to what feels good
+        public static final double kPrecisionMovementMultiplier = 0.3;
 		public static final double kPrecisionRotationMultiplier = 0.3;
 		public static final double kTriggerDeadband = 0.15;
 	}
@@ -57,7 +56,7 @@ public final class Constants {
 		// public static final double kMaxAngularAcceleration = 0.0;
 
 		public static final DCMotor kKrakenDcMotorProfile = new DCMotor(
-			12, // TODO: Populate with MORE real data
+			12,
 			7.09, 
 			366, 
 			2,
@@ -85,7 +84,6 @@ public final class Constants {
 			int driveMotorId,
 			double steerEncoderOffset) {}
 
-		// TODO: Immediately after reciving drivetrain, set these
 		public static final SwerveModuleConfiguration kFrontRight = new SwerveModuleConfiguration(
 			0,
 			IDs.kFrontRightEncoder,
@@ -117,13 +115,10 @@ public final class Constants {
 
 	public static class Elevator {
 		// Gear ratio between the rotation of the motor and the rotation extending the elevator
-		public static final double kRotorToSensorRatio = 1.0 / 12.0; //TODO: validate
+		public static final double kRotorToSensorRatio = 1.0 / 12.0;
         public static final double kSensorToMechanismRatio = 2 * Math.PI * Units.inchesToMeters(0.8);
-		public static final double kExtensionMagnetOffset = 0.0; // TODO: find later
-		// public static final double kMaxVelocity = 0; // Find desired units of setVelocity
-        // public static final double kMaxAcceleration = 0;
-		// public static final Constraints kMotionProfileConstraints = new Constraints(kMaxVelocity, kMaxAcceleration);
-
+		public static final double kExtensionMagnetOffset = 0.0;
+		
         public static final double kValidExtensionTolerance = 0.05;
 	}
 
@@ -157,7 +152,7 @@ public final class Constants {
 
 	public static class Climber {
 		public static final double kRotationGearRatio = 4.0 / 3.0;		
-		public static final double kValidRotationTolerance = 0.01; // In degrees TODO: Tune
+		public static final double kValidRotationTolerance = 0.01;
 		public static final double kMaxRotationalSpeed = 0;
 		public static final double kClimbPositionDegrees = 0;
 		public static final double kMinimumPositionDegrees = 0;

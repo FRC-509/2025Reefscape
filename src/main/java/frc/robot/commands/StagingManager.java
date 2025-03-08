@@ -77,6 +77,7 @@ public class StagingManager {
     private final Runnable softReset;
     private final Runnable hardReset;
     private boolean reseting;
+    private boolean coralL4;
 
     public StagingManager(
         Elevator elevator,
@@ -95,8 +96,13 @@ public class StagingManager {
     ){
         this.L4_StagingTrigger = new StagingTrigger(
             L4_Supplier,
-            () -> L4_Rising(elevator, arm).schedule(),
-            () -> L4_Falling(elevator, arm, intake).schedule());
+            () -> {
+                coralL4 = !(intake.getIntakingState().equals(IntakingState.ALGAE_PASSIVE)
+                    || intake.getIntakingState().equals(IntakingState.ALGAE_INTAKE) 
+                    || intake.getIntakingState().equals(IntakingState.ALGAE_OUTAKE));
+                L4_Rising(elevator, arm).schedule();
+            },
+            () -> L4_Falling(elevator, arm, intake, () -> coralL4).schedule());
 
         this.L3_StagingTrigger = new StagingTrigger(
             L3_Supplier,
@@ -251,8 +257,8 @@ public class StagingManager {
 
         // Coral
         CORAL_L4(4.777822,0.1240143),
-        CORAL_L3(4.758,0.47),
-        CORAL_L2(3.367207,0.47),
+        CORAL_L3(4.758,0.485),
+        CORAL_L2(3.367207,0.485),
         CORAL_L1(1.8645,0.426),
 
         // Algae
@@ -288,17 +294,22 @@ public class StagingManager {
         );
     }
 
-    public static SequentialCommandGroup L4_Falling(Elevator elevator, Arm arm, Intake intake){
-        return new SequentialCommandGroup(
-            Commands.runOnce(() -> elevator.setExtension(4.0307), elevator),
-            Commands.runOnce(() -> intake.setCommandOutake(true), intake),
-            Commands.runOnce(() -> intake.L4Outake(), intake),
-            Commands.runOnce(() -> arm.setRawVoltageOut(-0.2), arm),
-            new WaitUntilCommand(() -> (arm.getRotation() > 0.28418)),
-            Commands.runOnce(() -> intake.stop(), intake),
-            Commands.runOnce(() -> intake.setCommandOutake(false), intake),
-            zero(elevator, arm, intake)
-        );
+    public static SequentialCommandGroup L4_Falling(Elevator elevator, Arm arm, Intake intake, BooleanSupplier coralSupplier){
+        return coralSupplier.getAsBoolean()
+            ? new SequentialCommandGroup(
+                Commands.runOnce(() -> elevator.setExtension(4.0307), elevator),
+                Commands.runOnce(() -> intake.setCommandOutake(true), intake),
+                Commands.runOnce(() -> intake.L4Outake(), intake),
+                Commands.runOnce(() -> arm.setRawVoltageOut(-0.2), arm),
+                new WaitUntilCommand(() -> (arm.getRotation() > 0.28418)),
+                Commands.runOnce(() -> intake.stop(), intake),
+                Commands.runOnce(() -> intake.setCommandOutake(false), intake),
+                zero(elevator, arm, intake))
+            : new SequentialCommandGroup(
+                Commands.parallel(
+                    Commands.runOnce(() -> elevator.setExtension(4.0307), elevator),
+                    Commands.runOnce(() -> arm.setRotation(0.28418), arm)),
+                zero(elevator, arm, intake));
     }
 
     public static ParallelCommandGroup all(StagingState state, Elevator elevator, Arm arm){
@@ -348,7 +359,7 @@ public class StagingManager {
         return new ParallelCommandGroup(
             Commands.sequence( // Arm reset
                 Commands.runOnce(() -> arm.setCoast(), arm),
-                Commands.waitSeconds(4),
+                Commands.waitSeconds(1),
                 Commands.runOnce(() -> arm.setRawVoltageOut(0.525), arm),
                 new WaitUntilCommand(() -> arm.isZeroed()),
                 Commands.runOnce(() -> arm.setCoast(), arm)

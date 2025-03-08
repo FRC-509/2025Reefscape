@@ -84,7 +84,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void L4Outake(){
-        intakeMotor.setControl(intakeOpenLoop.withOutput(Constants.Intake.kCoralOutakeVoltage/3));
+        intakeMotor.setControl(intakeOpenLoop.withOutput(Constants.Intake.kCoralOutakeVoltage/10));
     }
 
     public IntakingState getIntakingState(){
