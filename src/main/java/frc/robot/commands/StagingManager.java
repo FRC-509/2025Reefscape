@@ -269,8 +269,8 @@ public class StagingManager {
         CORAL_L1(1.8645,0.426),
 
         // Algae
-        ALGAE_HIGH(3.967207,0.24338),
-        ALGAE_LOW(2.7645,0.48338),
+        ALGAE_HIGH(4.0967207,0.48338),
+        ALGAE_LOW(2.5645,0.48338),
 
         // Ground Pickup
         ALGAE_GROUND(0.3322,0.474609),
@@ -307,7 +307,7 @@ public class StagingManager {
                 Commands.runOnce(() -> elevator.setExtension(4.0307), elevator),
                 Commands.runOnce(() -> arm.setRawVoltageOut(-0.2), arm),
                 Commands.runOnce(() -> intake.L4Outake()),
-                new WaitUntilCommand(() -> (arm.getRotation() > 0.28418)),
+                new WaitUntilCommand(() -> (arm.getRotation() > 0.21418)),
                 zero(elevator, arm, intake))
             : new SequentialCommandGroup(
                 Commands.parallel(
