@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.drive.SwerveDrive;
@@ -13,19 +14,19 @@ public class VisionAlignment {
 
     public static enum StationOffset {
 
-        REEF_LEFT(new Translation2d(0,0)), // TODO: Find Real Offsets, ensure x and y directions
-        REEF_RIGHT(new Translation2d(0,0)),
-        REEF_ALGAE(new Translation2d(0,0)),
-        ALGAE_STATION(new Translation2d(0,0)),
-        PROCESSOR(new Translation2d(0,0)),
-        NO_TAG(new Translation2d());
+        REEF_LEFT(new Pose2d(0,0,new Rotation2d(0))), // TODO: Find Real Offsets, ensure x and y directions
+        REEF_RIGHT(new Pose2d(0,0,new Rotation2d(0))),
+        REEF_ALGAE(new Pose2d(0,0,new Rotation2d(0))),
+        ALGAE_STATION(new Pose2d(0,0,new Rotation2d(0))),
+        PROCESSOR(new Pose2d(0,0,new Rotation2d(0))),
+        NO_TAG(new Pose2d(0,0,new Rotation2d(0)));
 
-        public final Translation2d offset;
+        public final Pose2d offset;
 
         /**
          * @param offset x and y offset in meters. x is horizontal to the front of the robot, x is horizontal offset and y is forward offset
          */
-        StationOffset(Translation2d offset){
+        StationOffset(Pose2d offset){
             this.offset = offset;
         }
     }
@@ -60,5 +61,6 @@ public class VisionAlignment {
                 false)
         );
     }
+
     */
 }

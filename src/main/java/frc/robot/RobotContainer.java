@@ -152,5 +152,6 @@ public class RobotContainer {
 	}
 
 	public void onTeleopEntry() {
+		pigeon.setYaw(180); // temp to correct yaw after straight leave auto
 	}
 }

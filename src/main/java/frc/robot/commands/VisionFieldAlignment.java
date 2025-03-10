@@ -19,7 +19,9 @@ import java.util.function.DoubleSupplier;
 public class VisionFieldAlignment extends Command {
 
 	private SwerveDrive swerve;
-	private Limelight limelight;
+	private Limelight highLimelight;
+	private Limelight lowLimelight;
+	private Limelight activeLimelight;
 
 	private DoubleSupplier xSupplier;
 	private DoubleSupplier ySupplier;
@@ -35,12 +37,14 @@ public class VisionFieldAlignment extends Command {
 	// Meant to be an "isDownBind" command
 	public VisionFieldAlignment(
 			SwerveDrive swerve,
-			Limelight limelight,
+			Limelight highLimelight,
+			Limelight lowLimelight,
 			DoubleSupplier xSupplier,
 			DoubleSupplier ySupplier,
 			DoubleSupplier rotationSupplier) {
 		this.swerve = swerve;
-		this.limelight = limelight;
+		this.highLimelight = highLimelight;
+		this.lowLimelight = lowLimelight;
 
 		this.xSupplier = xSupplier;
 		this.ySupplier = ySupplier;
@@ -52,7 +56,7 @@ public class VisionFieldAlignment extends Command {
     /**
      * collects desired offset position
      * @param TagID
-     * @return part of pose should be the desired translational offset
+     * @return pose of the desired translational offset and rotation
      */
 	public Pose2d getAlignmentOffset(int TagID) {
 
@@ -65,7 +69,7 @@ public class VisionFieldAlignment extends Command {
 			case 3:
 			case 16:
 				// Rotate to be parallel with the 
-				desiredRotation = Math.toRadians(-limelight.getTX()) * Constants.Vision.kRotationAlignmentSpeedScalar;			
+				desiredRotation = Math.toRadians(-activeLimelight.getTX()) * Constants.Vision.kRotationAlignmentSpeedScalar;			
 
 				SmartDashboard.putNumber("desiredRotationAA",
 						Math.toDegrees(MathUtil.clamp(Math.toRadians(desiredRotation), -Constants.Chassis.kMaxAngularVelocity,
@@ -114,43 +118,57 @@ public class VisionFieldAlignment extends Command {
 	@Override
 	public void execute() {
 		// if there is no valid tag, then default driver behaivor is given
-		if (!limelight.getTV()){
+		if (highLimelight.getTV() && 
+			(highLimelight.getFiducialID() == 1 // HP Station
+			|| highLimelight.getFiducialID() == 2
+			|| highLimelight.getFiducialID() == 12
+			|| highLimelight.getFiducialID() == 13
+			|| highLimelight.getFiducialID() == 5 // Barge
+			|| highLimelight.getFiducialID() == 14)){
+				activeLimelight = highLimelight;
+		} else if (lowLimelight.getTV() && 
+			(lowLimelight.getFiducialID() == 6 // Reef
+			|| lowLimelight.getFiducialID() == 7
+			|| lowLimelight.getFiducialID() == 8
+			|| lowLimelight.getFiducialID() == 9
+			|| lowLimelight.getFiducialID() == 10
+			|| lowLimelight.getFiducialID() == 11
+			|| lowLimelight.getFiducialID() == 17
+			|| lowLimelight.getFiducialID() == 18
+			|| lowLimelight.getFiducialID() == 19
+			|| lowLimelight.getFiducialID() == 20
+			|| lowLimelight.getFiducialID() == 21
+			|| lowLimelight.getFiducialID() == 22
+			|| lowLimelight.getFiducialID() == 3 // Barge
+			|| lowLimelight.getFiducialID() == 16)) {
+				activeLimelight = lowLimelight;
+		}else {
 			SmartDashboard.putBoolean("Autonomous Lock On", false);
-			// lights.setColor(ColorCode.AutoTargetLost);
 			swerve.drive(
-				new Translation2d(xSupplier.getAsDouble(), ySupplier.getAsDouble()).times(Constants.Chassis.kMaxSpeed),
+				new Translation2d(
+					xSupplier.getAsDouble(), 
+					ySupplier.getAsDouble()).times(Constants.Chassis.kMaxSpeed).times(Constants.Operator.kPrecisionMovementMultiplier),
 				rotationSupplier.getAsDouble() * Constants.Chassis.kMaxAngularVelocity * 0.5, // Reduce rotation for precision
 				true,
 				false);
 			return;
 		}
 
-		targetTagID = (int) limelight.getFiducialID();
+		targetTagID = (int) activeLimelight.getFiducialID();
 		SmartDashboard.putBoolean("Autonomous Lock On", true);
 		SmartDashboard.putNumber("Targeted April Tag", targetTagID);
-		// lights.setColor(ColorCode.AutoTargetFound);
 
 		// The desired translation
-		Pose3d TagToRobotPose = Limelight.toPose3D(limelight.getBotPose_TargetSpace());
+		Pose3d TagToRobotPose = Limelight.toPose3D(activeLimelight.getBotPose_TargetSpace());
 		RobotToTag = new Translation3d(-TagToRobotPose.getZ(), -TagToRobotPose.getX(), -TagToRobotPose.getY());
 
 		Pose2d offsetPose = getAlignmentOffset(targetTagID);
 
 		outputTranslation = RobotToTag.toTranslation2d().minus(offsetPose.getTranslation());
 
-		if (offsetPose.equals(new Pose2d())) return; // checks if LL has valid tag
-		if (!offsetPose.getTranslation().equals(new Translation2d())) {
-			swerve.setTargetHeading(offsetPose.getRotation().getDegrees());
-
-			// possible wait for target heading to be near reached if needed
-			swerve.drive(
-				new Translation2d(
-					MathUtil.clamp(outputTranslation.getX(), -Constants.Chassis.kMaxSpeed, Constants.Chassis.kMaxSpeed),
-					MathUtil.clamp(outputTranslation.getY(), -Constants.Chassis.kMaxSpeed, Constants.Chassis.kMaxSpeed)),
-				0.0,
-				false, // check for issues with rotation & field relative
-				false);
-		} else {
+		if (offsetPose.equals(Pose2d.kZero)) return; // checks if LL has valid tag
+		if (!offsetPose.getTranslation().equals(Translation2d.kZero)) defaultOffsetBehaivior(offsetPose);	
+		else {
 			swerve.drive(
 				new Translation2d(xSupplier.getAsDouble(), ySupplier.getAsDouble()).times(Constants.Chassis.kMaxSpeed),
 				MathUtil.clamp(offsetPose.getRotation().getRadians(), -Constants.Chassis.kMaxAngularVelocity,
@@ -170,17 +188,30 @@ public class VisionFieldAlignment extends Command {
 				false);
 	}
 
-	public void defaultOffsetBehaivior(){
-		
+	public void defaultOffsetBehaivior(Pose2d offsetPose){
+		swerve.setTargetHeading(offsetPose.getRotation().getDegrees());
+
+			// possible wait for target heading to be near reached if needed
+			swerve.drive(
+				new Translation2d(
+					MathUtil.clamp(outputTranslation.getX(), -Constants.Chassis.kMaxSpeed, Constants.Chassis.kMaxSpeed),
+					MathUtil.clamp(outputTranslation.getY(), -Constants.Chassis.kMaxSpeed, Constants.Chassis.kMaxSpeed)),
+				0.0,
+				false, // check for issues with rotation & field relative
+				false);
 	}
 
-	public void reefOffset(){
+	public void reefOffsetBehaivior(){
+
+	}
+
+	public void bargeOffsetBehaivor(){
 
 	}
 
 	@Override
 	public boolean isFinished() {
-		if (DriverStation.isAutonomous() && limelight.getTX() < 0.5d) return true;
+		if (DriverStation.isAutonomous() && activeLimelight.getTX() < 0.5d) return true;
 
 		return MathUtil.isNear(0, outputTranslation.getX(), Constants.Vision.kAlignmentTranslationTolerance) &&
 			MathUtil.isNear(0, outputTranslation.getY(), Constants.Vision.kAlignmentTranslationTolerance) &&
@@ -189,7 +220,6 @@ public class VisionFieldAlignment extends Command {
 
 	@Override
 	public void end(boolean wasInterrupted) {
-		//lights.setDefault();
 		SmartDashboard.putBoolean("Autonomous Lock On", false);
 		swerve.drive(new Translation2d(0, 0), 0, true, false);
 		swerve.setTargetHeading(swerve.getYaw().getDegrees());

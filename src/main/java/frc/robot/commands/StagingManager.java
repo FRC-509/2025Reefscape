@@ -152,8 +152,7 @@ public class StagingManager {
             () -> zero(elevator, arm, intake).schedule(),
             () -> all(StagingState.PROCESSOR, elevator, arm).schedule(),
             () -> {
-                return intake.getIntakingState().equals(IntakingState.ALGAE_PASSIVE)
-                    || intake.getIntakingState().equals(IntakingState.ALGAE_OUTAKE);
+                return intake.getIntakingState().equals(IntakingState.ALGAE_PASSIVE);
             });
         
         this.extensionSupplier = () -> elevator.getExtension();
@@ -238,6 +237,8 @@ public class StagingManager {
             quedStage.run();
             quedStage = null;
         } else if (quedStage != null && extensionDistance.getAsDouble() < 0.07 && !buttonIsPressed) relaxElevator.run();
+        else if (quedStage == null && extensionDistance.getAsDouble() > 0.8 && !buttonIsPressed) safeZero.run();
+
     }
 
     void onChange(StagingTrigger trigger) {
@@ -274,11 +275,12 @@ public class StagingManager {
 
         // Ground Pickup
         ALGAE_GROUND(0.3322,0.474609),
-        CORAL_GROUND(0.3828,0.448402),
+        CORAL_GROUND(0.38,0.448402),
         LOLIPOP(1.43,0.474609),
 
         // Field Elements
         CORAL_STATION(1.938,0.304195),
+        BARGE(4.777822,0.1240143),
         PROCESSOR(1.022,0.474609);
 
 

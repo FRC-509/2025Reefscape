@@ -27,7 +27,7 @@ public final class Constants {
 	public static class Operator {
 		public static final double kStickDeadband = 0.1;
         public static final double kPrecisionMovementMultiplier = 0.3;
-		public static final double kPrecisionRotationMultiplier = 0.3;
+		public static final double kPrecisionRotationMultiplier = 0.2;
 		public static final double kTriggerDeadband = 0.15;
 	}
 
@@ -137,22 +137,21 @@ public final class Constants {
         public static final double kAlgaeTorqueCurrent = 20;
 		public static final double kCoralTorqueCurrent = 18;
 
-        public static final double kAlgaePassiveVoltage = -0.58;
+        public static final double kAlgaePassiveVoltage = -0.75;
         public static final double kCoralPassiveVoltage = 0.75;
 
-        public static final double kAlgaeOutakeVoltage = 14;
+        public static final double kAlgaeOutakeVoltage = 15.5;
         public static final double kCoralOutakeVoltage = -8.5;
 
 		public static final double kCoralOutakeDelay = 0.75; // seconds
         public static final double kAlgaeOutakeDelay = 0.5;
 		
         public static final double kIntakeClockPeriod = 0.2; // seconds
-        public static final double kTorqueStablePeriod = 0.1; // seconds
 	}
 
 	public static class Climber {
 		public static final double kRotationGearRatio = 4.0 / 3.0;		
-		public static final double kValidRotationTolerance = 0.0075;
+		public static final double kValidRotationTolerance = 0.005;
 		public static final double kMaxRotationalSpeed = 0;
 		public static final double kClimbPositionDegrees = 0;
 		public static final double kMinimumPositionDegrees = 0;
