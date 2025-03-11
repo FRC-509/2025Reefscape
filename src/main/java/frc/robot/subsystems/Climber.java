@@ -7,24 +7,26 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.commands.StagingManager;
 
 public class Climber extends SubsystemBase {
     
-    private final TalonFX climbMotor = new TalonFX(Constants.IDs.kClimbMotor);
+    private final TalonFX climbMotor = new TalonFX(Constants.IDs.kClimbMotor, Constants.kRio);
     private final PositionVoltage rotationClosedLoop = new PositionVoltage(climbMotor.getPosition().getValueAsDouble()).withEnableFOC(false);
     private final VoltageOut openLoop = new VoltageOut(0).withEnableFOC(false);
 
 	private Solenoid lockSolenoid = new Solenoid(PneumaticsModuleType.REVPH, Constants.IDs.kClimbSolenoid);
-    private boolean lockClimb;
     private double initialRotation;
 
+    private DigitalInput maximumLimitSwitch = new DigitalInput(9);
+    private DigitalInput minimumLimitSwitch = new DigitalInput(8);
+
     public Climber() {
-        lockClimb = false;
         TalonFXConfiguration climbConfig = new TalonFXConfiguration();
 
         // Current limits
@@ -41,21 +43,9 @@ public class Climber extends SubsystemBase {
 
         // Feedback
         climbConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-        climbConfig.Feedback.SensorToMechanismRatio = Constants.Climber.kSensorToMechanismRatio;
 
 		climbMotor.getConfigurator().apply(climbConfig);
     }
-
-    /**
-     * Sets the position target of the climber to it's most vertical state  
-     */
-    public void setClimbPivot(){
-        climbMotor.setControl(rotationClosedLoop.withPosition(Constants.Climber.kClimbPositionDegrees));
-    }
-
-    public double getPivotDegrees() {
-		return climbMotor.getPosition().getValueAsDouble() * 360.0;
-	}
 
     public double getRotation(){
         return initialRotation - climbMotor.getPosition().getValueAsDouble();
@@ -66,30 +56,30 @@ public class Climber extends SubsystemBase {
         climbMotor.setControl(rotationClosedLoop.withPosition(position));
     }
 
-    public boolean isExtensionSafe(){
-        return getRotation() > StagingManager.kExtensionSafeRotation;
-    }
-
     public void setCoast(){
-
+        climbMotor.setControl(openLoop.withOutput(0.0));
     }
-
+    
     public void setInitializationRotation(){
         this.initialRotation = climbMotor.getPosition().getValueAsDouble();
     }
 
-    // public boolean isZeroed() {
-    //     return limitSwitch.get();
-    // }
-
-    public void toggleLockClimb(){
-        lockClimb = !lockClimb;
-        lockSolenoid.set(lockClimb);
+    public void lockClimb(boolean unlock){
+        lockSolenoid.set(unlock);
     }
 
-    public void overrideLock(boolean lock){
-        lockSolenoid.set(lock);
-        lockClimb = lock;
+    @Override
+    public void periodic() {
+        dashboard();
+        if (minimumLimitSwitch.get()) setInitializationRotation();
+    }
+
+    private void dashboard(){
+        SmartDashboard.putNumber("Climber Real", climbMotor.getPosition().getValueAsDouble());
+        SmartDashboard.putNumber("Climber Initial Rotation", initialRotation);
+        SmartDashboard.putNumber("ClimberRotationDelta", initialRotation - climbMotor.getPosition().getValueAsDouble());
+        SmartDashboard.putBoolean("MaximumLimitSwitch", maximumLimitSwitch.get());
+        SmartDashboard.putBoolean("MinimumLimitSwitch", minimumLimitSwitch.get());
     }
 
 }

@@ -27,23 +27,23 @@ public class DefaultClimbCommand extends Command {
         addRequirements(climber);
     }
 
-    @Override
-    public void execute() {
-        if (autoPivotSupplier.getAsBoolean()) {
-            autoPivoting = true;
-            alreadySetPivot = false;
-        }
+//     @Override
+//     public void execute() {
+//         if (autoPivotSupplier.getAsBoolean()) {
+//             autoPivoting = true;
+//             alreadySetPivot = false;
+//         }
         
-        if (Math.abs(pivotSupplier.getAsDouble()) > Constants.Operator.kStickDeadband){
-            // climber.pivot(pivotSupplier.getAsDouble());
-            autoPivoting = false;
-        } else {
-            if (autoPivoting && !alreadySetPivot
-                && !MathUtil.isNear(Constants.Climber.kClimbPositionDegrees, climber.getPivotDegrees(), Constants.Climber.kValidRotationTolerance)) {
-                alreadySetPivot = true;
-                climber.setClimbPivot();
-            }
-        }
-    }
+//         if (Math.abs(pivotSupplier.getAsDouble()) > Constants.Operator.kStickDeadband){
+//             // climber.pivot(pivotSupplier.getAsDouble());
+//             autoPivoting = false;
+//         } else {
+//             if (autoPivoting && !alreadySetPivot
+//                 && !MathUtil.isNear(Constants.Climber.kClimbPositionDegrees, climber.getPivotDegrees(), Constants.Climber.kValidRotationTolerance)) {
+//                 alreadySetPivot = true;
+//                 // climber.setClimbPivot();
+//             }
+//         }
+//     }
 
 }

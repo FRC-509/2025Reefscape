@@ -153,9 +153,11 @@ public final class Constants {
 		public static final double kRotationGearRatio = 4.0 / 3.0;		
 		public static final double kValidRotationTolerance = 0.005;
 		public static final double kMaxRotationalSpeed = 0;
-		public static final double kClimbPositionDegrees = 0;
 		public static final double kMinimumPositionDegrees = 0;
         public static final double kSensorToMechanismRatio = 0;
+
+		public static final double kClimbReadyPosition = 0;
+		public static final double kClimbFinalPosition = 0;
 	}
 
 	public static class IDs {
@@ -188,7 +190,7 @@ public final class Constants {
 		public static final int kIntakeMotor = 16;
 
 		public static final int kClimbMotor = 17;
-		public static final int kClimbSolenoid = 0; // not a can
+		public static final int kClimbSolenoid = 8;
 	}
 
 	public static class Vision {
@@ -242,8 +244,8 @@ public final class Constants {
 		}
 
         public static class Climber {
-			public static final double kRotateP = 0.0;
-			public static final double kRotateI = 0.0;
+			public static final double kRotateP = 0.4;
+			public static final double kRotateI = 1.0;
 			public static final double kRotateD = 0.0;
 		}
 	}
@@ -261,8 +263,8 @@ public final class Constants {
 		public static final double kIntakeSupply = 35.0;
 		public static final double kIntakeStator = 120.0;
 
-        public static final double kClimbSupply = 0;
-        public static final double kClimbStator = 0;
+        public static final double kClimbSupply = 40;
+        public static final double kClimbStator = 120;
 	}
 
 	public static class Field {

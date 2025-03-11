@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.math.MathUtil;
@@ -11,7 +12,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.autonomous.Leave;
 import frc.robot.commands.*;
+import frc.robot.commands.StagingManager.StagingState;
+import frc.robot.commands.staging.RotateTo;
 import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Intake.IntakingState;
@@ -37,7 +41,7 @@ public class RobotContainer {
 	private final Elevator elevator;
 	private final Arm arm;
 	private final Intake intake;
-	// private final Climber climber;
+	private final Climber climber;
 	
 	private SendableChooser<Command> chooser = new SendableChooser<Command>();
 
@@ -46,7 +50,7 @@ public class RobotContainer {
 		this.elevator = new Elevator();
 		this.arm = new Arm();
 		this.intake = new Intake();
-		// this.climber = new Climber();
+		this.climber = new Climber();
 
 		configureButtonBindings();
 		addAutonomousRoutines();
@@ -127,6 +131,30 @@ public class RobotContainer {
 		// 	() -> operator.getRightY(), 
 		// 	() -> operator.getRightTriggerAxis() >= Constants.Operator.kTriggerDeadband, 
 		// 	climber));
+
+		operator.leftTrigger().onTrue(new SequentialCommandGroup(
+			Commands.runOnce(() -> climber.lockClimb(false), climber)
+			// Commands.runOnce(new RotateTo(StagingState.ALGAE_SAFE.rotation, () -> , arm), arm),
+			// Commands.runOnce(() -> climber.setRotation(Constants.Climber.kClimbPositionDegrees), climber),
+		));
+		operator.leftTrigger().onFalse(new SequentialCommandGroup(
+			Commands.runOnce(() -> climber.lockClimb(true), climber)
+		));
+
+		// // Set climber up
+		// operator.leftTrigger().onTrue(new SequentialCommandGroup(
+		// 	Commands.runOnce(() -> climber.lockClimb(false), climber),
+		// 	new RotateTo(StagingState.ALGAE_SAFE.rotation, () -> elevator.isInwardsRotationSafe(), arm),
+		// 	Commands.waitSeconds(0.3),
+		// 	Commands.runOnce(() -> climber.setRotation(Constants.Climber.kClimbReadyPosition), climber)
+		// ));
+
+		// // Set climber down
+		// operator.rightTrigger().onTrue(new SequentialCommandGroup(
+		// 	Commands.runOnce(() -> climber.lockClimb(false), climber),
+		// 	Commands.runOnce(() -> climber.setRotation(Constants.Climber.kClimbReadyPosition), climber),
+		// 	Commands.waitSeconds(0.3)
+		// ));
 	}
 
 	private void addAutonomousRoutines() {
@@ -145,6 +173,7 @@ public class RobotContainer {
 
 	public void onRobotEnable() {
 		pigeon.onEnable();
+		climber.lockClimb(false);
 	}
 
 	public void robotPeriodic(){

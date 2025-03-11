@@ -241,7 +241,7 @@ public class StagingManager {
 
     }
 
-    void onChange(StagingTrigger trigger) {
+    private void onChange(StagingTrigger trigger) {
         if (!trigger.last && trigger.booleanSupplier.getAsBoolean()){ // on true
             quedStage = !trigger.alternateCondition.getAsBoolean() ?  trigger.onTrue : trigger.algaeAlternate;
         } else if (trigger.last && !trigger.booleanSupplier.getAsBoolean()) { // on false
@@ -250,6 +250,9 @@ public class StagingManager {
         trigger.last = trigger.booleanSupplier.getAsBoolean(); 
     }
 
+    public void setQuedStage(StagingState state){
+        this.quedStage = quedStage;
+    }
 
     // static staging states
 
