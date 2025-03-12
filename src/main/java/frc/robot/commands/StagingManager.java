@@ -60,7 +60,9 @@ public class StagingManager {
     private final StagingTrigger coralStation_StagingTrigger;
     
     private final StagingTrigger coralGround_StagingTrigger;
-    private final StagingTrigger algaeGround_StagingTrigger; 
+    private final StagingTrigger algaeGround_StagingTrigger;
+
+    private final StagingTrigger shotput_StagingTrigger;
 
     private final DoubleSupplier extensionSupplier;
     private final DoubleSupplier extensionDistance;
@@ -91,6 +93,7 @@ public class StagingManager {
         BooleanSupplier coralStation_Supplier,
         BooleanSupplier coralGround_Supplier,
         BooleanSupplier algaeGround_Supplier,
+        BooleanSupplier shotput_Supplier,
         BooleanSupplier manualZeroSupplier,
         BooleanSupplier manualSafeZeroSupplier,
         BooleanSupplier softResetSupplier,
@@ -154,6 +157,11 @@ public class StagingManager {
             () -> {
                 return intake.getIntakingState().equals(IntakingState.ALGAE_PASSIVE);
             });
+
+        this.shotput_StagingTrigger = new StagingTrigger(
+                shotput_Supplier,
+                () -> shotput(elevator, arm, intake).schedule(), 
+                () -> allSafe(StagingState.ZEROED, elevator, arm));
         
         this.extensionSupplier = () -> elevator.getExtension();
         this.extensionDistance = () -> elevator.getDistanceOffGround();
@@ -162,10 +170,7 @@ public class StagingManager {
         this.safeZero = new Runnable() {
             @Override
             public void run() {
-                (new SequentialCommandGroup(
-                    Commands.runOnce(() -> arm.setRotation(StagingManager.StagingState.SAFE.rotation), arm),
-                    zero(elevator, arm, intake)
-                )).schedule();
+                allSafe(StagingState.ZEROED, elevator, arm).schedule();
             }
         };
         this.relaxElevator = new Runnable() {
@@ -223,6 +228,7 @@ public class StagingManager {
         onChange(algaeGround_StagingTrigger);
 
         onChange(L4_StagingTrigger);
+        onChange(shotput_StagingTrigger);
 
         if (L4_StagingTrigger.booleanSupplier.getAsBoolean()
             || L3_StagingTrigger.booleanSupplier.getAsBoolean()
@@ -248,10 +254,6 @@ public class StagingManager {
             trigger.onFalse.run();
         }
         trigger.last = trigger.booleanSupplier.getAsBoolean(); 
-    }
-
-    public void setQuedStage(StagingState state){
-        this.quedStage = quedStage;
     }
 
     // static staging states
@@ -382,6 +384,22 @@ public class StagingManager {
             Commands.runOnce(() -> arm.setRawVoltageOut(0.725), arm),
             Commands.waitUntil(() -> arm.isZeroed()),
             Commands.runOnce(() -> arm.setCoast(), arm)
+        );
+    }
+
+    public static SequentialCommandGroup shotput(Elevator elevator, Arm arm, Intake intake){
+        return new SequentialCommandGroup(
+            L4_Rising(elevator, arm),
+            Commands.parallel(
+                Commands.sequence(
+                    Commands.waitSeconds(0.3), // Tune
+                    Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_OUTAKE))
+                ),
+                Commands.runOnce(() -> arm.setRotation(StagingState.ALGAE_SAFE.rotation), arm)
+            ),
+            Commands.waitSeconds(0.4),
+            Commands.runOnce(() -> intake.setState(IntakingState.STOP)),
+            allSafe(StagingState.ZEROED, elevator, arm)
         );
     }
 }

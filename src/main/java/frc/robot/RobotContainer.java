@@ -3,7 +3,6 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.math.MathUtil;
@@ -12,8 +11,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.autonomous.Leave;
 import frc.robot.commands.*;
-import frc.robot.commands.StagingManager.StagingState;
-import frc.robot.commands.staging.RotateTo;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
@@ -70,14 +67,14 @@ public class RobotContainer {
 		// Defaults to field-oriented drive unless the left button on the left stick is
 		// held down.
 
-		swerve.setDefaultCommand(new DefaultDriveCommand(
-				swerve,
-				() -> nonInvSquare(-driverLeft.getY()),
-				() -> nonInvSquare(-driverLeft.getX()),
-				() -> nonInvSquare(-driverRight.getX()),
-				() -> driverLeft.getTrigger(),
-				() -> driverRight.getTrigger(),
-				() -> true));
+		// swerve.setDefaultCommand(new DefaultDriveCommand(
+		// 		swerve,
+		// 		() -> nonInvSquare(-driverLeft.getY()),
+		// 		() -> nonInvSquare(-driverLeft.getX()),
+		// 		() -> nonInvSquare(-driverRight.getX()),
+		// 		() -> driverLeft.getTrigger(),
+		// 		() -> driverRight.getTrigger(),
+		// 		() -> true));
 
 		// Binds heading locks to the right stick's dpad. Pressing up will face forward,
 		// pressing down will face backward.
@@ -115,6 +112,7 @@ public class RobotContainer {
 			() -> driverLeft.getJoystickButton(StickButton.Right).getAsBoolean(),
 			() -> driverRight.getJoystickButton(StickButton.Right).getAsBoolean(),
 			() -> driverRight.getJoystickButton(StickButton.Left).getAsBoolean(),
+			() -> driverLeft.getJoystickButton(StickButton.Bottom).getAsBoolean(),
 			() -> (driverLeft.getPOV(0) == 0),
 			() -> (driverLeft.getPOV(0) == 270),
 			() -> (driverLeft.getPOV(0) == 90),
@@ -132,14 +130,14 @@ public class RobotContainer {
 		// 	() -> operator.getRightTriggerAxis() >= Constants.Operator.kTriggerDeadband, 
 		// 	climber));
 
-		operator.leftTrigger().onTrue(new SequentialCommandGroup(
-			Commands.runOnce(() -> climber.lockClimb(false), climber)
-			// Commands.runOnce(new RotateTo(StagingState.ALGAE_SAFE.rotation, () -> , arm), arm),
-			// Commands.runOnce(() -> climber.setRotation(Constants.Climber.kClimbPositionDegrees), climber),
-		));
-		operator.leftTrigger().onFalse(new SequentialCommandGroup(
-			Commands.runOnce(() -> climber.lockClimb(true), climber)
-		));
+		// operator.leftTrigger().onTrue(new SequentialCommandGroup(
+		// 	Commands.runOnce(() -> climber.lockClimb(false), climber)
+		// 	// Commands.runOnce(new RotateTo(StagingState.ALGAE_SAFE.rotation, () -> , arm), arm),
+		// 	// Commands.runOnce(() -> climber.setRotation(Constants.Climber.kClimbPositionDegrees), climber),
+		// ));
+		// operator.leftTrigger().onFalse(new SequentialCommandGroup(
+		// 	Commands.runOnce(() -> climber.lockClimb(true), climber)
+		// ));
 
 		// // Set climber up
 		// operator.leftTrigger().onTrue(new SequentialCommandGroup(

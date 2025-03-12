@@ -65,10 +65,10 @@ public final class Constants {
 
 		public static final ModuleConfig kModuleConfig = new ModuleConfig(
 			MK4I.kWheelRadius,
-			kMaxSpeed, 
+			kMaxSpeed,
 			MK4I.wheelCOF,
 			kKrakenDcMotorProfile,
-			Constants.CurrentLimits.kSwerveModuleSupply, 
+			Constants.CurrentLimits.kSwerveModuleSupply,
 			4);
 
 		public static final PathConstraints constraints = new PathConstraints(
