@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.autonomous.Leave;
+import frc.robot.autonomous.Test;
 import frc.robot.commands.*;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Climber;
@@ -67,14 +68,14 @@ public class RobotContainer {
 		// Defaults to field-oriented drive unless the left button on the left stick is
 		// held down.
 
-		// swerve.setDefaultCommand(new DefaultDriveCommand(
-		// 		swerve,
-		// 		() -> nonInvSquare(-driverLeft.getY()),
-		// 		() -> nonInvSquare(-driverLeft.getX()),
-		// 		() -> nonInvSquare(-driverRight.getX()),
-		// 		() -> driverLeft.getTrigger(),
-		// 		() -> driverRight.getTrigger(),
-		// 		() -> true));
+		swerve.setDefaultCommand(new DefaultDriveCommand(
+				swerve,
+				() -> nonInvSquare(-driverLeft.getY()),
+				() -> nonInvSquare(-driverLeft.getX()),
+				() -> nonInvSquare(-driverRight.getX()),
+				() -> driverLeft.getTrigger(),
+				() -> driverRight.getTrigger(),
+				() -> true));
 
 		// Binds heading locks to the right stick's dpad. Pressing up will face forward,
 		// pressing down will face backward.
@@ -158,6 +159,7 @@ public class RobotContainer {
 	private void addAutonomousRoutines() {
 		chooser.addOption("\"Go AFK\" (Null)", new InstantCommand());
 		chooser.addOption("Leave", new Leave(0.3, 1.0, swerve));
+		chooser.addOption("Test", new Test("Test", swerve));
 		SmartDashboard.putData("Auto Mode", chooser);
 
 		if (RobotBase.isSimulation()) {

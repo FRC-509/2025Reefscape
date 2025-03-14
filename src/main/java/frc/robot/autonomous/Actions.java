@@ -113,7 +113,7 @@ public class Actions {
     
     
 
-    public class PathValidation {
+    public static class PathValidation {
         public Command pathCommand;
         public Command errorCancel;
         public PathValidation(String pathName){

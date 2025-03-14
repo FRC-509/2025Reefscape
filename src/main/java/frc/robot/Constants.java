@@ -32,9 +32,9 @@ public final class Constants {
 	}
 
 	public static class Chassis {
-		public static final double kRobotWeight = 100.0d; // kg, incl bumpers and battery TODO:
+		public static final double kRobotWeight = 61.7d; // kg, incl bumpers and battery TODO:
 		public static final double kMOI = 4.4659;
-		public static final double kOffsetToSwerveModule = Units.inchesToMeters(10.375);
+		public static final double kOffsetToSwerveModule = 0.395;
 		public static final double kKrakenFreeSpeedRPM = 6000.0d;
 		public static final double kKrakenFreeSpeedRPS = kKrakenFreeSpeedRPM / 60.0d;
 		public static final double kMaxSpeed = Conversions.falconToMPS(kKrakenFreeSpeedRPS, MK4I.kWheelCircumference,
@@ -196,8 +196,16 @@ public final class Constants {
 	public static class Vision {
 
 		public static final double kRotationAlignmentSpeedScalar = 5.45;
-		public static final double kAlignmentRotationTolerance = 0; // meters
-        public static final double kAlignmentTranslationTolerance = 0; // degrees
+		public static final double kAlignmentRotationTolerance = 0;
+        public static final double kAlignmentTranslationTolerance = 0;
+        public static final double kCameraHeightFromGround = Units.inchesToMeters(39);
+        public static final double kIntakeCameraAngleOffset = 0;
+        public static final double kMaxTargetDistanceVariation = 10;
+
+        public static class Pipeline {
+            public static int AprilTags = 0;
+            public static int NeuralNetwork = 1;
+		}
 		
 	}
 

@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Intake.IntakingState;
+import frc.robot.subsystems.drive.SwerveDrive;
 import frc.robot.commands.staging.ExtendTo;
 import frc.robot.commands.staging.RotateTo;
 import frc.robot.subsystems.Arm;
@@ -170,7 +171,7 @@ public class StagingManager {
         this.safeZero = new Runnable() {
             @Override
             public void run() {
-                allSafe(StagingState.ZEROED, elevator, arm).schedule();
+                zero(elevator, arm, intake).schedule();
             }
         };
         this.relaxElevator = new Runnable() {
@@ -253,7 +254,7 @@ public class StagingManager {
         } else if (trigger.last && !trigger.booleanSupplier.getAsBoolean()) { // on false
             trigger.onFalse.run();
         }
-        trigger.last = trigger.booleanSupplier.getAsBoolean(); 
+        trigger.last = trigger.booleanSupplier.getAsBoolean();
     }
 
     // static staging states
@@ -280,7 +281,7 @@ public class StagingManager {
 
         // Ground Pickup
         ALGAE_GROUND(0.3322,0.474609),
-        CORAL_GROUND(0.38,0.448402),
+        CORAL_GROUND(0.3322,0.448402),
         LOLIPOP(1.43,0.474609),
 
         // Field Elements
@@ -311,7 +312,7 @@ public class StagingManager {
     public static SequentialCommandGroup L4_Falling(Elevator elevator, Arm arm, Intake intake, BooleanSupplier coralSupplier){
         return coralSupplier.getAsBoolean()
             ? new SequentialCommandGroup(
-                Commands.runOnce(() -> elevator.setExtension(4.0307), elevator),
+                Commands.runOnce(() -> elevator.setExtension(3.8), elevator),
                 Commands.runOnce(() -> arm.setRawVoltageOut(-0.2), arm),
                 Commands.runOnce(() -> intake.L4Outake()),
                 new WaitUntilCommand(() -> (arm.getRotation() > 0.21418)),
