@@ -123,7 +123,7 @@ public final class Constants {
 	}
 
 	public static class Arm {
-		public static final double kValidRotationTolerance = 0.05;
+		public static final double kValidRotationTolerance = 0.04;
 
 		public static final double kRotationGearRatio = 4.0 / 3.0;
         public static final double kSensorToMechanismRatio = 4 / 3;

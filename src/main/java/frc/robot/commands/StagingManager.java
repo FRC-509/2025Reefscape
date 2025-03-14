@@ -280,8 +280,8 @@ public class StagingManager {
         ALGAE_LOW(2.5645,0.48338),
 
         // Ground Pickup
-        ALGAE_GROUND(0.3322,0.474609),
-        CORAL_GROUND(0.3322,0.448402),
+        ALGAE_GROUND(0.3222,0.474609),
+        CORAL_GROUND(0.5,0.488402),
         LOLIPOP(1.43,0.474609),
 
         // Field Elements
@@ -312,10 +312,11 @@ public class StagingManager {
     public static SequentialCommandGroup L4_Falling(Elevator elevator, Arm arm, Intake intake, BooleanSupplier coralSupplier){
         return coralSupplier.getAsBoolean()
             ? new SequentialCommandGroup(
-                Commands.runOnce(() -> elevator.setExtension(3.8), elevator),
+                Commands.runOnce(() -> elevator.setExtension(3.85), elevator),
                 Commands.runOnce(() -> arm.setRawVoltageOut(-0.2), arm),
                 Commands.runOnce(() -> intake.L4Outake()),
-                new WaitUntilCommand(() -> (arm.getRotation() > 0.21418)),
+                new WaitUntilCommand(() -> (arm.getRotation() > 0.22418)),
+                Commands.runOnce(() -> intake.stop()),
                 zero(elevator, arm, intake))
             : new SequentialCommandGroup(
                 Commands.parallel(
