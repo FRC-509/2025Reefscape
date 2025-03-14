@@ -27,7 +27,7 @@ public class GeometryUtils {
 
 	public static Pose2d flipFieldPose(Pose2d pose) {
     return new Pose2d(
-        new Translation2d(Constants.Field.kFieldLength - pose.getTranslation().getX(), pose.getTranslation().getY()),
+        new Translation2d(Constants.Field.kFullFieldLength - pose.getTranslation().getX(), pose.getTranslation().getY()),
 		new Rotation2d(Math.PI).minus(pose.getRotation()));
  	}
 }

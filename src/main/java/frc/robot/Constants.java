@@ -209,6 +209,10 @@ public final class Constants {
 		
 	}
 
+	public static class PathGeneration {
+		public static final double kSafePathTolerance = 0.2; // m
+	}
+
 	public static class PIDConstants {
 		public static class Drive {
 			// TODO: Change all values
@@ -276,7 +280,15 @@ public final class Constants {
 	}
 
 	public static class Field {
-		public static final double kFieldLength = 16.54d; // Double check
+		public static final double kFullFieldLength = 16.54d; // Double check
+		
+		public static final double kReefRadius = Units.inchesToMeters(77.5d)/2;
+		public static final double kReefOffsetX = Units.inchesToMeters(0.0);
+		public static final double kReefOffsety = Units.inchesToMeters(144.0d) + kReefRadius;
+
+		public static final double kBargeLength = Units.inchesToMeters(46.0d);
+		public static final double kBargeWidth = Units.inchesToMeters(146.5d);
+		public static final double kBargeDistance = kReefOffsety + kReefRadius + Units.inchesToMeters(88);
 	}
 
 	public static double tunableNumber(String name, double defaultValue){

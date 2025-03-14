@@ -425,6 +425,10 @@ public class SwerveDrive extends SubsystemBase {
 		return pigeon.getRotation2d();
 	}
 
+	public Field2d getField(){
+		return field2d;
+	}
+
 	public void resetSimState() {
 		simHeading = 0.0d;
 		targetHeading = 0.0d;

@@ -27,8 +27,8 @@ import com.redstorm509.stormkit.controllers.ThrustmasterJoystick.StickButton;
 public class RobotContainer {
 
 	private final PigeonWrapper pigeon = new PigeonWrapper(0);
-	// private final Limelight baseLimelight = new Limelight(null);
-	// private final Limelight highLimelight = new Limelight(null);
+	private final Limelight leftLimelight = new Limelight("limelight-left");
+	private final Limelight rightLimelight = new Limelight("limelight-right");
 
 	private final ThrustmasterJoystick driverLeft = new ThrustmasterJoystick(0);
 	private final ThrustmasterJoystick driverRight = new ThrustmasterJoystick(1);
@@ -44,7 +44,7 @@ public class RobotContainer {
 	private SendableChooser<Command> chooser = new SendableChooser<Command>();
 
 	public RobotContainer() {
-		this.swerve = new SwerveDrive(pigeon, new Limelight("womp womp"));
+		this.swerve = new SwerveDrive(pigeon, rightLimelight);
 		this.elevator = new Elevator();
 		this.arm = new Arm();
 		this.intake = new Intake();
