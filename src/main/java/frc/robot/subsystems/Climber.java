@@ -11,7 +11,10 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 
 public class Climber extends SubsystemBase {
@@ -20,11 +23,10 @@ public class Climber extends SubsystemBase {
     private final PositionVoltage rotationClosedLoop = new PositionVoltage(climbMotor.getPosition().getValueAsDouble()).withEnableFOC(false);
     private final VoltageOut openLoop = new VoltageOut(0).withEnableFOC(false);
 
-	private Solenoid lockSolenoid = new Solenoid(PneumaticsModuleType.REVPH, Constants.IDs.kClimbSolenoid);
     private double initialRotation;
 
-    private DigitalInput maximumLimitSwitch = new DigitalInput(9);
-    private DigitalInput minimumLimitSwitch = new DigitalInput(8);
+    // private DigitalInput maximumLimitSwitch = new DigitalInput(9);
+    private DigitalInput limitSwitch = new DigitalInput(8);
 
     public Climber() {
         TalonFXConfiguration climbConfig = new TalonFXConfiguration();
@@ -64,22 +66,25 @@ public class Climber extends SubsystemBase {
         this.initialRotation = climbMotor.getPosition().getValueAsDouble();
     }
 
-    public void lockClimb(boolean unlock){
-        lockSolenoid.set(unlock);
+    public SequentialCommandGroup StartupSequence(){
+        return new SequentialCommandGroup(
+            Commands.runOnce(() -> climbMotor.setControl(openLoop.withOutput(0.6)), this),
+            new WaitUntilCommand(() -> limitSwitch.get()),
+            Commands.runOnce(() -> climbMotor.setControl(openLoop.withOutput(0.0)), this)
+        );
     }
 
     @Override
     public void periodic() {
         dashboard();
-        if (minimumLimitSwitch.get()) setInitializationRotation();
+        if (limitSwitch.get()) setInitializationRotation();
     }
 
     private void dashboard(){
         SmartDashboard.putNumber("Climber Real", climbMotor.getPosition().getValueAsDouble());
         SmartDashboard.putNumber("Climber Initial Rotation", initialRotation);
         SmartDashboard.putNumber("ClimberRotationDelta", initialRotation - climbMotor.getPosition().getValueAsDouble());
-        SmartDashboard.putBoolean("MaximumLimitSwitch", maximumLimitSwitch.get());
-        SmartDashboard.putBoolean("MinimumLimitSwitch", minimumLimitSwitch.get());
+        SmartDashboard.putBoolean("ClimberLimitSwitch", limitSwitch.get());
     }
 
 }

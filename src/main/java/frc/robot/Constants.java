@@ -156,8 +156,8 @@ public final class Constants {
 		public static final double kMinimumPositionDegrees = 0;
         public static final double kSensorToMechanismRatio = 0;
 
-		public static final double kClimbReadyPosition = 0;
-		public static final double kClimbFinalPosition = 0;
+		public static final double kClimbReadyPosition = 80;
+		public static final double kClimbFinalPosition = 30; //14
 	}
 
 	public static class IDs {
@@ -256,8 +256,8 @@ public final class Constants {
 		}
 
         public static class Climber {
-			public static final double kRotateP = 0.4;
-			public static final double kRotateI = 1.0;
+			public static final double kRotateP = 1.0;
+			public static final double kRotateI = 0.0;
 			public static final double kRotateD = 0.0;
 		}
 	}

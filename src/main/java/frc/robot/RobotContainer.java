@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.math.MathUtil;
@@ -148,12 +149,14 @@ public class RobotContainer {
 		// 	Commands.runOnce(() -> climber.setRotation(Constants.Climber.kClimbReadyPosition), climber)
 		// ));
 
-		// // Set climber down
-		// operator.rightTrigger().onTrue(new SequentialCommandGroup(
-		// 	Commands.runOnce(() -> climber.lockClimb(false), climber),
-		// 	Commands.runOnce(() -> climber.setRotation(Constants.Climber.kClimbReadyPosition), climber),
-		// 	Commands.waitSeconds(0.3)
-		// ));
+		// Set climber down
+		operator.leftTrigger().onTrue(new SequentialCommandGroup(
+			climber.StartupSequence(),
+			Commands.runOnce(() -> climber.setRotation(Constants.Climber.kClimbReadyPosition), climber)
+		));
+		operator.rightTrigger().onTrue(
+			Commands.runOnce(() -> climber.setRotation(Constants.Climber.kClimbFinalPosition), climber)
+		);
 	}
 
 	private void addAutonomousRoutines() {
@@ -173,7 +176,6 @@ public class RobotContainer {
 
 	public void onRobotEnable() {
 		pigeon.onEnable();
-		climber.lockClimb(false);
 	}
 
 	public void robotPeriodic(){
