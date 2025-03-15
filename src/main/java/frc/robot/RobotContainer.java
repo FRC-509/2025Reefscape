@@ -28,8 +28,6 @@ import com.redstorm509.stormkit.controllers.ThrustmasterJoystick.StickButton;
 public class RobotContainer {
 
 	private final PigeonWrapper pigeon = new PigeonWrapper(0);
-	private final Limelight leftLimelight = new Limelight("limelight-left");
-	private final Limelight rightLimelight = new Limelight("limelight-right");
 
 	private final ThrustmasterJoystick driverLeft = new ThrustmasterJoystick(0);
 	private final ThrustmasterJoystick driverRight = new ThrustmasterJoystick(1);
@@ -45,7 +43,7 @@ public class RobotContainer {
 	private SendableChooser<Command> chooser = new SendableChooser<Command>();
 
 	public RobotContainer() {
-		this.swerve = new SwerveDrive(pigeon, rightLimelight);
+		this.swerve = new SwerveDrive(pigeon);
 		this.elevator = new Elevator();
 		this.arm = new Arm();
 		this.intake = new Intake();
@@ -114,7 +112,7 @@ public class RobotContainer {
 			() -> driverLeft.getJoystickButton(StickButton.Right).getAsBoolean(),
 			() -> driverRight.getJoystickButton(StickButton.Right).getAsBoolean(),
 			() -> driverRight.getJoystickButton(StickButton.Left).getAsBoolean(),
-			() -> driverLeft.getJoystickButton(StickButton.Bottom).getAsBoolean(),
+			// () -> driverLeft.getJoystickButton(StickButton.Bottom).getAsBoolean(),
 			() -> (driverLeft.getPOV(0) == 0),
 			() -> (driverLeft.getPOV(0) == 270),
 			() -> (driverLeft.getPOV(0) == 90),
@@ -126,6 +124,8 @@ public class RobotContainer {
 
 		operator.rightBumper().onFalse(Intake.outakeCommand(false, intake));
 		operator.leftBumper().onFalse(Intake.outakeCommand(true, intake));
+
+		driverLeft.getJoystickButton(StickButton.Bottom).onTrue(new DriveToLocation(swerve));
 
 		// climber.setDefaultCommand(new DefaultClimbCommand(
 		// 	() -> operator.getRightY(), 

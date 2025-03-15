@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import java.security.PublicKey;
 import java.util.ArrayList;
 
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -114,7 +115,9 @@ public class BezierPathGeneration extends Command {
         return false;
     }
     
-    
+    public void addBezier(BezierPath bezier, ArrayList<BezierPath> spline, int index){
+        
+    }
     
     private SwerveDrive swerve;
     private Field2d field;

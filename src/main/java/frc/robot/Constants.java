@@ -194,6 +194,8 @@ public final class Constants {
 	}
 
 	public static class Vision {
+		public static final String leftLimelight = "limelight-left";
+		public static final String rightLimelight = "limelight-right";
 
 		public static final double kRotationAlignmentSpeedScalar = 5.45;
 		public static final double kAlignmentRotationTolerance = 0;

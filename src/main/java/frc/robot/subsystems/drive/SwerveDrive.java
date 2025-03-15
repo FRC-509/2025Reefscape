@@ -28,7 +28,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Optional;
 
 import frc.robot.Constants;
-import frc.robot.subsystems.vision.Limelight;
+import frc.robot.subsystems.vision.LimelightHelpers;
+import frc.robot.subsystems.vision.LimelightHelpers.PoseEstimate;
 import frc.robot.util.LoggablePID;
 import frc.robot.util.PigeonWrapper;
 import frc.robot.util.ThinNT;
@@ -80,7 +81,6 @@ public class SwerveDrive extends SubsystemBase {
 
 	private double simHeading = 0.0d;
 	private double prevRotOutput = 0.0d;
-	private Limelight shooterCamera;
 	private StructArrayPublisher<SwerveModuleState> moduleStatePublisher;
 	private StructPublisher<Pose2d> odometryPublisher;
 	private StructPublisher<Pose2d> poseEstimatePublisher;
@@ -101,12 +101,11 @@ public class SwerveDrive extends SubsystemBase {
 	);
 	*/
 
-	public SwerveDrive(PigeonWrapper pigeon, Limelight shooterCamera) {
+	public SwerveDrive(PigeonWrapper pigeon) {
 		this.manualRotationTimer = new Timer();
 		manualRotationTimer.start();
 
 		this.pigeon = pigeon;
-		this.shooterCamera = shooterCamera;
 		this.headingInterplator = new Interpolator(Constants.Chassis.kMaxAngularVelocity);
 		this.targetHeading = 0.0;
 
@@ -137,7 +136,9 @@ public class SwerveDrive extends SubsystemBase {
 
 		odometry = new SwerveDriveOdometry(kinematics, getYaw(), getModulePositions());
 		poseEstimator = new SwerveDrivePoseEstimator(kinematics, getYaw(), getModulePositions(), new Pose2d());
-		poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, Math.toRadians(7)));
+		poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999)); // 7 degrees
+		LimelightHelpers.SetIMUMode(Constants.Vision.leftLimelight, 1);
+		LimelightHelpers.SetIMUMode(Constants.Vision.rightLimelight, 1);
 		AutoBuilder.configure(
 				this::getEstimatedPose, //
 				this::resetOdometry, //
@@ -390,7 +391,8 @@ public class SwerveDrive extends SubsystemBase {
 	}
 
 	public Pose2d getEstimatedPose() {
-		return poseEstimator.getEstimatedPosition();
+		return poseEstimator.getEstimatedPosition().rotateBy(getYaw().minus(poseEstimator.getEstimatedPosition().getRotation()));
+		// return poseEstimator.getEstimatedPosition();
 	}
 
 	public void resetOdometry(Pose2d pose) {
@@ -451,16 +453,20 @@ public class SwerveDrive extends SubsystemBase {
 		odometry.update(getYaw(), getModulePositions());
 		poseEstimator.update(getYaw(), getModulePositions());
 
-		if (shooterCamera.getTV()) {
-			double[] botPoseData = shooterCamera.getBotPoseBlue();
-			int numberOfTags = (int) botPoseData[7];
-			if (numberOfTags >= 2) {
-				Pose2d visionPose = Limelight.toPose2D(botPoseData);
-				double timestamp = Timer.getFPGATimestamp() - (shooterCamera.getLatency_Pipeline() / 1000.0)
-						- (shooterCamera.getLatency_Capture() / 1000.0);
-				poseEstimator.addVisionMeasurement(visionPose, timestamp);
-			}
-		}
+		LimelightHelpers.SetRobotOrientation(Constants.Vision.rightLimelight, pigeon.getYaw(), 0, 0, 0, 0, 0);	
+		PoseEstimate mt2 = getAlliance().equals(Alliance.Blue)
+				? LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.Vision.rightLimelight)
+				: LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.Vision.rightLimelight);
+		if (mt2.tagCount > 0 && !(Math.abs(pigeon.getAngularVelocityZWorld()) > 360))
+				poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
+
+		LimelightHelpers.SetRobotOrientation(Constants.Vision.leftLimelight, pigeon.getYaw(), 0, 0, 0, 0, 0);	
+		mt2 = getAlliance().equals(Alliance.Blue)
+				? LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.Vision.leftLimelight)
+				: LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.Vision.leftLimelight);
+		if (mt2.tagCount > 0 && !(Math.abs(pigeon.getAngularVelocityZWorld()) > 360))
+				poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
+
 		field2d.setRobotPose(getEstimatedPose());
 
 		SmartDashboard.putNumber("yaw", getYaw().getDegrees());
