@@ -10,6 +10,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import frc.robot.autonomous.Leave;
 import frc.robot.autonomous.Test;
 import frc.robot.commands.*;
@@ -21,6 +22,7 @@ import frc.robot.subsystems.Intake.IntakingState;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.PigeonWrapper;
+import frc.robot.util.ThinNT;
 
 import com.redstorm509.stormkit.controllers.ThrustmasterJoystick;
 import com.redstorm509.stormkit.controllers.ThrustmasterJoystick.StickButton;
@@ -127,27 +129,6 @@ public class RobotContainer {
 
 		driverLeft.getJoystickButton(StickButton.Bottom).onTrue(new DriveToLocation(swerve));
 
-		// climber.setDefaultCommand(new DefaultClimbCommand(
-		// 	() -> operator.getRightY(), 
-		// 	() -> operator.getRightTriggerAxis() >= Constants.Operator.kTriggerDeadband, 
-		// 	climber));
-
-		// operator.leftTrigger().onTrue(new SequentialCommandGroup(
-		// 	Commands.runOnce(() -> climber.lockClimb(false), climber)
-		// 	// Commands.runOnce(new RotateTo(StagingState.ALGAE_SAFE.rotation, () -> , arm), arm),
-		// 	// Commands.runOnce(() -> climber.setRotation(Constants.Climber.kClimbPositionDegrees), climber),
-		// ));
-		// operator.leftTrigger().onFalse(new SequentialCommandGroup(
-		// 	Commands.runOnce(() -> climber.lockClimb(true), climber)
-		// ));
-
-		// // Set climber up
-		// operator.leftTrigger().onTrue(new SequentialCommandGroup(
-		// 	Commands.runOnce(() -> climber.lockClimb(false), climber),
-		// 	new RotateTo(StagingState.ALGAE_SAFE.rotation, () -> elevator.isInwardsRotationSafe(), arm),
-		// 	Commands.waitSeconds(0.3),
-		// 	Commands.runOnce(() -> climber.setRotation(Constants.Climber.kClimbReadyPosition), climber)
-		// ));
 
 		// Set climber down
 		operator.leftTrigger().onTrue(new SequentialCommandGroup(
@@ -162,7 +143,7 @@ public class RobotContainer {
 	private void addAutonomousRoutines() {
 		chooser.addOption("\"Go AFK\" (Null)", new InstantCommand());
 		chooser.addOption("Leave", new Leave(0.3, 1.0, swerve));
-		chooser.addOption("Test", new Test("Test", swerve));
+		// chooser.addOption("Test", new Test("Test", swerve));
 		SmartDashboard.putData("Auto Mode", chooser);
 
 		if (RobotBase.isSimulation()) {

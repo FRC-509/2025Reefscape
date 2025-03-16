@@ -89,7 +89,7 @@ public final class Constants {
 			IDs.kFrontRightEncoder,
 			IDs.kFrontRightSteer,
 			IDs.kFrontRightDrive,
-			118.337891);
+			118.587891);
 
 		public static final SwerveModuleConfiguration kFrontLeft = new SwerveModuleConfiguration(
 			1,
@@ -103,14 +103,14 @@ public final class Constants {
 			IDs.kBackLeftEncoder,
 			IDs.kBackLeftSteer,
 			IDs.kBackLeftDrive,
-			104.066406);
+			104.066406+1);
 
 		public static final SwerveModuleConfiguration kBackRight = new SwerveModuleConfiguration(
 			3,
 			IDs.kBackRightEncoder,
 			IDs.kBackRightSteer,
 			IDs.kBackRightDrive,
-			137.925782);
+			140.425782);
 	}
 
 	public static class Elevator {

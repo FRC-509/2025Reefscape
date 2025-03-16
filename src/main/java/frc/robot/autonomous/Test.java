@@ -11,6 +11,7 @@ public class Test extends SequentialCommandGroup {
             SwerveDrive swerve){
         PathValidation path = new PathValidation(pathName);
         addCommands(
+            Commands.runOnce(() -> System.out.println("Running Test!")),
             path.pathCommand,
             Commands.runOnce(() -> swerve.stopModules(), swerve)
         );

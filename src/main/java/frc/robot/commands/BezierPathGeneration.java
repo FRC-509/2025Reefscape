@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import java.security.PublicKey;
 import java.util.ArrayList;
 
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -9,7 +8,7 @@ import frc.robot.subsystems.drive.SwerveDrive;
 
 public class BezierPathGeneration extends Command {
     
-    public class FieldPosition {
+    public static class FieldPosition {
         public double x;
         public double y;
         public FieldPosition(double x, double y){
@@ -19,7 +18,7 @@ public class BezierPathGeneration extends Command {
         public double distanceTo(FieldPosition other){ return Math.sqrt((x+other.x)*(x+other.x) + (y+other.y)*(y+other.y)); }
     }
 
-    public class BezierPath {
+    public static class BezierPath {
         public FieldPosition initialPosition;
         public SwerveState initialState;
 
@@ -48,7 +47,7 @@ public class BezierPathGeneration extends Command {
         }
     }
 
-    public class SwerveState {
+    public static class SwerveState {
         public double velocity;
         public double acceleration;
         public double yaw;

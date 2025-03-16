@@ -136,7 +136,7 @@ public class SwerveDrive extends SubsystemBase {
 
 		odometry = new SwerveDriveOdometry(kinematics, getYaw(), getModulePositions());
 		poseEstimator = new SwerveDrivePoseEstimator(kinematics, getYaw(), getModulePositions(), new Pose2d());
-		poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999)); // 7 degrees
+		poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 99999));
 		LimelightHelpers.SetIMUMode(Constants.Vision.leftLimelight, 1);
 		LimelightHelpers.SetIMUMode(Constants.Vision.rightLimelight, 1);
 		AutoBuilder.configure(
@@ -391,8 +391,7 @@ public class SwerveDrive extends SubsystemBase {
 	}
 
 	public Pose2d getEstimatedPose() {
-		return poseEstimator.getEstimatedPosition().rotateBy(getYaw().minus(poseEstimator.getEstimatedPosition().getRotation()));
-		// return poseEstimator.getEstimatedPosition();
+		return poseEstimator.getEstimatedPosition();
 	}
 
 	public void resetOdometry(Pose2d pose) {
@@ -454,17 +453,13 @@ public class SwerveDrive extends SubsystemBase {
 		poseEstimator.update(getYaw(), getModulePositions());
 
 		LimelightHelpers.SetRobotOrientation(Constants.Vision.rightLimelight, pigeon.getYaw(), 0, 0, 0, 0, 0);	
-		PoseEstimate mt2 = getAlliance().equals(Alliance.Blue)
-				? LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.Vision.rightLimelight)
-				: LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.Vision.rightLimelight);
-		if (mt2.tagCount > 0 && !(Math.abs(pigeon.getAngularVelocityZWorld()) > 360))
+		PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.Vision.rightLimelight);
+		if (mt2.tagCount != 0 && !(Math.abs(pigeon.getAngularVelocityZWorld()) > 360))
 				poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
 
 		LimelightHelpers.SetRobotOrientation(Constants.Vision.leftLimelight, pigeon.getYaw(), 0, 0, 0, 0, 0);	
-		mt2 = getAlliance().equals(Alliance.Blue)
-				? LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.Vision.leftLimelight)
-				: LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.Vision.leftLimelight);
-		if (mt2.tagCount > 0 && !(Math.abs(pigeon.getAngularVelocityZWorld()) > 360))
+		mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.Vision.leftLimelight);
+		if (mt2.tagCount != 0 && !(Math.abs(pigeon.getAngularVelocityZWorld()) > 360))
 				poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
 
 		field2d.setRobotPose(getEstimatedPose());
