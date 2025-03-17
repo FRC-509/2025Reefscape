@@ -1,7 +1,13 @@
 package frc.robot.commands;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
+import org.opencv.core.Point;
+
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.SwerveDrive;
@@ -47,6 +53,22 @@ public class BezierPathGeneration extends Command {
         }
     }
 
+    public static class Spline {
+        BezierPath[] spline;
+        int currentBezier;
+
+        FieldPosition currentPosition;
+        FieldPosition finalPosition;
+        public Spline(BezierPath[] spline){
+            this.spline = spline;
+        }
+
+        public void getNextTarget(){
+            // spline[currentBezier]
+        }
+        
+    }
+
     public static class SwerveState {
         public double velocity;
         public double acceleration;
@@ -65,53 +87,32 @@ public class BezierPathGeneration extends Command {
         // form best case linear path
         // check if obstacles intersect that path, or safe radius
     }
+    //Point pointA,
+    // Point pointB, Point center, double radius
+    public static Pair<FieldPosition,FieldPosition> getCircleLineIntersectionPoint(
+            FieldPosition startingPosition, FieldPosition targetPosition, 
+            FieldPosition obstacleCenter, double obstacleRadius) {
+        double discriminant = Math.pow(((targetPosition.x - startingPosition.x) * (obstacleCenter.x - startingPosition.x) + (targetPosition.y - startingPosition.y) * (obstacleCenter.y - startingPosition.y)) / (Math.pow(targetPosition.x - startingPosition.x,2) + Math.pow(targetPosition.y - startingPosition.y,2)),2) - (Math.pow(obstacleCenter.x - startingPosition.x,2) + Math.pow(obstacleCenter.y - startingPosition.y,2) - Math.pow(obstacleRadius,2)) / (Math.pow(targetPosition.x - startingPosition.x,2) + Math.pow(targetPosition.y - startingPosition.y,2));
+        if (discriminant < 0) return new Pair<FieldPosition,FieldPosition>(null,null);
 
-    public boolean checkForIntersection(FieldPosition robotPosition, double pathSlope, FieldPosition obstaclePosition, double obstacleRadius){
-        // double a = d.Dot(d);
-        // double b = 2*f.Dot(d);
-        // double c = f.Dot(f) - r*r;
+        double tmpSqrt = Math.sqrt(discriminant);
+        double abScalingFactor1 = -(((targetPosition.x - startingPosition.x) * (obstacleCenter.x - startingPosition.x) + (targetPosition.y - startingPosition.y) * (obstacleCenter.y - startingPosition.y)) 
+            / (Math.pow(targetPosition.x - startingPosition.x,2) + Math.pow(targetPosition.y - startingPosition.y,2))) + tmpSqrt;
+        double abScalingFactor2 = -((targetPosition.x - startingPosition.x) * (obstacleCenter.x - startingPosition.x) + (targetPosition.y - startingPosition.y) * (obstacleCenter.y - startingPosition.y)) 
+            / (Math.pow(targetPosition.x - startingPosition.x,2) + Math.pow(targetPosition.y - startingPosition.y,2)) - tmpSqrt;
+
+        FieldPosition p1 = new FieldPosition(startingPosition.x - (targetPosition.x - startingPosition.x) * abScalingFactor1, startingPosition.y
+                - (targetPosition.y - startingPosition.y) * abScalingFactor1);
+        if (discriminant == 0) return new Pair<FieldPosition,FieldPosition>(p1,null);
         
-        // double discriminant = b*b-4*a*c;
-        // if( discriminant < 0 ){
-        //     // no intersection
-        // } else {
-        //     // ray didn't totally miss sphere,
-        //     // so there is a solution to
-        //     // the equation.
-  
-        //     discriminant = Math.sqrt(discriminant);
+        FieldPosition p2 = new FieldPosition(startingPosition.x - (targetPosition.x - startingPosition.x) * abScalingFactor2, startingPosition.y
+                - (targetPosition.y - startingPosition.y) * abScalingFactor2);
+        return new Pair<FieldPosition,FieldPosition>(p1,p2);
+    }
 
-        //     // either solution may be on or off the ray so need to test both
-        //     // t1 is always the smaller value, because BOTH discriminant and
-        //     // a are nonnegative.
-        //     double t1 = (-b - discriminant)/(2*a);
-        //     double t2 = (-b + discriminant)/(2*a);
-
-        //     // 3x HIT cases:
-        //     //          -o->             --|-->  |            |  --|->
-        //     // Impale(t1 hit,t2 hit), Poke(t1 hit,t2>1), ExitWound(t1<0, t2 hit), 
-        
-        //     // 3x MISS cases:
-        //     //       ->  o                     o ->              | -> |
-        //     // FallShort (t1>1,t2>1), Past (t1<0,t2<0), CompletelyInside(t1<0, t2>1)
-  
-        //     if( t1 >= 0 && t1 <= 1 ){
-        //         // t1 is the intersection, and it's closer than t2
-        //         // (since t1 uses -b - discriminant)
-        //         // Impale, Poke
-        //         return true;
-        //     }
-
-        //     // here t1 didn't intersect so we are either started
-        //     // inside the sphere or completely past it
-        //     if( t2 >= 0 && t2 <= 1 ){
-        //         // ExitWound
-        //         return true;
-        //     }
-        //     // no intn: FallShort, Past, CompletelyInside
-        //     return false;
-        // }
-        return false;
+    public static Pair<FieldPosition,FieldPosition> extrudeControlPointsAlongBestNormals(){
+        // FieldPosition robotPosition, FieldPosition obstacleCenter, Pair<>){
+        return new Pair<BezierPathGeneration.FieldPosition,BezierPathGeneration.FieldPosition>(null, null);
     }
     
     public void addBezier(BezierPath bezier, ArrayList<BezierPath> spline, int index){
