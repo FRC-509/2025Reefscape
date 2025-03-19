@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Acceleration;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -20,6 +21,12 @@ public class BezierPathGeneration extends Command {
         public double y;
         public FieldPosition(double x, double y){ this.x = x; this.y = y; }
         public double distanceTo(FieldPosition other){ return Math.sqrt((x+other.x)*(x+other.x) + (y+other.y)*(y+other.y)); }
+        public FieldPosition conditionallyFlip(Location location){
+            if (SwerveDrive.getAlliance().equals(Alliance.Red)) return this;
+            return new FieldPosition( // Does this work?
+                Math.abs(location.position.x - Constants.Field.kFullFieldLength), 
+                Math.abs(location.position.y - Constants.Field.kFullFieldLength));
+        }
     }
 
     public static class Obstacle extends FieldPosition{

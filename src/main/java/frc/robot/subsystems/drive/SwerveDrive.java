@@ -200,7 +200,7 @@ public class SwerveDrive extends SubsystemBase {
 		*/
 	}
 
-	public Alliance getAlliance() {
+	public static Alliance getAlliance() {
 		Optional<Alliance> alliance = DriverStation.getAlliance();
 		if (alliance.isPresent()) {
 			return alliance.get();
