@@ -10,6 +10,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.commands.BezierPathGeneration.Obstacle;
 import frc.robot.util.math.Conversions;
 
 /**
@@ -32,17 +33,15 @@ public final class Constants {
 	}
 
 	public static class Chassis {
-		public static final double kRobotWeight = 61.7d; // kg, incl bumpers and battery TODO:
+		public static final double kRobotWeight = 61.7d;
 		public static final double kMOI = 4.4659;
 		public static final double kOffsetToSwerveModule = 0.395;
 		public static final double kKrakenFreeSpeedRPM = 6000.0d;
 		public static final double kKrakenFreeSpeedRPS = kKrakenFreeSpeedRPM / 60.0d;
 		public static final double kMaxSpeed = Conversions.falconToMPS(kKrakenFreeSpeedRPS, MK4I.kWheelCircumference,
 			MK4I.kDriveGearRatio); // allegedly 4.7244
-		public static final double kMaxAcceleration = 0.0; // TODO: FIND REAL VALUES
-		public static final double kMaxAngularAcceleration = 0.0;
 		
-		public static class MK4I { // MK4i level 2s
+		public static class MK4I { // MK4i L2
 			public static final double kWheelRadius = Units.inchesToMeters(2.0);
 			public static final double kWheelCircumference = 2 * kWheelRadius * Math.PI; // 0.3192 meters
 			public static final double kDriveGearRatio = 6.75 / 1;
@@ -70,12 +69,6 @@ public final class Constants {
 			kKrakenDcMotorProfile,
 			Constants.CurrentLimits.kSwerveModuleSupply,
 			4);
-
-		public static final PathConstraints constraints = new PathConstraints(
-			kMaxSpeed, 
-			kMaxAcceleration, 
-			kMaxAngularVelocity, 
-			kMaxAngularAcceleration);
 
 		public static record SwerveModuleConfiguration(
 			int moduleNumber,
@@ -111,6 +104,10 @@ public final class Constants {
 			IDs.kBackRightSteer,
 			IDs.kBackRightDrive,
 			140.425782);
+		public static final double kRobotWidth = 0;
+        public static final double kSafePathingTolerance = 0;
+        public static final double kValidPositionTolerance = 0;
+        public static final double kValidHeadingTolerance = 0;
 	}
 
 	public static class Elevator {
@@ -156,8 +153,8 @@ public final class Constants {
 		public static final double kMinimumPositionDegrees = 0;
         public static final double kSensorToMechanismRatio = 0;
 
-		public static final double kClimbReadyPosition = 80;
-		public static final double kClimbFinalPosition = 30; //14
+		public static final double kClimbReadyPosition = 90;
+		public static final double kClimbFinalPosition = 6.5; //14
 	}
 
 	public static class IDs {
@@ -208,7 +205,6 @@ public final class Constants {
             public static int AprilTags = 0;
             public static int NeuralNetwork = 1;
 		}
-		
 	}
 
 	public static class PathGeneration {
@@ -217,7 +213,7 @@ public final class Constants {
 
 	public static class PIDConstants {
 		public static class Drive {
-			// TODO: Change all values
+			// TODO: Tune Me
 			public static final double kDriveVelocityS = 0.124;
 			public static final double kDriveVelocityV = 0.109;
 			public static final double kDriveVelocityA = 0.0;
@@ -230,7 +226,6 @@ public final class Constants {
 			public static final double kSteerAngleI = 0.0;
 			public static final double kSteerAngleD = 0.0;
 
-			// TODO: Tune Me!
 			public static final double kHeadingPassiveP = 8.0;
 			public static final double kHeadingPassiveI = 0.15;
 			public static final double kHeadingPassiveD = 0.4;
@@ -285,12 +280,17 @@ public final class Constants {
 		public static final double kFullFieldLength = 16.54d; // Double check
 		
 		public static final double kReefRadius = Units.inchesToMeters(77.5d)/2;
-		public static final double kReefOffsetX = Units.inchesToMeters(0.0);
+		public static final double kReefOffsetX = Units.inchesToMeters(0.0); // TODO: Find
 		public static final double kReefOffsety = Units.inchesToMeters(144.0d) + kReefRadius;
 
 		public static final double kBargeLength = Units.inchesToMeters(46.0d);
 		public static final double kBargeWidth = Units.inchesToMeters(146.5d);
 		public static final double kBargeDistance = kReefOffsety + kReefRadius + Units.inchesToMeters(88);
+
+		public static final Obstacle reef_BLUE_ALLIANCE = new Obstacle(kReefOffsetX, kReefOffsety, kReefRadius);
+		public static final Obstacle reef_RED_ALLIANCE = new Obstacle(kReefOffsetX, kReefOffsety, kReefRadius);
+
+        public static final double kFieldWidth = 8; // TODO: find a real number
 	}
 
 	public static double tunableNumber(String name, double defaultValue){

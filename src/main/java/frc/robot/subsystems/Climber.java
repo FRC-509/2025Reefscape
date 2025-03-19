@@ -66,6 +66,10 @@ public class Climber extends SubsystemBase {
         this.initialRotation = climbMotor.getPosition().getValueAsDouble();
     }
 
+    public void maintainClimb(){
+        climbMotor.setControl(rotationClosedLoop.withPosition(climbMotor.getPosition().getValueAsDouble()));
+    }
+
     public SequentialCommandGroup StartupSequence(){
         return new SequentialCommandGroup(
             Commands.runOnce(() -> climbMotor.setControl(openLoop.withOutput(0.6)), this),

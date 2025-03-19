@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -14,6 +15,9 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import frc.robot.autonomous.Leave;
 import frc.robot.autonomous.Test;
 import frc.robot.commands.*;
+import frc.robot.commands.StagingManager.StagingState;
+import frc.robot.commands.staging.ExtendTo;
+import frc.robot.commands.staging.RotateTo;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
@@ -132,11 +136,18 @@ public class RobotContainer {
 
 		// Set climber down
 		operator.leftTrigger().onTrue(new SequentialCommandGroup(
+			Commands.runOnce(() -> arm.setRotation(0.43), arm),
+			Commands.waitSeconds(0.55),
+			Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_STATION.extension), elevator),
 			climber.StartupSequence(),
 			Commands.runOnce(() -> climber.setRotation(Constants.Climber.kClimbReadyPosition), climber)
 		));
-		operator.rightTrigger().onTrue(
-			Commands.runOnce(() -> climber.setRotation(Constants.Climber.kClimbFinalPosition), climber)
+		operator.rightTrigger().onTrue(Commands.sequence(
+			Commands.runOnce(() -> climber.setRotation(Constants.Climber.kClimbFinalPosition), climber),
+			Commands.parallel(
+				Commands.waitSeconds(10),
+				Commands.run(() -> swerve.drive(new Translation2d(0,0), 0, true, true), swerve)
+			))
 		);
 	}
 
@@ -165,5 +176,9 @@ public class RobotContainer {
 
 	public void onTeleopEntry() {
 		pigeon.setYaw(180); // temp to correct yaw after straight leave auto
+	}
+
+	public void disabledInit(){
+		climber.maintainClimb();
 	}
 }

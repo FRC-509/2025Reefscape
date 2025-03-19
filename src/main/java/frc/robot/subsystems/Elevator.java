@@ -26,7 +26,7 @@ public class Elevator extends SubsystemBase {
 
     private CANcoder extensionEncoder = new CANcoder(Constants.IDs.kExtensionEncoder,  Constants.kCANIvore);
     private CANrange rangeSensor = new CANrange(20, Constants.kCANIvore);
-    private DigitalInput limitSwitch = new DigitalInput(1);
+    private DigitalInput limitSwitch = new DigitalInput(2);
 
     private VoltageOut openLoop = new VoltageOut(0).withEnableFOC(false);
     private PositionDutyCycle closedLoopPosition = new PositionDutyCycle(0.0).withEnableFOC(false);
