@@ -136,7 +136,7 @@ public class SwerveDrive extends SubsystemBase {
 
 		odometry = new SwerveDriveOdometry(kinematics, getYaw(), getModulePositions());
 		poseEstimator = new SwerveDrivePoseEstimator(kinematics, getYaw(), getModulePositions(), new Pose2d());
-		poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 99999));
+		// poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 99999));
 		LimelightHelpers.SetIMUMode(Constants.Vision.leftLimelight, 1);
 		LimelightHelpers.SetIMUMode(Constants.Vision.rightLimelight, 1);
 		AutoBuilder.configure(
@@ -153,9 +153,8 @@ public class SwerveDrive extends SubsystemBase {
 				},
 				new RobotConfig(
 					Constants.Chassis.kRobotWeight,
-					0.0, // TODO: get later
+					Constants.Chassis.kMOI, // TODO: get later
 					Constants.Chassis.kModuleConfig,
-					// TODO: which way is forward, which way does it think is forwards
 					// Front Left, Front Right, Back Left, Back Right 
 					new Translation2d(+Constants.Chassis.kOffsetToSwerveModule, -Constants.Chassis.kOffsetToSwerveModule),
 					new Translation2d(+Constants.Chassis.kOffsetToSwerveModule, +Constants.Chassis.kOffsetToSwerveModule),

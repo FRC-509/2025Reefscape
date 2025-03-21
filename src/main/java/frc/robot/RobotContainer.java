@@ -4,15 +4,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import frc.robot.autonomous.Actions;
+import frc.robot.autonomous.Actions.PathValidation;
 import frc.robot.autonomous.Leave;
 import frc.robot.autonomous.Test;
 import frc.robot.commands.*;
@@ -81,19 +84,28 @@ public class RobotContainer {
 				() -> nonInvSquare(-driverLeft.getX()),
 				() -> nonInvSquare(-driverRight.getX()),
 				() -> driverLeft.getTrigger(),
-				() -> driverRight.getTrigger(),
+				() -> false,
 				() -> true));
+			
+
+		driverRight.isPressedBind(StickButton.Trigger, new AutoPickup(
+			swerve, 
+			new Limelight(Constants.Vision.rightLimelight), 
+			intake, 
+			() -> nonInvSquare(-driverLeft.getY()),
+			() -> nonInvSquare(-driverLeft.getX()),
+			() -> nonInvSquare(-driverRight.getX())));
 
 		// Binds heading locks to the right stick's dpad. Pressing up will face forward,
 		// // pressing down will face backward.
-		// (new Trigger(() -> driverRight.getPOV(0) == 0))
-		// 	.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(0), swerve));
-		// (new Trigger(() -> driverRight.getPOV(0) == 90))
-		// 	.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(-90), swerve));
-		// (new Trigger(() -> driverRight.getPOV(0) == 270))
-		// 	.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(90), swerve));
-		// (new Trigger(() -> driverRight.getPOV(0) == 180))
-		// 	.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(180), swerve));
+		(new Trigger(() -> driverRight.getPOV(0) == 0))
+			.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(0), swerve));
+		(new Trigger(() -> driverRight.getPOV(0) == 90))
+			.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(-137), swerve));
+		(new Trigger(() -> driverRight.getPOV(0) == 270))
+			.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(137), swerve));
+		(new Trigger(() -> driverRight.getPOV(0) == 180))
+			.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(180), swerve));
 
 		// Toggle heading correction by pressing the bottom-rightmost botton on the left
 		// side of the right stick. Heading correction defaults to ON at boot.
@@ -133,27 +145,6 @@ public class RobotContainer {
 		// 	() -> driverRight.getPOV(0) == 180,
 		// 	swerve, elevator, arm, intake);
 
-		
-		
-		// (new Trigger(() -> driverRight.getPOV(0) == 0))
-		// 	.onTrue(new DriveToLocation(swerve));
-		(new Trigger(() -> driverRight.getPOV(0) == 270)).onTrue(Commands.sequence(
-			Commands.runOnce(() -> swerve.setTargetHeading(30), swerve),
-			Commands.waitSeconds(0.4),
-			Commands.runOnce(() -> swerve.setTargetHeading(60), swerve)
-		));
-		(new Trigger(() -> driverRight.getPOV(0) == 90))
-			.onTrue(Commands.sequence(
-				Commands.runOnce(() -> swerve.setTargetHeading(-30), swerve),
-				Commands.waitSeconds(0.4),
-				Commands.runOnce(() -> swerve.setTargetHeading(-60), swerve)
-			));
-		(new Trigger(() -> driverRight.getPOV(0) == 180))
-			.onTrue(Commands.race(
-				Actions.BargeShot(swerve, elevator, arm, intake),
-				Commands.waitSeconds(6)
-			));
-
 		// // Algae Intake / outake on release
 		operator.rightBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));
 		operator.leftBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake));
@@ -184,7 +175,29 @@ public class RobotContainer {
 	private void addAutonomousRoutines() {
 		chooser.addOption("\"Go AFK\" (Null)", new InstantCommand());
 		chooser.addOption("Leave", new Leave(0.3, 1.0, swerve));
-		// chooser.addOption("Test", new Test("Test", swerve));
+		chooser.addOption("Test", Commands.sequence(
+			Commands.runOnce(() -> intake.setState(IntakingState.CORAL_PASSIVE), intake),
+			Commands.runOnce(() ->swerve.setChassisSpeeds(new ChassisSpeeds(Constants.Chassis.kMaxSpeed * 0.2, 0, 0)),swerve),
+            Commands.waitSeconds(1),
+            Commands.runOnce(() ->swerve.setChassisSpeeds(new ChassisSpeeds(0, 0, 0)),swerve),
+			StagingManager.L4_Rising(elevator, arm),
+			Commands.waitSeconds(0.2),
+			Commands.runOnce(() ->swerve.setChassisSpeeds(new ChassisSpeeds(Constants.Chassis.kMaxSpeed * 0.2, 0, 0)),swerve),
+            Commands.waitSeconds(1),
+            Commands.runOnce(() ->swerve.setChassisSpeeds(new ChassisSpeeds(0, 0, 0)),swerve),
+			StagingManager.L4_Falling(elevator, arm, intake, () -> true),
+			Commands.runOnce(() -> elevator.setExtension(3.85), elevator),
+            Commands.runOnce(() -> arm.setRawVoltageOut(-0.2), arm),
+            Commands.runOnce(() -> intake.L4Outake()),
+			Commands.runOnce(() ->swerve.setChassisSpeeds(new ChassisSpeeds(Constants.Chassis.kMaxSpeed * 0.2, 0, 0)),swerve),
+            new WaitUntilCommand(() -> (arm.getRotation() > 0.22418)),
+			Commands.waitSeconds(0.2),
+            Commands.runOnce(() ->swerve.setChassisSpeeds(new ChassisSpeeds(0, 0, 0)),swerve),
+			StagingManager.zero(elevator, arm, intake)
+		));
+		chooser.addOption("PP", Commands.sequence(
+
+		));
 		SmartDashboard.putData("Auto Mode", chooser);
 
 		if (RobotBase.isSimulation()) {
@@ -202,6 +215,8 @@ public class RobotContainer {
 
 	public void robotPeriodic(){
 		stagingManager.update();
+		SmartDashboard.putNumberArray("OutputMove", new double[]{LimelightHelpers.getBotPose3d_TargetSpace(Constants.Vision.rightLimelight).getX(),LimelightHelpers.getBotPose3d_TargetSpace(Constants.Vision.rightLimelight).getY()});
+
 	}
 
 	public void onTeleopEntry() {

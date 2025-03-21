@@ -28,7 +28,7 @@ public class AutoPickup extends Command {
 	private double lastDistanceToTarget;
 	private boolean lostTarget = false;
 
-	public AutoPickup(
+	AutoPickup(
 			SwerveDrive swerve,
 			Limelight limelight,
 			Intake intake,

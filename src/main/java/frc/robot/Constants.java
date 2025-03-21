@@ -34,7 +34,7 @@ public final class Constants {
 
 	public static class Chassis {
 		public static final double kRobotWeight = 61.7d;
-		public static final double kMOI = 4.4659;
+		public static final double kMOI = 5.2013;
 		public static final double kOffsetToSwerveModule = 0.395;
 		public static final double kKrakenFreeSpeedRPM = 6000.0d;
 		public static final double kKrakenFreeSpeedRPS = kKrakenFreeSpeedRPM / 60.0d;
@@ -196,7 +196,7 @@ public final class Constants {
 
 		public static final double kRotationAlignmentSpeedScalar = 5.45;
 		public static final double kAlignmentRotationTolerance = 0;
-        public static final double kAlignmentTranslationTolerance = 0;
+        public static final double kAlignmentTranslationTolerance = 0.1;
         public static final double kCameraHeightFromGround = Units.inchesToMeters(39);
         public static final double kIntakeCameraAngleOffset = 0;
         public static final double kMaxTargetDistanceVariation = 10;
