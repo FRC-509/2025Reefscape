@@ -166,29 +166,6 @@ public class RobotContainer {
 	private void addAutonomousRoutines() {
 		chooser.addOption("\"Go AFK\" (Null)", new InstantCommand());
 		chooser.addOption("Leave", new Leave(0.3, 1.0, swerve));
-		chooser.addOption("Test", Commands.sequence(
-			Commands.runOnce(() -> intake.setState(IntakingState.CORAL_PASSIVE), intake),
-			Commands.runOnce(() ->swerve.setChassisSpeeds(new ChassisSpeeds(Constants.Chassis.kMaxSpeed * 0.2, 0, 0)),swerve),
-            Commands.waitSeconds(1),
-            Commands.runOnce(() ->swerve.setChassisSpeeds(new ChassisSpeeds(0, 0, 0)),swerve),
-			StagingManager.L4_Rising(elevator, arm),
-			Commands.waitSeconds(0.2),
-			Commands.runOnce(() ->swerve.setChassisSpeeds(new ChassisSpeeds(Constants.Chassis.kMaxSpeed * 0.2, 0, 0)),swerve),
-            Commands.waitSeconds(1),
-            Commands.runOnce(() ->swerve.setChassisSpeeds(new ChassisSpeeds(0, 0, 0)),swerve),
-			StagingManager.L4_Falling(elevator, arm, intake, () -> true),
-			Commands.runOnce(() -> elevator.setExtension(3.85), elevator),
-            Commands.runOnce(() -> arm.setRawVoltageOut(-0.2), arm),
-            Commands.runOnce(() -> intake.L4Outake()),
-			Commands.runOnce(() ->swerve.setChassisSpeeds(new ChassisSpeeds(Constants.Chassis.kMaxSpeed * 0.2, 0, 0)),swerve),
-            new WaitUntilCommand(() -> (arm.getRotation() > 0.22418)),
-			Commands.waitSeconds(0.2),
-            Commands.runOnce(() ->swerve.setChassisSpeeds(new ChassisSpeeds(0, 0, 0)),swerve),
-			StagingManager.zero(elevator, arm, intake)
-		));
-		chooser.addOption("PP", Commands.sequence(
-
-		));
 		SmartDashboard.putData("Auto Mode", chooser);
 
 		if (RobotBase.isSimulation()) {
@@ -206,8 +183,6 @@ public class RobotContainer {
 
 	public void robotPeriodic(){
 		stagingManager.update();
-		SmartDashboard.putNumberArray("OutputMove", new double[]{LimelightHelpers.getBotPose3d_TargetSpace(Constants.Vision.rightLimelight).getX(),LimelightHelpers.getBotPose3d_TargetSpace(Constants.Vision.rightLimelight).getY()});
-
 	}
 
 	public void onTeleopEntry() {

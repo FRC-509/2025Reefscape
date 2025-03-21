@@ -72,7 +72,7 @@ public class Climber extends SubsystemBase {
 
     public SequentialCommandGroup StartupSequence(){
         return new SequentialCommandGroup(
-            Commands.runOnce(() -> climbMotor.setControl(openLoop.withOutput(0.6)), this),
+            Commands.runOnce(() -> climbMotor.setControl(openLoop.withOutput(0.8)), this),
             new WaitUntilCommand(() -> limitSwitch.get()),
             Commands.runOnce(() -> climbMotor.setControl(openLoop.withOutput(0.0)), this)
         );

@@ -153,7 +153,8 @@ public final class Constants {
 		public static final double kMinimumPositionDegrees = 0;
         public static final double kSensorToMechanismRatio = 0;
 
-		public static final double kClimbReadyPosition = 90;
+		public static final double kClimberAbsoluteMax = 98.0;
+		public static final double kClimbReadyPosition = 87;
 		public static final double kClimbFinalPosition = 6.5; //14
 	}
 
