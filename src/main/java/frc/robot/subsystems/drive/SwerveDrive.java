@@ -451,15 +451,15 @@ public class SwerveDrive extends SubsystemBase {
 		odometry.update(getYaw(), getModulePositions());
 		poseEstimator.update(getYaw(), getModulePositions());
 
-		LimelightHelpers.SetRobotOrientation(Constants.Vision.rightLimelight, pigeon.getYaw(), 0, 0, 0, 0, 0);	
-		PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.Vision.rightLimelight);
-		if (mt2.tagCount != 0 && !(Math.abs(pigeon.getAngularVelocityZWorld()) > 360))
-				poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
+		// LimelightHelpers.SetRobotOrientation(Constants.Vision.rightLimelight, pigeon.getYaw(), 0, 0, 0, 0, 0);	
+		// PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.Vision.rightLimelight);
+		// if (mt2.tagCount != 0 && !(Math.abs(pigeon.getAngularVelocityZWorld()) > 360))
+		// 		poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
 
-		LimelightHelpers.SetRobotOrientation(Constants.Vision.leftLimelight, pigeon.getYaw(), 0, 0, 0, 0, 0);	
-		mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.Vision.leftLimelight);
-		if (mt2.tagCount != 0 && !(Math.abs(pigeon.getAngularVelocityZWorld()) > 360))
-				poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
+		// LimelightHelpers.SetRobotOrientation(Constants.Vision.leftLimelight, pigeon.getYaw(), 0, 0, 0, 0, 0);	
+		// mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.Vision.leftLimelight);
+		// if (mt2.tagCount != 0 && !(Math.abs(pigeon.getAngularVelocityZWorld()) > 360))
+		// 		poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
 
 		field2d.setRobotPose(getEstimatedPose());
 

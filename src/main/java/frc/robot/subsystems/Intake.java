@@ -34,6 +34,7 @@ public class Intake extends SubsystemBase {
         private double voltageOut;
         IntakingState(double voltageOut) { this.voltageOut = voltageOut; }
     }
+    
     private IntakingState intakingState;
     private IntakingState lastIntakingState;
     private boolean commandOutake;

@@ -32,7 +32,7 @@ public class RoughAlign extends Command{
                 xSupplier.getAsDouble(), ySupplier.getAsDouble()
             ).times(Constants.Chassis.kMaxSpeed * Constants.Operator.kPrecisionRotationMultiplier), 
             MathUtil.clamp(swerve.getYaw().getDegrees() - targetHeading, Constants.Chassis.kMaxAngularVelocity * -0.1, Constants.Chassis.kMaxAngularVelocity * 0.1), 
-            true, 
-            true);   
+            true,
+            true);
     }
 }

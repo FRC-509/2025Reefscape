@@ -200,6 +200,8 @@ public final class Constants {
         public static final double kCameraHeightFromGround = Units.inchesToMeters(39);
         public static final double kIntakeCameraAngleOffset = 0;
         public static final double kMaxTargetDistanceVariation = 10;
+        public static final double kxFOV = 84;
+        public static final double kyFOV = 56.4;
 
         public static class Pipeline {
             public static int AprilTags = 0;
