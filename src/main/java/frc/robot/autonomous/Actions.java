@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.robot.Constants;
+import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.StagingManager;
 import frc.robot.commands.StagingManager.StagingState;
 import frc.robot.subsystems.Arm;
@@ -110,7 +112,26 @@ public class Actions {
                     Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake)));
     }
     
-    
+    public static SequentialCommandGroup BargeShot(
+            SwerveDrive swerve,
+            Elevator elevator,
+            Arm arm,
+            Intake intake){
+        return new SequentialCommandGroup(
+            StagingManager.L4_Rising(elevator, arm),
+            Commands.waitSeconds(0.2),
+            Commands.parallel(
+                Commands.sequence(
+                    Commands.waitSeconds(0.6),
+                    Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_OUTAKE))    
+                ),
+                new DefaultDriveCommand(swerve, 0.5 * Constants.Operator.kPrecisionMovementMultiplier, 0.0, 0.0, false)
+            ),
+            Commands.waitSeconds(2),
+            Commands.runOnce(() -> intake.stop()),
+            new DefaultDriveCommand(swerve, 0.0, 0.0, 0.0, true),
+            StagingManager.allSafe(StagingState.ZEROED, elevator, arm));
+    }
 
     public static class PathValidation {
         public Command pathCommand;

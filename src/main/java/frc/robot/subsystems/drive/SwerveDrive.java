@@ -457,10 +457,10 @@ public class SwerveDrive extends SubsystemBase {
 		if (mt2.tagCount != 0 && !(Math.abs(pigeon.getAngularVelocityZWorld()) > 360))
 				poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
 
-		// LimelightHelpers.SetRobotOrientation(Constants.Vision.leftLimelight, pigeon.getYaw(), 0, 0, 0, 0, 0);	
-		// mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.Vision.leftLimelight);
-		// if (mt2.tagCount != 0 && !(Math.abs(pigeon.getAngularVelocityZWorld()) > 360))
-		// 		poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
+		LimelightHelpers.SetRobotOrientation(Constants.Vision.leftLimelight, pigeon.getYaw(), 0, 0, 0, 0, 0);	
+		mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.Vision.leftLimelight);
+		if (mt2.tagCount != 0 && !(Math.abs(pigeon.getAngularVelocityZWorld()) > 360))
+				poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
 
 		field2d.setRobotPose(getEstimatedPose());
 
@@ -471,6 +471,7 @@ public class SwerveDrive extends SubsystemBase {
 		ThinNT.putNumber("y-velocity", getChassisSpeeds().vyMetersPerSecond);
 		ThinNT.putNumber("yaw-velocity", pigeon.getAngularVelocityZWorld());
 		ThinNT.putNumber("target-heading", targetHeading);
+		SmartDashboard.putNumberArray("Estimated Pose", new double[]{getEstimatedPose().getX(),getEstimatedPose().getY()});
 
 		moduleStatePublisher.set(getModuleStates());
 		odometryPublisher.set(getRawOdometeryPose());

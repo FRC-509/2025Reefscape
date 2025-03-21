@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import frc.robot.autonomous.Actions;
 import frc.robot.autonomous.Leave;
 import frc.robot.autonomous.Test;
 import frc.robot.commands.*;
@@ -39,6 +40,7 @@ public class RobotContainer {
 	private final ThrustmasterJoystick driverRight = new ThrustmasterJoystick(1);
 	private final CommandXboxController operator = new CommandXboxController(2);
 	public StagingManager stagingManager;
+	public AlignmentManager alignmentManager;
 
 	private final SwerveDrive swerve;
 	private final Elevator elevator;
@@ -83,15 +85,15 @@ public class RobotContainer {
 				() -> true));
 
 		// Binds heading locks to the right stick's dpad. Pressing up will face forward,
-		// pressing down will face backward.
-		(new Trigger(() -> driverRight.getPOV(0) == 0))
-			.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(0), swerve));
-		(new Trigger(() -> driverRight.getPOV(0) == 90))
-			.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(-90), swerve));
-		(new Trigger(() -> driverRight.getPOV(0) == 270))
-			.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(90), swerve));
-		(new Trigger(() -> driverRight.getPOV(0) == 180))
-			.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(180), swerve));
+		// // pressing down will face backward.
+		// (new Trigger(() -> driverRight.getPOV(0) == 0))
+		// 	.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(0), swerve));
+		// (new Trigger(() -> driverRight.getPOV(0) == 90))
+		// 	.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(-90), swerve));
+		// (new Trigger(() -> driverRight.getPOV(0) == 270))
+		// 	.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(90), swerve));
+		// (new Trigger(() -> driverRight.getPOV(0) == 180))
+		// 	.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(180), swerve));
 
 		// Toggle heading correction by pressing the bottom-rightmost botton on the left
 		// side of the right stick. Heading correction defaults to ON at boot.
@@ -123,6 +125,34 @@ public class RobotContainer {
 			() -> (driverLeft.getPOV(0) == 270),
 			() -> (driverLeft.getPOV(0) == 90),
 			() -> (driverLeft.getPOV(0) == 180));
+
+		// this.alignmentManager = new AlignmentManager(
+		// 	() -> nonInvSquare(-driverLeft.getY()), 
+		// 	() -> driverRight.getPOV(0) == 90, 
+		// 	() -> driverRight.getPOV(0) == 270,
+		// 	() -> driverRight.getPOV(0) == 180,
+		// 	swerve, elevator, arm, intake);
+
+		
+		
+		// (new Trigger(() -> driverRight.getPOV(0) == 0))
+		// 	.onTrue(new DriveToLocation(swerve));
+		(new Trigger(() -> driverRight.getPOV(0) == 270)).onTrue(Commands.sequence(
+			Commands.runOnce(() -> swerve.setTargetHeading(30), swerve),
+			Commands.waitSeconds(0.4),
+			Commands.runOnce(() -> swerve.setTargetHeading(60), swerve)
+		));
+		(new Trigger(() -> driverRight.getPOV(0) == 90))
+			.onTrue(Commands.sequence(
+				Commands.runOnce(() -> swerve.setTargetHeading(-30), swerve),
+				Commands.waitSeconds(0.4),
+				Commands.runOnce(() -> swerve.setTargetHeading(-60), swerve)
+			));
+		(new Trigger(() -> driverRight.getPOV(0) == 180))
+			.onTrue(Commands.race(
+				Actions.BargeShot(swerve, elevator, arm, intake),
+				Commands.waitSeconds(6)
+			));
 
 		// // Algae Intake / outake on release
 		operator.rightBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));
