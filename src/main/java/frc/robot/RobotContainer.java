@@ -86,15 +86,6 @@ public class RobotContainer {
 				() -> driverLeft.getTrigger(),
 				() -> false,
 				() -> true));
-			
-
-		driverRight.isPressedBind(StickButton.Trigger, new AutoPickup(
-			swerve, 
-			new Limelight(Constants.Vision.rightLimelight), 
-			intake, 
-			() -> nonInvSquare(-driverLeft.getY()),
-			() -> nonInvSquare(-driverLeft.getX()),
-			() -> nonInvSquare(-driverRight.getX())));
 
 		// Binds heading locks to the right stick's dpad. Pressing up will face forward,
 		// // pressing down will face backward.
