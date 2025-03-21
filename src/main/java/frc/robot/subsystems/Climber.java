@@ -26,7 +26,7 @@ public class Climber extends SubsystemBase {
     private double initialRotation;
 
     // private DigitalInput maximumLimitSwitch = new DigitalInput(9);
-    private DigitalInput limitSwitch = new DigitalInput(8);
+    private DigitalInput limitSwitch = new DigitalInput(1);
 
     public Climber() {
         TalonFXConfiguration climbConfig = new TalonFXConfiguration();
