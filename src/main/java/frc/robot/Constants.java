@@ -137,7 +137,7 @@ public final class Constants {
         public static final double kAlgaePassiveVoltage = -0.75;
         public static final double kCoralPassiveVoltage = 0.75;
 
-        public static final double kAlgaeOutakeVoltage = 15.5;
+        public static final double kAlgaeOutakeVoltage = 15.9;
         public static final double kCoralOutakeVoltage = -8.5;
 
 		public static final double kCoralOutakeDelay = 0.75; // seconds

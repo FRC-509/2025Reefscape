@@ -142,7 +142,7 @@ public class RobotContainer {
 		operator.leftBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake));
 
 		operator.rightBumper().onFalse(Intake.outakeCommand(false, intake));
-		operator.leftBumper().onFalse(Intake.outakeCommand(true, intake));
+		operator.leftBumper().onFalse(Intake.coralConditionalOutake(intake, () -> arm.getRotation() < StagingState.ALGAE_SAFE.rotation));
 
 		driverLeft.getJoystickButton(StickButton.Bottom).onTrue(new DriveToLocation(swerve));
 
@@ -155,6 +155,7 @@ public class RobotContainer {
 	private void addAutonomousRoutines() {
 		chooser.addOption("\"Go AFK\" (Null)", new InstantCommand());
 		chooser.addOption("Leave", new Leave(0.3, 1.0, swerve));
+		chooser.addOption("ReverseLeave", new Leave(-0.3, 1.0, swerve));
 		SmartDashboard.putData("Auto Mode", chooser);
 
 		if (RobotBase.isSimulation()) {

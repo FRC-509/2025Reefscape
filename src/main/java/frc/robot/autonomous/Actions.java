@@ -118,7 +118,7 @@ public class Actions {
             Arm arm,
             Intake intake){
         return new SequentialCommandGroup(
-            StagingManager.L4_Rising(elevator, arm),
+            StagingManager.L4_Rising(elevator, arm, intake, () -> false),
             Commands.waitSeconds(0.2),
             Commands.parallel(
                 Commands.sequence(

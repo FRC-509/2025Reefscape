@@ -10,7 +10,9 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -29,7 +31,8 @@ public class Intake extends SubsystemBase {
         ALGAE_OUTAKE(Constants.Intake.kAlgaeOutakeVoltage),
         ALGAE_PASSIVE(Constants.Intake.kAlgaePassiveVoltage),
 
-        STOP(0.0d);
+        STOP(0.0d), 
+        ALGAE_PASSIVE_AGRESSIVE(Constants.Intake.kAlgaePassiveVoltage * 1.45);
 
         private double voltageOut;
         IntakingState(double voltageOut) { this.voltageOut = voltageOut; }
@@ -143,6 +146,18 @@ public class Intake extends SubsystemBase {
 			Commands.runOnce(() -> intake.stop(), intake),
             Commands.runOnce(() -> intake.setCommandOutake(false), intake)
 		);
+    }
+
+    public static ConditionalCommand coralConditionalOutake(Intake intake, BooleanSupplier condition) {
+        return new ConditionalCommand(Commands.none(),
+            Commands.sequence(
+                Commands.runOnce(() -> intake.setCommandOutake(true), intake),
+                Commands.runOnce(() -> intake.outake(true), intake),
+			    Commands.waitSeconds(Constants.Intake.kCoralOutakeDelay),
+			    Commands.runOnce(() -> intake.stop(), intake),
+                Commands.runOnce(() -> intake.setCommandOutake(false), intake)
+		    ), 
+        () -> condition.getAsBoolean());
     }
 
     public static SequentialCommandGroup outakeCommand(boolean coral, BooleanSupplier l4_Supplier, Intake intake) {
