@@ -19,7 +19,7 @@ public class Intake extends SubsystemBase {
     
     private final TalonFX intakeMotor = new TalonFX(Constants.IDs.kIntakeMotor, Constants.kCANIvore);
     private final VoltageOut intakeOpenLoop = new VoltageOut(0).withEnableFOC(false);
-    
+
     public enum IntakingState {
         CORAL_INTAKE(Constants.Intake.kCoralIntakeVoltage),
         CORAL_OUTAKE(Constants.Intake.kCoralOutakeVoltage),

@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -84,7 +85,7 @@ public class RobotContainer {
 				() -> nonInvSquare(-driverLeft.getX()),
 				() -> nonInvSquare(-driverRight.getX()),
 				() -> driverLeft.getTrigger(),
-				() -> false,
+				() -> driverRight.getTrigger(),
 				() -> true));
 
 		// Binds heading locks to the right stick's dpad. Pressing up will face forward,
@@ -147,20 +148,8 @@ public class RobotContainer {
 
 
 		// Set climber down
-		operator.leftTrigger().onTrue(new SequentialCommandGroup(
-			Commands.runOnce(() -> arm.setRotation(0.43), arm),
-			Commands.waitSeconds(0.55),
-			Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_STATION.extension), elevator),
-			climber.StartupSequence(),
-			Commands.runOnce(() -> climber.setRotation(Constants.Climber.kClimbReadyPosition), climber)
-		));
-		operator.rightTrigger().onTrue(Commands.sequence(
-			Commands.runOnce(() -> climber.setRotation(Constants.Climber.kClimbFinalPosition), climber),
-			Commands.parallel(
-				Commands.waitSeconds(10),
-				Commands.run(() -> swerve.drive(new Translation2d(0,0), 0, true, true), swerve)
-			))
-		);
+		operator.leftTrigger().onTrue(new SequentialCommandGroup(climber.ClimbReady(elevator, arm)));
+		operator.rightTrigger().onTrue(Commands.sequence(climber.ClimbFinal(elevator, arm, swerve)));
 	}
 
 	private void addAutonomousRoutines() {
