@@ -128,12 +128,8 @@ public class Elevator extends SubsystemBase {
     }
 
     private void dashboard(){
-        SmartDashboard.putNumber("range sensor", rangeSensor.getDistance().getValueAsDouble());
-        SmartDashboard.putBoolean("InwardsRotationSafe", isInwardsRotationSafe());
-
-        SmartDashboard.putNumber("initialRotation", initialRotation);
+        SmartDashboard.putBoolean("Elevator Inwards Rotation Safe", isInwardsRotationSafe());
         SmartDashboard.putNumber("ExtensionDelta", extensionLeader.getPosition().getValueAsDouble() - initialRotation);
-        SmartDashboard.putNumber("GetExtension", getExtension());
         SmartDashboard.putBoolean("ElevatorLimitSwitch", limitSwitch.get());
     }
 

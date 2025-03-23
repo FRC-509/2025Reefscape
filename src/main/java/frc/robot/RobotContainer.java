@@ -2,37 +2,24 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import frc.robot.autonomous.Actions;
-import frc.robot.autonomous.Actions.PathValidation;
 import frc.robot.autonomous.Leave;
-import frc.robot.autonomous.Test;
 import frc.robot.commands.*;
 import frc.robot.commands.StagingManager.StagingState;
-import frc.robot.commands.staging.ExtendTo;
-import frc.robot.commands.staging.RotateTo;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Intake.IntakingState;
 import frc.robot.subsystems.drive.*;
-import frc.robot.subsystems.vision.*;
 import frc.robot.util.PigeonWrapper;
-import frc.robot.util.ThinNT;
-
 import com.redstorm509.stormkit.controllers.ThrustmasterJoystick;
 import com.redstorm509.stormkit.controllers.ThrustmasterJoystick.StickButton;
 
@@ -142,7 +129,7 @@ public class RobotContainer {
 		operator.leftBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake));
 
 		operator.rightBumper().onFalse(Intake.outakeCommand(false, intake));
-		operator.leftBumper().onFalse(Intake.coralConditionalOutake(intake, () -> arm.getRotation() < StagingState.ALGAE_SAFE.rotation));
+		operator.leftBumper().onFalse(Intake.coralConditionalOutake(intake, () -> arm.getRotation() < StagingState.ALGAE_SAFE.rotation && elevator.getExtension() > StagingState.CORAL_STATION.extension));
 
 		driverLeft.getJoystickButton(StickButton.Bottom).onTrue(new DriveToLocation(swerve));
 

@@ -10,7 +10,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -129,12 +128,11 @@ public class Intake extends SubsystemBase {
     }
 
     public void dashboard(){
-        double stallTorqueCurrent = intakeMotor.getTorqueCurrent().getValueAsDouble();
+        double torqueCurrent = intakeMotor.getTorqueCurrent().getValueAsDouble();
         SmartDashboard.putString("Intaking State", intakingState.toString());
-        SmartDashboard.putNumber("Torque Current", stallTorqueCurrent);
         SmartDashboard.putBoolean("Has Intaken Gamepiece",
-            intakingState.equals(IntakingState.ALGAE_INTAKE) && stallTorqueCurrent > Constants.Intake.kAlgaeTorqueCurrent
-            || intakingState.equals(IntakingState.CORAL_INTAKE) && stallTorqueCurrent > Constants.Intake.kCoralTorqueCurrent);
+            intakingState.equals(IntakingState.ALGAE_INTAKE) && torqueCurrent > Constants.Intake.kAlgaeTorqueCurrent
+            || intakingState.equals(IntakingState.CORAL_INTAKE) && torqueCurrent > Constants.Intake.kCoralTorqueCurrent);
         SmartDashboard.putNumber("Torque Comparison Value", torqueValueClock.timer1.get() >= torqueValueClock.timer2.get() ? torqueValueClock.first : torqueValueClock.second);
     }
 
