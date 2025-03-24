@@ -274,7 +274,7 @@ public class StagingManager {
         // Coral
         CORAL_L4(4.777822,0.1240143),
         CORAL_L3(4.7508,0.485),
-        CORAL_L2(3.207207,0.485),
+        CORAL_L2(3.207207,0.475),
         CORAL_L1(1.8645,0.426),
 
         // Algae
