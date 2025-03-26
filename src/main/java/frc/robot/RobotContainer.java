@@ -101,7 +101,6 @@ public class RobotContainer {
 			swerve.setTargetHeading(0);
 		}, swerve));
 
-		
 		driverRight.isPressedBind(StickButton.Bottom, 
 			new AlignToOffset(new Limelight(Constants.Vision.rightLimelight, 0.31, 0.3, 0, 15), swerve, 0, 0, 0));
 		
@@ -112,7 +111,8 @@ public class RobotContainer {
 				swerve, 
 				intake, 
 				() -> nonInvSquare(-driverLeft.getY()),
-				() -> nonInvSquare(-driverLeft.getX()))
+				() -> nonInvSquare(-driverLeft.getX()),
+				() -> nonInvSquare(-driverRight.getX()))
 		));
 		driverRight.isReleasedBind(StickButton.Left, 
 			new ConditionalCommand(

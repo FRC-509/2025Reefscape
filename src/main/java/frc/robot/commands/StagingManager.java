@@ -305,15 +305,14 @@ public class StagingManager {
         return !algaeSupplier.getAsBoolean() 
             ? new SequentialCommandGroup(
                 all(StagingState.SAFE, elevator, arm),
-                Commands.waitSeconds(0.3),
+                Commands.waitSeconds(0.05),
                 Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_L4.extension), elevator),
-                Commands.waitSeconds(0.6),
+                Commands.waitSeconds(0.55),
                 Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_L4.rotation), arm))
             : new SequentialCommandGroup(
                 all(StagingState.SAFE, elevator, arm),
-                Commands.waitSeconds(0.3),
                 Commands.runOnce(() -> elevator.setExtension(StagingState.CORAL_L4.extension), elevator),
-                Commands.waitSeconds(0.6),
+                Commands.waitSeconds(0.55),
                 Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_PASSIVE_AGRESSIVE)),
                 Commands.runOnce(() -> arm.setRotation(StagingState.CORAL_L4.rotation), arm));
     }

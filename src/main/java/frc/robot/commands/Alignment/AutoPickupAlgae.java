@@ -18,13 +18,15 @@ public class AutoPickupAlgae extends Command{
 
     private DoubleSupplier xSupplier;
     private DoubleSupplier ySupplier;
+    private DoubleSupplier rotSupplier;
 
 
-    public AutoPickupAlgae(SwerveDrive swerve, Intake intake, DoubleSupplier xSupplier, DoubleSupplier ySupplier){
+    public AutoPickupAlgae(SwerveDrive swerve, Intake intake, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rotSupplier){
         this.swerve = swerve;
         this.intake = intake;
         this.xSupplier = xSupplier;
         this.ySupplier = ySupplier;
+        this.rotSupplier = rotSupplier;
     }
 
     @Override
@@ -42,12 +44,19 @@ public class AutoPickupAlgae extends Command{
                     xSupplier.getAsDouble(),
                     ySupplier.getAsDouble()
                 ).times(Constants.Chassis.kMaxSpeed),
-                Math.abs(LimelightHelpers.getTX(Constants.Vision.rightLimelight)) > 1
-                    ?MathUtil.clamp((-LimelightHelpers.getTX(Constants.Vision.rightLimelight)-closeupOffset)/(Constants.Vision.kxFOV/2) * Constants.Chassis.kMaxAngularVelocity * 0.55,
-                        -Constants.Chassis.kMaxAngularVelocity * 0.45, Constants.Chassis.kMaxAngularVelocity * 0.45)
-                    : 0.0,
+                (Math.abs(LimelightHelpers.getTX(Constants.Vision.rightLimelight)) > 1
+                    ?MathUtil.clamp((-LimelightHelpers.getTX(Constants.Vision.rightLimelight)-closeupOffset)/(Constants.Vision.kxFOV/2) * 0.55,
+                        -Constants.Chassis.kMaxAngularVelocity * 0.45, Constants.Chassis.kMaxAngularVelocity * 0.7)
+                    : 0.0),
                 false,
-                false);
+                true); 
+        else swerve.drive(
+            new Translation2d(
+			        xSupplier.getAsDouble(), 
+			        xSupplier.getAsDouble()
+                ).times(Constants.Chassis.kMaxAngularVelocity * 0.5), 
+                rotSupplier.getAsDouble() * 0.3 * Constants.Chassis.kMaxAngularVelocity,
+				true, false);
     }
 
     @Override
