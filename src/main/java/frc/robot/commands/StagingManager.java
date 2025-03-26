@@ -267,14 +267,14 @@ public class StagingManager {
 
     public static enum StagingState {
         // Defaults                               
-        ZEROED(0.111523,0.0),
+        ZEROED(0.111523,0.01),
         SAFE(0.111523,0.257803),
-        ALGAE_SAFE(0.111523, 0.2233887),
+        ALGAE_SAFE(0.111523, 0.2033887),
 
         // Coral
         CORAL_L4(4.777822,0.1240143),
-        CORAL_L3(4.7508,0.485),
-        CORAL_L2(3.207207,0.475),
+        CORAL_L3(4.7708,0.475),
+        CORAL_L2(3.347207,0.47),
         CORAL_L1(1.8645,0.426),
 
         // Algae
@@ -344,7 +344,7 @@ public class StagingManager {
     public static SequentialCommandGroup allSafe(StagingState state, Elevator elevator, Arm arm){
         return new SequentialCommandGroup(
             Commands.runOnce(() -> arm.setRotation(StagingState.SAFE.rotation), arm),
-            Commands.waitSeconds(0.4),
+            Commands.waitSeconds(0.15),
             all(state, elevator, arm)
         );
     }

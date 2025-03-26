@@ -359,7 +359,6 @@ public class SwerveDrive extends SubsystemBase {
 	public Command resetOdometryCmd(Pose2d pose) {
 		return Commands.runOnce(
 				() -> {
-
 					boolean flip = false;
 					Alliance alliance = getAlliance();
 					flip = alliance == DriverStation.Alliance.Red;

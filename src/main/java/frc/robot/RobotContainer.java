@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -12,6 +13,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.autonomous.Leave;
 import frc.robot.commands.*;
+import frc.robot.commands.Alignment.AlignToOffset;
+import frc.robot.commands.Alignment.AutoPickupAlgae;
+import frc.robot.commands.Alignment.AlignToOffset.Limelight;
 import frc.robot.commands.StagingManager.StagingState;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Climber;
@@ -97,6 +101,28 @@ public class RobotContainer {
 			swerve.setTargetHeading(0);
 		}, swerve));
 
+		
+		driverRight.isPressedBind(StickButton.Bottom, 
+			new AlignToOffset(new Limelight(Constants.Vision.rightLimelight, 0.31, 0.3, 0, 15), swerve, 0, 0, 0));
+		
+		// Auto Algae Pickup
+		driverRight.isDownBind(StickButton.Left, Commands.sequence(
+			StagingManager.all(StagingState.ALGAE_GROUND, elevator, arm),
+			new AutoPickupAlgae(
+				swerve, 
+				intake, 
+				() -> nonInvSquare(-driverLeft.getY()),
+				() -> nonInvSquare(-driverLeft.getX()))
+		));
+		driverRight.isReleasedBind(StickButton.Left, 
+			new ConditionalCommand(
+				StagingManager.all(StagingState.ALGAE_SAFE, elevator, arm),
+				StagingManager.all(StagingState.ZEROED, elevator, arm),
+				() -> intake.getIntakingState().equals(IntakingState.ALGAE_PASSIVE)));
+
+
+
+
 
 		// OPERATOR ------------------------------------
 
@@ -110,8 +136,7 @@ public class RobotContainer {
 			() -> operator.x().getAsBoolean(),
 			() -> driverLeft.getJoystickButton(StickButton.Right).getAsBoolean(),
 			() -> driverRight.getJoystickButton(StickButton.Right).getAsBoolean(),
-			() -> driverRight.getJoystickButton(StickButton.Left).getAsBoolean(),
-			// () -> driverLeft.getJoystickButton(StickButton.Bottom).getAsBoolean(),
+			() -> false,
 			() -> (driverLeft.getPOV(0) == 0),
 			() -> (driverLeft.getPOV(0) == 270),
 			() -> (driverLeft.getPOV(0) == 90),
@@ -130,8 +155,6 @@ public class RobotContainer {
 
 		operator.rightBumper().onFalse(Intake.outakeCommand(false, intake));
 		operator.leftBumper().onFalse(Intake.coralConditionalOutake(intake, () -> arm.getRotation() < StagingState.ALGAE_SAFE.rotation && elevator.getExtension() > StagingState.CORAL_STATION.extension));
-
-		driverLeft.getJoystickButton(StickButton.Bottom).onTrue(new DriveToLocation(swerve));
 
 
 		// Set climber down

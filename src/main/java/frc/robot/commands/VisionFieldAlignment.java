@@ -1,18 +1,12 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.drive.SwerveDrive;
-import frc.robot.subsystems.vision.Limelight;
 import frc.robot.subsystems.vision.LimelightHelpers;
 
 import java.util.function.DoubleSupplier;
@@ -126,14 +120,14 @@ public class VisionFieldAlignment extends Command {
 
 				double heading = getHeading(targetTagID);
 				swerve.setTargetHeading(heading);
-				swerve.drive(
-				new Translation2d(
-					xSupplier.getAsDouble(), 
-					ySupplier.getAsDouble()
-				).times(Constants.Chassis.kMaxSpeed * Constants.Operator.kPrecisionMovementMultiplier),
-				rotationSupplier.getAsDouble() * Constants.Chassis.kMaxAngularVelocity * 0.5, // Reduce rotation for precision
-				true,
-				false);
+				if (MathUtil.isNear(heading, swerve.getYaw().getDegrees(), 0.75)) swerve.drive(
+					new Translation2d(
+						LimelightHelpers.getTY(highLimelight)/(Constants.Vision.kyFOV),
+						LimelightHelpers.getTX(highLimelight)/(Constants.Vision.kxFOV)
+					).times(Constants.Chassis.kMaxSpeed * 0.8), 
+					0, 
+					false, 
+					false);
 
 		}else {
 			SmartDashboard.putBoolean("Autonomous Lock On", false);
@@ -153,8 +147,6 @@ public class VisionFieldAlignment extends Command {
 		SmartDashboard.putBoolean("Autonomous Lock On", false);
 		swerve.drive(new Translation2d(0, 0), 0, true, false);
 		swerve.setTargetHeading(swerve.getYaw().getDegrees());
-		if (DriverStation.isAutonomous()) {
-			swerve.stopModules();
-		}
+		if (DriverStation.isAutonomous()) swerve.stopModules();
 	}
 }

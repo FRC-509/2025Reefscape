@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
-import frc.robot.commands.PositionAwareAlignment.TargetPosition;
 import frc.robot.subsystems.drive.SwerveDrive;
 
 public class BezierPathGeneration extends Command {
