@@ -15,8 +15,8 @@ import frc.robot.autonomous.Leave;
 import frc.robot.commands.*;
 import frc.robot.commands.alignment.AlignToOffset;
 import frc.robot.commands.alignment.AlignmentManager;
-import frc.robot.commands.alignment.AutoPickupAlgae;
 import frc.robot.commands.alignment.AlignToOffset.Limelight;
+import frc.robot.commands.alignment.AutoPickupAlgae;
 import frc.robot.commands.staging.StagingManager;
 import frc.robot.commands.staging.StagingManager.StagingState;
 import frc.robot.subsystems.Arm;
@@ -36,7 +36,7 @@ public class RobotContainer {
 	private final ThrustmasterJoystick driverLeft = new ThrustmasterJoystick(0);
 	private final ThrustmasterJoystick driverRight = new ThrustmasterJoystick(1);
 	private final CommandXboxController operator = new CommandXboxController(2);
-	public StagingManager stagingManager;
+	private StagingManager stagingManager;
 	public AlignmentManager alignmentManager;
 
 	private final SwerveDrive swerve;
@@ -144,12 +144,12 @@ public class RobotContainer {
 			() -> (driverLeft.getPOV(0) == 90),
 			() -> (driverLeft.getPOV(0) == 180));
 
-		// this.alignmentManager = new AlignmentManager(
-		// 	() -> nonInvSquare(-driverLeft.getY()), 
-		// 	() -> driverRight.getPOV(0) == 90, 
-		// 	() -> driverRight.getPOV(0) == 270,
-		// 	() -> driverRight.getPOV(0) == 180,
-		// 	swerve, elevator, arm, intake);
+		this.alignmentManager = new AlignmentManager(
+			() -> nonInvSquare(-driverLeft.getY()), 
+			() -> false, 
+			() -> false,
+			() -> false,
+			swerve, elevator, arm, intake);
 
 		// // Algae Intake / outake on release
 		operator.rightBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));

@@ -21,7 +21,6 @@ public class AutoPickupAlgae extends Command{
     private DoubleSupplier ySupplier;
     private DoubleSupplier rotSupplier;
 
-
     public AutoPickupAlgae(SwerveDrive swerve, Intake intake, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rotSupplier){
         this.swerve = swerve;
         this.intake = intake;

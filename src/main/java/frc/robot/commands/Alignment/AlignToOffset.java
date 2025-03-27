@@ -68,7 +68,7 @@ public class AlignToOffset extends Command{
         if (MathUtil.isNear(desiredHeading, swerve.getYaw().getDegrees(), 0.75) || LimelightHelpers.getTV(limelight.name))
             swerve.drive(
                 new Translation2d(
-                    MathUtil.clamp(getXDistance(Tag.REEF.targetHeight - offsetAway) * 0.2, -Constants.Chassis.kMaxSpeed, Constants.Chassis.kMaxSpeed),
+                    MathUtil.clamp((getXDistance(Tag.REEF.targetHeight) - offsetAway) * 0.2, -Constants.Chassis.kMaxSpeed, Constants.Chassis.kMaxSpeed),
                     MathUtil.clamp(0.0, -Constants.Chassis.kMaxSpeed, Constants.Chassis.kMaxSpeed)
                 ),
                 // MathUtil.clamp(Math.toRadians(desiredHeading-swerve.getYaw().getDegrees()), 
