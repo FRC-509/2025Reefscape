@@ -1,4 +1,4 @@
-package frc.robot.commands;
+package frc.robot.commands.alignment;
 
 import java.lang.constant.Constable;
 import java.util.function.BooleanSupplier;
@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants;
 import frc.robot.autonomous.Actions;
+import frc.robot.commands.BezierPathGeneration;
 import frc.robot.commands.BezierPathGeneration.FieldPosition;
 import frc.robot.commands.BezierPathGeneration.Location;
 import frc.robot.subsystems.Arm;

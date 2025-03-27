@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
-import frc.robot.commands.StagingManager.StagingState;
+import frc.robot.commands.staging.StagingManager.StagingState;
 import frc.robot.subsystems.drive.SwerveDrive;
 
 public class Climber extends SubsystemBase {

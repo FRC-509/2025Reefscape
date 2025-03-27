@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.commands.StagingManager;
+import frc.robot.commands.staging.StagingManager;
 
 public class Elevator extends SubsystemBase {
     

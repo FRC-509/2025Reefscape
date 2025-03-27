@@ -1,4 +1,4 @@
-package frc.robot.commands.Alignment;
+package frc.robot.commands.alignment;
 
 import java.util.function.DoubleSupplier;
 

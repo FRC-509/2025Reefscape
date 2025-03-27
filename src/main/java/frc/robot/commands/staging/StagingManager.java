@@ -1,4 +1,4 @@
-package frc.robot.commands;
+package frc.robot.commands.staging;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -9,8 +9,6 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Intake.IntakingState;
-import frc.robot.commands.staging.ExtendTo;
-import frc.robot.commands.staging.RotateTo;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Elevator;
 
