@@ -4,6 +4,7 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.Intake;
@@ -39,17 +40,13 @@ public class AutoPickupAlgae extends Command{
     public void execute() {
         double closeupOffset = 10 * LimelightHelpers.getTA(Constants.Vision.rightLimelight)/20;
         if (LimelightHelpers.getTV(Constants.Vision.rightLimelight))
-            swerve.drive(
-                new Translation2d(
-                    xSupplier.getAsDouble(),
-                    ySupplier.getAsDouble()
-                ).times(Constants.Chassis.kMaxSpeed),
+            swerve.setChassisSpeeds(new ChassisSpeeds(
+                xSupplier.getAsDouble() * Constants.Chassis.kMaxSpeed,
+                ySupplier.getAsDouble() * Constants.Chassis.kMaxSpeed,
                 (Math.abs(LimelightHelpers.getTX(Constants.Vision.rightLimelight)) > 1
                     ?MathUtil.clamp((-LimelightHelpers.getTX(Constants.Vision.rightLimelight)-closeupOffset)/(Constants.Vision.kxFOV/2) * 0.55,
                         -Constants.Chassis.kMaxAngularVelocity * 0.45, Constants.Chassis.kMaxAngularVelocity * 0.7)
-                    : 0.0),
-                false,
-                true); 
+                    : 0.0)));
         else swerve.drive(
             new Translation2d(
 			        xSupplier.getAsDouble(), 

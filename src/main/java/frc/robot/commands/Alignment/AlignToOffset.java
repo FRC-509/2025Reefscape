@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.drive.SwerveDrive;
@@ -60,22 +61,24 @@ public class AlignToOffset extends Command{
 
     @Override
     public void initialize() {
-        swerve.setTargetHeading(offsetAway);
     }
 
     @Override
     public void execute() {
-        if (MathUtil.isNear(desiredHeading, swerve.getYaw().getDegrees(), 0.75))
+        if (MathUtil.isNear(desiredHeading, swerve.getYaw().getDegrees(), 0.75) || LimelightHelpers.getTV(limelight.name))
             swerve.drive(
                 new Translation2d(
-                    MathUtil.clamp(getXDistance(desiredHeading), -Constants.Chassis.kMaxSpeed, Constants.Chassis.kMaxSpeed),
-                    MathUtil.clamp(getYDistance(desiredHeading), -Constants.Chassis.kMaxSpeed, Constants.Chassis.kMaxSpeed)
+                    MathUtil.clamp(getXDistance(Tag.REEF.targetHeight - offsetAway) * 0.2, -Constants.Chassis.kMaxSpeed, Constants.Chassis.kMaxSpeed),
+                    MathUtil.clamp(0.0, -Constants.Chassis.kMaxSpeed, Constants.Chassis.kMaxSpeed)
                 ),
-                MathUtil.clamp(Math.toRadians(desiredHeading-swerve.getYaw().getDegrees()), 
-                    -Constants.Chassis.kMaxAngularVelocity, Constants.Chassis.kMaxAngularVelocity), 
-                true, 
-                false);
-        
+                // MathUtil.clamp(Math.toRadians(desiredHeading-swerve.getYaw().getDegrees()), 
+                //     -Constants.Chassis.kMaxAngularVelocity, Constants.Chassis.kMaxAngularVelocity), 
+                0,
+                false,
+                true);
+        else swerve.drive(new Translation2d(), desiredHeading, true, false);
+        SmartDashboard.putNumber("X distance",getXDistance(Tag.REEF.targetHeight));
+        SmartDashboard.putNumber("y distance",getYDistance(Tag.REEF.targetHeight));
     }
 
     @Override
@@ -101,6 +104,6 @@ public class AlignToOffset extends Command{
      */
     public double getYDistance(double targetHeight){
         return (getXDistance(targetHeight) - limelight.mountDistanceFromCenter) 
-            / Math.tan(Math.toRadians(limelight.horizontalAngle + LimelightHelpers.getTX(limelight.name)));
+            / Math.tan(Math.toRadians(limelight.horizontalAngle - LimelightHelpers.getTX(limelight.name)));
     }
 }

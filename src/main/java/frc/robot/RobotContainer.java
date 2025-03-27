@@ -101,8 +101,9 @@ public class RobotContainer {
 			swerve.setTargetHeading(0);
 		}, swerve));
 
-		driverRight.isPressedBind(StickButton.Bottom, 
-			new AlignToOffset(new Limelight(Constants.Vision.rightLimelight, 0.31, 0.3, 0, 15), swerve, 0, 0, 0));
+		driverRight.isPressedBind(StickButton.Bottom,
+			new AlignToOffset(new Limelight(Constants.Vision.rightLimelight, 0.31, 0.3, 0, 15), swerve, 1, 0, -90));
+		
 		
 		// Auto Algae Pickup
 		driverRight.isDownBind(StickButton.Left, Commands.sequence(
@@ -112,8 +113,7 @@ public class RobotContainer {
 				intake, 
 				() -> nonInvSquare(-driverLeft.getY()),
 				() -> nonInvSquare(-driverLeft.getX()),
-				() -> nonInvSquare(-driverRight.getX()))
-		));
+				() -> nonInvSquare(-driverRight.getX()))));
 		driverRight.isReleasedBind(StickButton.Left, 
 			new ConditionalCommand(
 				StagingManager.all(StagingState.ALGAE_SAFE, elevator, arm),

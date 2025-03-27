@@ -229,14 +229,14 @@ public final class Constants {
 			public static final double kSteerAngleI = 0.0;
 			public static final double kSteerAngleD = 0.0;
 
-			public static final double kHeadingPassiveP = 8.0;
+			public static final double kHeadingPassiveP = 6.0;
 			public static final double kHeadingPassiveI = 0.15;
 			public static final double kHeadingPassiveD = 0.4;
-			public static final double kHeadingAggressiveP = 11.5;
+			public static final double kHeadingAggressiveP = 4.5;
 			public static final double kHeadingAggressiveI = 0.25;
 			public static final double kHeadingAggressiveD = 0.8;
 			public static final double kHeadingTimeout = 0.25;
-			public static final double kMinHeadingCorrectionSpeed = 0.05;
+			public static final double kMinHeadingCorrectionSpeed = 0.35;
 		}
 
 		public static class Elevator {
