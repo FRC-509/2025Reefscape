@@ -1,6 +1,5 @@
 package frc.robot.subsystems.drive;
 
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -29,16 +28,16 @@ import java.util.Optional;
 
 import frc.robot.Constants;
 import frc.robot.subsystems.vision.LimelightHelpers;
-import frc.robot.subsystems.vision.LimelightHelpers.PoseEstimate;
 import frc.robot.util.LoggablePID;
 import frc.robot.util.PigeonWrapper;
 import frc.robot.util.ThinNT;
 import frc.robot.util.math.GeometryUtils;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PathFollowingController;
-import com.pathplanner.lib.trajectory.PathPlannerTrajectoryState;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.util.PathPlannerLogging;
 import com.redstorm509.stormkit.math.Interpolator;
 
 public class SwerveDrive extends SubsystemBase {
@@ -139,37 +138,30 @@ public class SwerveDrive extends SubsystemBase {
 		// poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 99999));
 		LimelightHelpers.SetIMUMode(Constants.Vision.leftLimelight, 1);
 		LimelightHelpers.SetIMUMode(Constants.Vision.rightLimelight, 1);
-		AutoBuilder.configure(
-				this::getEstimatedPose, //
-				this::resetOdometry, //
-				this::getChassisSpeeds, //
-				this::setChassisSpeeds, //
-				new PathFollowingController(){
-					public ChassisSpeeds calculateRobotRelativeSpeeds(Pose2d currentPose, PathPlannerTrajectoryState targetState) {
-						return getChassisSpeeds(); // TODO: assert this works?
-					}
-					public void reset(Pose2d currentPose, ChassisSpeeds currentSpeeds) { resetOdometry(currentPose); }
-					public boolean isHolonomic() { return true; }
-				},
-				new RobotConfig(
-					Constants.Chassis.kRobotWeight,
-					Constants.Chassis.kMOI, // TODO: get later
-					Constants.Chassis.kModuleConfig,
-					// Front Left, Front Right, Back Left, Back Right 
-					new Translation2d(+Constants.Chassis.kOffsetToSwerveModule, -Constants.Chassis.kOffsetToSwerveModule),
-					new Translation2d(+Constants.Chassis.kOffsetToSwerveModule, +Constants.Chassis.kOffsetToSwerveModule),
-					new Translation2d(-Constants.Chassis.kOffsetToSwerveModule, +Constants.Chassis.kOffsetToSwerveModule),
-					new Translation2d(-Constants.Chassis.kOffsetToSwerveModule, -Constants.Chassis.kOffsetToSwerveModule)),
-				() -> { //
-					// Boolean supplier that controls when the path will be mirrored for the red
-					// alliance
-					// This will flip the path being followed to the red side of the field.
-					// THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+		try{
+      		RobotConfig config = RobotConfig.fromGUISettings();
+      		AutoBuilder.configure(
+        		this::getEstimatedPose, 
+        		this::resetOdometry, 
+        		this::getChassisSpeeds, 
+        		this::setChassisSpeeds, 
+        		new PPHolonomicDriveController(
+					new PIDConstants(5.0),
+					new PIDConstants(5.0)
+        		),
+        		config,
+        		() -> {
+            		if (DriverStation.getAlliance().isPresent()) {
+                		return DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
+            		}
+            		return false;
+        		},
+        		this
+      		);
+    	} catch(Exception e){ DriverStation.reportError("Could not load ", e.getStackTrace()); }
 
-					Alliance alliance = getAlliance();
-					return alliance == DriverStation.Alliance.Red;
-				},
-				this); //
+    	PathPlannerLogging.setLogActivePathCallback((poses) -> field2d.getObject("path").setPoses(poses));
+	
 		// PathPlannerLogging.setLogActivePathCallback((poses) ->
 		// field2d.getObject("path").setPoses(poses));
 		Shuffleboard.getTab("Robot Field Position").add(field2d);

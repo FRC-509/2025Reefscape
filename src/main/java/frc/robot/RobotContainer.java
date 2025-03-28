@@ -20,6 +20,7 @@ import frc.robot.commands.alignment.AlignToOffset;
 import frc.robot.commands.alignment.AlignmentManager;
 import frc.robot.commands.alignment.AlignToOffset.Limelight;
 import frc.robot.commands.alignment.AutoPickupAlgae;
+import frc.robot.commands.alignment.VisionFieldAlignment;
 import frc.robot.commands.staging.StagingManager;
 import frc.robot.commands.staging.StagingManager.StagingState;
 import frc.robot.subsystems.Arm;
@@ -107,8 +108,10 @@ public class RobotContainer {
 		}, swerve));
 
 		driverRight.isPressedBind(StickButton.Bottom,
-			new AlignToOffset(new Limelight(Constants.Vision.rightLimelight, 0.31, 0.3, 0, 15), swerve, 1, 0, -90));
-		
+			new VisionFieldAlignment(swerve,
+			() -> nonInvSquare(-driverLeft.getY()),
+			() -> nonInvSquare(-driverLeft.getX()),
+			() -> nonInvSquare(-driverRight.getX())));
 		
 		// Auto Algae Pickup
 		driverRight.isDownBind(StickButton.Left, Commands.sequence(
