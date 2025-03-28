@@ -5,13 +5,16 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.autonomous.Leave;
+import frc.robot.autonomous.Vortex.VortexConfig;
 import frc.robot.commands.*;
 import frc.robot.commands.alignment.AlignToOffset;
 import frc.robot.commands.alignment.AlignmentManager;
@@ -165,6 +168,46 @@ public class RobotContainer {
 	}
 
 	private void addAutonomousRoutines() {
+		VortexConfig vortexConfig = new VortexConfig(
+			Constants.Chassis.kRobotWeight,
+			Constants.Chassis.kMOI, 
+			Constants.Chassis.kRobotWidth,
+			Constants.Chassis.kRobotWidth,
+			new VortexConfig.PathController() {
+				public void robotRelativeDrive(double vxMetersPerSecond, double vyMetersPerSecond, double omegaRadiansPerSecond){
+					swerve.drive(
+						new Translation2d(
+							vxMetersPerSecond,
+							vyMetersPerSecond
+						), omegaRadiansPerSecond, false, false);
+				}
+				public void fieldRelativeDrive(double vxMetersPerSecond, double vyMetersPerSecond, double omegaRadiansPerSecond){
+					swerve.drive(
+						new Translation2d(
+							vxMetersPerSecond,
+							vyMetersPerSecond
+						), omegaRadiansPerSecond, true, false);
+				}
+			}, 
+			new VortexConfig.Action[]{
+				new VortexConfig.Action("L4 Rising", StagingManager.L4_Rising(elevator, arm, intake, () -> false)),
+				new VortexConfig.Action("L4 Falling", StagingManager.L4_Rising(elevator, arm, intake, () -> false)),
+				new VortexConfig.Action("Barge Rising", StagingManager.L4_Rising(elevator, arm, intake, () -> true)),
+				new VortexConfig.Action("Barge Falling", StagingManager.L4_Rising(elevator, arm, intake, () -> true)),
+				new VortexConfig.Action("L3 Position", StagingManager.allSafe(StagingState.CORAL_L3, elevator, arm)),
+				new VortexConfig.Action("L2 Position", StagingManager.allSafe(StagingState.CORAL_L2, elevator, arm)),
+				new VortexConfig.Action("L1 Position", StagingManager.allSafe(StagingState.CORAL_L1, elevator, arm)),
+				new VortexConfig.Action("Zero", StagingManager.zero(elevator, arm, intake)),
+				new VortexConfig.Action("Intake Coral", Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake)),
+				new VortexConfig.Action("Intake Algae", Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake)),
+				new VortexConfig.Action("Outake Coral", Intake.outakeCommand(true, intake)),
+				new VortexConfig.Action("Outake Algae", Intake.outakeCommand(false, intake))
+			},
+			new VortexConfig.ConditionalTrigger[]{
+				new VortexConfig.ConditionalTrigger("Has Algae", () -> intake.getIntakingState().equals(IntakingState.ALGAE_PASSIVE), true),
+				new VortexConfig.ConditionalTrigger("Has Coral", () -> intake.getIntakingState().equals(IntakingState.CORAL_PASSIVE), true),
+			});
+
 		chooser.addOption("\"Go AFK\" (Null)", new InstantCommand());
 		chooser.addOption("Leave", new Leave(0.3, 1.0, swerve));
 		chooser.addOption("ReverseLeave", new Leave(-0.3, 1.0, swerve));
