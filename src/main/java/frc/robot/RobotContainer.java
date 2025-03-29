@@ -105,35 +105,32 @@ public class RobotContainer {
 			swerve.setTargetHeading(0);
 		}, swerve));
 
-		driverRight.isDownBind(StickButton.Bottom,
-			new VisionFieldAlignment(swerve,
-			() -> nonInvSquare(-driverLeft.getY()),
-			() -> nonInvSquare(-driverLeft.getX()),
-			() -> nonInvSquare(-driverRight.getX())));
+		// driverRight.isDownBind(StickButton.Bottom,
+		// 	new VisionFieldAlignment(swerve,
+		// 	() -> nonInvSquare(-driverLeft.getY()),
+		// 	() -> nonInvSquare(-driverLeft.getX()),
+		// 	() -> nonInvSquare(-driverRight.getX())));
 		
 		// Auto Algae Pickup
-		driverRight.isDownBind(StickButton.Left, Commands.sequence(
-			StagingManager.all(StagingState.ALGAE_GROUND, elevator, arm),
-			new AutoPickupAlgae(
-				swerve, 
-				intake, 
-				() -> nonInvSquare(-driverLeft.getY()),
-				() -> nonInvSquare(-driverLeft.getX()),
-				() -> nonInvSquare(-driverRight.getX()))));
-		driverRight.isReleasedBind(StickButton.Left, 
-			new ConditionalCommand(
-				StagingManager.all(StagingState.ALGAE_SAFE, elevator, arm),
-				StagingManager.all(StagingState.ZEROED, elevator, arm),
-				() -> intake.getIntakingState().equals(IntakingState.ALGAE_PASSIVE)));
-
-
-
+		// driverRight.isDownBind(StickButton.Left, Commands.sequence(
+		// 	StagingManager.all(StagingState.ALGAE_GROUND, elevator, arm),
+		// 	new AutoPickupAlgae(
+		// 		swerve, 
+		// 		intake, 
+		// 		() -> nonInvSquare(-driverLeft.getY()),
+		// 		() -> nonInvSquare(-driverLeft.getX()),
+		// 		() -> nonInvSquare(-driverRight.getX()))));
+		// driverRight.isReleasedBind(StickButton.Left, 
+		// 	new ConditionalCommand(
+		// 		StagingManager.all(StagingState.ALGAE_SAFE, elevator, arm),
+		// 		StagingManager.all(StagingState.ZEROED, elevator, arm),
+		// 		() -> intake.getIntakingState().equals(IntakingState.ALGAE_PASSIVE)));
 
 
 		this.alignmentManager = new AlignmentManager(
 			() -> driverLeft.getJoystickButton(StickButton.Bottom).getAsBoolean(), 
 			() -> driverRight.getJoystickButton(StickButton.Bottom).getAsBoolean(), 
-			() -> driverRight.getJoystickButton(StickButton.Right).getAsBoolean(),
+			() -> driverRight.getJoystickButton(StickButton.Left).getAsBoolean(),
 			() -> false, 
 			() -> nonInvSquare(-driverLeft.getY()),
 			() -> nonInvSquare(-driverLeft.getX()),

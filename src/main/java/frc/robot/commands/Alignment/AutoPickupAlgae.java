@@ -1,5 +1,6 @@
 package frc.robot.commands.alignment;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
@@ -21,12 +22,16 @@ public class AutoPickupAlgae extends Command{
     private DoubleSupplier ySupplier;
     private DoubleSupplier rotSupplier;
 
-    public AutoPickupAlgae(SwerveDrive swerve, Intake intake, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rotSupplier){
+    private BooleanSupplier cancelSupplier;
+
+    public AutoPickupAlgae(SwerveDrive swerve, Intake intake, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rotSupplier, BooleanSupplier cancelSupplier){
         this.swerve = swerve;
         this.intake = intake;
         this.xSupplier = xSupplier;
         this.ySupplier = ySupplier;
         this.rotSupplier = rotSupplier;
+
+        this.cancelSupplier = cancelSupplier;
     }
 
     @Override
@@ -64,6 +69,6 @@ public class AutoPickupAlgae extends Command{
 
     @Override
     public boolean isFinished() {
-        return intake.getIntakingState().equals(IntakingState.ALGAE_PASSIVE);
+        return intake.getIntakingState().equals(IntakingState.ALGAE_PASSIVE) || cancelSupplier.getAsBoolean();
     }
 }

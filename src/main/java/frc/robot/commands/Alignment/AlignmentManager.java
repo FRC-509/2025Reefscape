@@ -11,10 +11,12 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
+import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.staging.StagingManager;
 import frc.robot.commands.staging.StagingManager.StagingState;
 import frc.robot.subsystems.Arm;
@@ -29,9 +31,10 @@ public class AlignmentManager {
 
     private class AlignmentTrigger {
         BooleanSupplier booleanSupplier;
-        boolean last; 
-        Runnable onTrue; 
+        boolean last;
+        Runnable onTrue;
         Runnable onFalse;
+        Command command;
 
         public AlignmentTrigger(
             BooleanSupplier booleanSupplier, 
@@ -41,12 +44,13 @@ public class AlignmentManager {
             this.last = false;
             this.onTrue = onTrue;
             this.onFalse = onFalse;
+            this.command = null;
         }
     }
 
     private void onChange(AlignmentTrigger trigger) {
         if (!trigger.last && trigger.booleanSupplier.getAsBoolean())
-            (trigger.booleanSupplier.getAsBoolean() ?  trigger.onTrue : trigger.onFalse).run();
+            (trigger.booleanSupplier.getAsBoolean() ? trigger.onTrue : trigger.onFalse).run();
         trigger.last = trigger.booleanSupplier.getAsBoolean();
     }
 
@@ -64,8 +68,6 @@ public class AlignmentManager {
     private AlignmentTrigger fieldElement;
     private AlignmentTrigger algaeGround;
     private AlignmentTrigger coralGround;
-
-    private Command alignmentCommand;
 
     public AlignmentManager(
         BooleanSupplier alignmentTrigger,
@@ -108,15 +110,28 @@ public class AlignmentManager {
 		        		? Constants.Vision.rightLimelight : Constants.Vision.leftLimelight;
 		        else activeLimelight = LimelightHelpers.getTV(Constants.Vision.rightLimelight) ? Constants.Vision.rightLimelight : Constants.Vision.leftLimelight; // Otherwise whichever has tag
             
-                alignmentCommand = getBehavior((int)LimelightHelpers.getFiducialID(activeLimelight));
-                alignmentCommand.schedule();
+                getBehavior((int)LimelightHelpers.getFiducialID(activeLimelight)).schedule();
             },
-            () -> { alignmentCommand.cancel(); });
+            () -> {});
 
         this.algaeGround = new AlignmentTrigger(
             algaeGroundSupplier,
-            () -> new AutoPickupAlgae(swerve, intake, xSupplier, ySupplier, rotSupplier),
-            () -> StagingManager.zero(elevator, arm, intake).schedule());
+            () -> {
+                Commands.sequence(
+                	StagingManager.all(StagingState.ALGAE_GROUND, elevator, arm),
+                	new AutoPickupAlgae(
+                		swerve,
+                		intake, 
+                		xSupplier,
+                		ySupplier,
+                		ySupplier,
+                        () -> !algaeGroundSupplier.getAsBoolean() || !alignmentTrigger.getAsBoolean()),
+                    new ConditionalCommand(
+                        StagingManager.all(StagingState.ALGAE_SAFE, elevator, arm),
+                        StagingManager.all(StagingState.ZEROED, elevator, arm),
+                        () -> intake.hasAlgae())).schedule();   
+            },
+            () -> {});
     
         this.coralGround = new AlignmentTrigger(
             coralGroundSupplier,
@@ -135,23 +150,51 @@ public class AlignmentManager {
 		switch (tagID) {
 			// Coral Station
 			case 1: case 13: return Commands.sequence(
-                    new AlignToHeading(swerve, 137),
-                    new AlignTo(swerve, Constants.Vision.leftLimelight));
+                cancelableAlign(Commands.sequence(
+                    Commands.parallel(
+                        // new AlignToHeading(swerve, 130),
+                        StagingManager.all(StagingState.CORAL_STATION, elevator, arm),
+                        Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE)),
+                        new AlignTo(swerve, Constants.Vision.leftLimelight,130)
+                    )
+                )),
+                Commands.parallel(
+                    StagingManager.zero(elevator, arm, intake),
+                    new ConditionalCommand(
+                        Commands.none(),
+                        Commands.runOnce(() -> intake.stop()),
+                        () -> intake.getIntakingState().equals(IntakingState.CORAL_PASSIVE))
+                    )
+                );
 			case 2: case 12: return Commands.sequence(
-                new AlignToHeading(swerve, 137),
-                new AlignTo(swerve, Constants.Vision.leftLimelight));
+                cancelableAlign(Commands.sequence(
+                    Commands.parallel(
+                        // new AlignToHeading(swerve, -130),
+                        StagingManager.all(StagingState.CORAL_STATION, elevator, arm),
+                        Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE)),
+                        new AlignTo(swerve, Constants.Vision.leftLimelight, -130)
+                    )
+                )),
+                Commands.parallel(
+                    StagingManager.zero(elevator, arm, intake),
+                    new ConditionalCommand(
+                        Commands.none(),
+                        Commands.runOnce(() -> intake.stop()), 
+                        () -> intake.getIntakingState().equals(IntakingState.CORAL_PASSIVE))
+                    )
+                );
 
 			// Reef
-			case 9: case 22: return reefAutoBehaivor(-137);
-			case 11: case 20: return reefAutoBehaivor(137);
-			case 6: case 19: return reefAutoBehaivor(47);
-			case 8: case 17: return reefAutoBehaivor(-47);
-			case 7: case 18: return reefAutoBehaivor(0);
-			case 10: case 21: return reefAutoBehaivor(180);
+			case 9: case 22: return cancelableAlign(reefAutoBehaivor(-130));
+			case 11: case 20: return cancelableAlign(reefAutoBehaivor(130));
+			case 6: case 19: return cancelableAlign(reefAutoBehaivor(45));
+			case 8: case 17: return cancelableAlign(reefAutoBehaivor(-45));
+			case 7: case 18: return cancelableAlign(reefAutoBehaivor(0));
+			case 10: case 21: return cancelableAlign(reefAutoBehaivor(180));
 			// Barge
-			case 5: case 14: return Commands.sequence(
+			case 5: case 14: return cancelableAlign(Commands.sequence(
                     new AlignToHeading(swerve, 137),
-                    new AlignTo(swerve, Constants.Vision.leftLimelight),
+                    new AlignTo(swerve, Constants.Vision.leftLimelight, 0),
                     new WaitUntilCommand(() -> driverRightAlt.getAsDouble() > 0.6),
                     StagingManager.L4_Rising(elevator, arm, intake, () -> true),
                     Commands.waitSeconds(0.6),
@@ -175,7 +218,7 @@ public class AlignmentManager {
                                 }, swerve)
                         )
                     )
-                );
+                ));
 
 			default: 
 				return Commands.none();
@@ -184,31 +227,41 @@ public class AlignmentManager {
 
     private Command reefAutoBehaivor(double heading){
         return Commands.sequence(
-            new AlignToHeading(swerve, 0),
-            new AlignTo(swerve, Constants.Vision.rightLimelight),
-            new WaitUntilCommand(() -> rotSupplier.getAsDouble() > 0.6 || driverRightAlt.getAsDouble() > 0.6),
+            // new AlignToHeading(swerve, 0),
+            new AlignTo(swerve, Constants.Vision.rightLimelight, heading),
+            new WaitUntilCommand(() -> Math.abs(rotSupplier.getAsDouble()) > 0.6 || driverRightAlt.getAsDouble() > 0.6),
             new ConditionalCommand(
                 Commands.sequence(
                     driveFor(0.2, 0, 0.75),
-                    new WaitUntilCommand(() -> driverRightAlt.getAsDouble() < 0.6),
-                    driveFor(0.2, 0, 0.75)
+                    new WaitUntilCommand(() -> driverRightAlt.getAsDouble() < -0.6),
+                    driveFor(-0.2, 0, 0.75)
                 ),
                 Commands.sequence(
-                    driveFor(0, 0.2 * (driverRightAlt.getAsDouble()/Math.abs(driverRightAlt.getAsDouble())), 0.2), // find adjustment time
-                    new WaitUntilCommand(() -> driverRightAlt.getAsDouble() < 0.6),
+                    driveFor(0, 0.2 * (driverRightAlt.getAsDouble()/Math.abs(driverRightAlt.getAsDouble())), 0.6), // find adjustment time
+                    new WaitUntilCommand(() -> driverRightAlt.getAsDouble() > 0.6),
                     driveFor(0.1, 0, 0.3)                
                 ), 
             () -> driverRightAlt.getAsDouble() > 0.6)
         );
     }
 
+    private Command cancelableAlign(Command command){
+        return Commands.deadline(
+            Commands.waitUntil(() -> !fieldElement.booleanSupplier.getAsBoolean() || !alignmentTrigger.getAsBoolean()), 
+            command);
+    }
+
     public static class AlignToHeading extends Command {
         SwerveDrive swerve;
         double heading;
-        PIDController controller = new PIDController(0.075, 0, 0);
+        PIDController controller = new PIDController(0.055, 0, 0);
         public AlignToHeading(SwerveDrive swerve, double heading){
             this.swerve = swerve;
             this.heading = heading;
+        }
+        @Override
+        public void initialize() {
+            if (heading == 180 && swerve.getYaw().getDegrees() < 0) heading = -180;
         }
         @Override
         public void execute() {
@@ -217,7 +270,7 @@ public class AlignmentManager {
                 controller.calculate( 
                     swerve.getYaw().getDegrees(), 
                     heading),
-                false, 
+                false,
                 false);
         }
         @Override
@@ -236,40 +289,66 @@ public class AlignmentManager {
 	    private SwerveDrive swerve;
 	    private String limelight;
         private Translation2d outputTranslation;
+        private double desiredTxOffset;
+
+        private double heading;
+        private PIDController controller = new PIDController(0.055, 0, 0);
 
 	    private static final double kReefAlignedTagPercent = 2.33;
-	    private static final double ktP = 0.5;
+	    private static final double kCoralStationTagPercent = 1.595;
+        private static final double ktP = 0.5;
+        private static final double kReefAlignedTxOffset = -7.52;
+        private static final double kCoralstationTxOffset = -8.5;
 
-	    public AlignTo(SwerveDrive swerve, String limelight) {
+	    public AlignTo(SwerveDrive swerve, String limelight, double heading) {
 	    	this.swerve = swerve;
             this.limelight = limelight;
+            this.heading = heading;
 		    addRequirements(swerve);
 	    }
 
+        @Override
+        public void initialize() {
+            if (heading == 180 && swerve.getYaw().getDegrees() < 0) heading = -180;
+        }
+
     	@Override
 	    public void execute() {
-            outputTranslation = limelight.equals(Constants.Vision.rightLimelight) 
-                ? new Translation2d(
-                    MathUtil.clamp((kReefAlignedTagPercent - LimelightHelpers.getTA(limelight))/kReefAlignedTagPercent,
+            if (limelight.equals(Constants.Vision.rightLimelight)){
+                desiredTxOffset = kReefAlignedTxOffset;
+                outputTranslation = new Translation2d(
+                    MathUtil.clamp((kReefAlignedTagPercent - LimelightHelpers.getTA(limelight))/kReefAlignedTagPercent * Constants.Chassis.kMaxSpeed,
                         -Constants.Chassis.kMaxSpeed,
                         Constants.Chassis.kMaxSpeed),
-                    -LimelightHelpers.getTX(limelight)/(Constants.Vision.kxFOV) * 0.5)
-                : new Translation2d(
-		    		LimelightHelpers.getTY(limelight)/(Constants.Vision.kyFOV),
-	    			LimelightHelpers.getTX(limelight)/(Constants.Vision.kxFOV));
-		    swerve.drive(outputTranslation.times(Constants.Chassis.kMaxSpeed * ktP), 
-                0, false, false);
+                    -(LimelightHelpers.getTX(limelight) - kReefAlignedTxOffset)/(Constants.Vision.kxFOV/2) * Constants.Chassis.kMaxSpeed);
+            } else {
+                desiredTxOffset = kCoralstationTxOffset;
+                outputTranslation = new Translation2d(
+		    		MathUtil.clamp((kCoralStationTagPercent - LimelightHelpers.getTA(limelight))/kCoralStationTagPercent * Constants.Chassis.kMaxSpeed,
+                        -Constants.Chassis.kMaxSpeed,
+                        Constants.Chassis.kMaxSpeed),
+                    -(LimelightHelpers.getTX(limelight) - kCoralstationTxOffset)/(Constants.Vision.kxFOV/2) * Constants.Chassis.kMaxSpeed);
+            }
+		    swerve.drive(
+                Math.abs(swerve.getYaw().getDegrees() - heading) < 5 
+                    ? outputTranslation.times(ktP)
+                    : new Translation2d(),
+                controller.calculate( 
+                    swerve.getYaw().getDegrees(), 
+                    heading), 
+                false, 
+                false);
         }
 
         @Override
         public boolean isFinished() {
-            return outputTranslation.getDistance(Translation2d.kZero) < 0.25;
+            return outputTranslation.getX() < 0.0175 && Math.abs(LimelightHelpers.getTX(limelight) - desiredTxOffset) < 0.45;
         }
 
 	    @Override
 	    public void end(boolean wasInterrupted) {
-	    	swerve.drive(new Translation2d(0, 0), 0, true, false);
 	    	swerve.setTargetHeading(swerve.getYaw().getDegrees());
+	    	swerve.drive(new Translation2d(0, 0), 0, true, false);
 	    }
     }
 
@@ -279,7 +358,7 @@ public class AlignmentManager {
             Commands.runEnd(() -> swerve.setChassisSpeeds(new ChassisSpeeds(
                 xSpeed * Constants.Chassis.kMaxSpeed,
                 ySpeed * Constants.Chassis.kMaxSpeed,
-            0)), null, swerve));
+            0)), () -> swerve.setChassisSpeeds(new ChassisSpeeds(0,0,0)), swerve));
     }
 
     public boolean isAutoAligning(){
