@@ -174,7 +174,7 @@ public class Intake extends SubsystemBase {
                 Commands.runOnce(() -> intake.setCommandOutake(false), intake));
     }
 
-    private class AlternatingValueCLock {
+    public static class AlternatingValueCLock {
         private double period;
         private double first;
         private double second;

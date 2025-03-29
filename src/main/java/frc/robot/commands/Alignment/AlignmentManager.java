@@ -4,6 +4,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -19,6 +20,7 @@ import frc.robot.commands.staging.StagingManager.StagingState;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Intake.AlternatingValueCLock;
 import frc.robot.subsystems.Intake.IntakingState;
 import frc.robot.subsystems.drive.SwerveDrive;
 import frc.robot.subsystems.vision.LimelightHelpers;
@@ -30,7 +32,6 @@ public class AlignmentManager {
         boolean last; 
         Runnable onTrue; 
         Runnable onFalse;
-        BooleanSupplier alternateCondition;
 
         public AlignmentTrigger(
             BooleanSupplier booleanSupplier, 
@@ -45,7 +46,7 @@ public class AlignmentManager {
 
     private void onChange(AlignmentTrigger trigger) {
         if (!trigger.last && trigger.booleanSupplier.getAsBoolean())
-            (trigger.alternateCondition.getAsBoolean() ?  trigger.onTrue : trigger.onFalse).run();
+            (trigger.booleanSupplier.getAsBoolean() ?  trigger.onTrue : trigger.onFalse).run();
         trigger.last = trigger.booleanSupplier.getAsBoolean();
     }
 
@@ -201,11 +202,11 @@ public class AlignmentManager {
         );
     }
 
-    private class AlignToHeading extends Command {
+    public static class AlignToHeading extends Command {
         SwerveDrive swerve;
         double heading;
-        TrapezoidProfile trapezoidProfile = new TrapezoidProfile(new Constraints(Constants.Chassis.kMaxAngularVelocity/1.5, Math.PI/2));
-        AlignToHeading(SwerveDrive swerve, double heading){
+        PIDController controller = new PIDController(0.075, 0, 0);
+        public AlignToHeading(SwerveDrive swerve, double heading){
             this.swerve = swerve;
             this.heading = heading;
         }
@@ -213,18 +214,15 @@ public class AlignmentManager {
         public void execute() {
             swerve.drive(
                 new Translation2d(), 
-                trapezoidProfile.calculate(0.02, 
-                    new State(
-                        swerve.getYaw().getDegrees(), 
-                        swerve.getChassisSpeeds().omegaRadiansPerSecond), 
-                    new State(heading,0))
-                .velocity,
+                controller.calculate( 
+                    swerve.getYaw().getDegrees(), 
+                    heading),
                 false, 
                 false);
         }
         @Override
         public boolean isFinished() {
-            return MathUtil.isNear(heading, swerve.getYaw().getDegrees(), 0.75);
+            return MathUtil.isNear(heading, swerve.getYaw().getDegrees(), 0.25);
         }
         @Override
         public void end(boolean interrupted) {
@@ -233,7 +231,7 @@ public class AlignmentManager {
         }
     }
 
-    private class AlignTo extends Command {
+    public static class AlignTo extends Command {
 
 	    private SwerveDrive swerve;
 	    private String limelight;

@@ -86,13 +86,13 @@ public class RobotContainer {
 		// Binds heading locks to the right stick's dpad. Pressing up will face forward,
 		// // pressing down will face backward.
 		(new Trigger(() -> driverRight.getPOV(0) == 0))
-			.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(0), swerve));
+			.onTrue(new AlignmentManager.AlignToHeading(swerve,0));
 		(new Trigger(() -> driverRight.getPOV(0) == 90))
-			.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(-137), swerve));
+			.onTrue(new AlignmentManager.AlignToHeading(swerve,-137));
 		(new Trigger(() -> driverRight.getPOV(0) == 270))
-			.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(137), swerve));
+			.onTrue(new AlignmentManager.AlignToHeading(swerve,137));
 		(new Trigger(() -> driverRight.getPOV(0) == 180))
-			.onTrue(Commands.runOnce(() -> swerve.setTargetHeading(180), swerve));
+			.onTrue(new AlignmentManager.AlignToHeading(swerve,180));
 
 		// Toggle heading correction by pressing the bottom-rightmost botton on the left
 		// side of the right stick. Heading correction defaults to ON at boot.
