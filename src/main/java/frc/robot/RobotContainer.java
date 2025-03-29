@@ -236,6 +236,7 @@ public class RobotContainer {
 
 	public void robotPeriodic(){
 		stagingManager.update();
+		alignmentManager.update();
 	}
 
 	public void onTeleopEntry() {

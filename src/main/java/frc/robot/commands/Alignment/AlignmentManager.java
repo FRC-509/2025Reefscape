@@ -1,35 +1,25 @@
 package frc.robot.commands.alignment;
 
-import java.lang.constant.Constable;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
-import frc.robot.autonomous.Actions;
-import frc.robot.commands.BezierPathGeneration;
-import frc.robot.commands.BezierPathGeneration.FieldPosition;
-import frc.robot.commands.BezierPathGeneration.Location;
 import frc.robot.commands.staging.StagingManager;
 import frc.robot.commands.staging.StagingManager.StagingState;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Intake.IntakingState;
 import frc.robot.subsystems.drive.SwerveDrive;
 import frc.robot.subsystems.vision.LimelightHelpers;
 
@@ -74,7 +64,7 @@ public class AlignmentManager {
     private AlignmentTrigger algaeGround;
     private AlignmentTrigger coralGround;
 
-    private boolean isAutoAligning;
+    private Command alignmentCommand;
 
     public AlignmentManager(
         BooleanSupplier alignmentTrigger,
@@ -96,8 +86,6 @@ public class AlignmentManager {
         this.intake = intake;
 
         this.alignmentTrigger = alignmentTrigger;
-        this.isAutoAligning = false;
-
         
         this.xSupplier = xSupplier;
         this.ySupplier = ySupplier; 
@@ -119,9 +107,10 @@ public class AlignmentManager {
 		        		? Constants.Vision.rightLimelight : Constants.Vision.leftLimelight;
 		        else activeLimelight = LimelightHelpers.getTV(Constants.Vision.rightLimelight) ? Constants.Vision.rightLimelight : Constants.Vision.leftLimelight; // Otherwise whichever has tag
             
-                getBehavior((int)LimelightHelpers.getFiducialID(activeLimelight)).schedule();
+                alignmentCommand = getBehavior((int)LimelightHelpers.getFiducialID(activeLimelight));
+                alignmentCommand.schedule();
             },
-            () -> {});
+            () -> { alignmentCommand.cancel(); });
 
         this.algaeGround = new AlignmentTrigger(
             algaeGroundSupplier,
@@ -135,48 +124,82 @@ public class AlignmentManager {
     }
 
     public void update(){
-        if (alignmentTrigger.getAsBoolean()){
-            isAutoAligning = true;
-            onChange(algaeGround);
-        } else {
-            isAutoAligning = false;
-        }
+        if (!alignmentTrigger.getAsBoolean()) return;
+        onChange(fieldElement);
+        onChange(algaeGround);
+        onChange(coralGround);
     }
 
     private Command getBehavior(int tagID){
 		switch (tagID) {
 			// Coral Station
 			case 1: case 13: return Commands.sequence(
-                    new AlignToHeading(swerve, 0),
-                    new AlignTo(swerve, Constants.Vision.rightLimelight),
-                    new WaitUntilCommand(() -> rotSupplier.getAsDouble() > 0.6 || driverRightAlt.getAsDouble() > 0.6),
-                    new ConditionalCommand(
+                    new AlignToHeading(swerve, 137),
+                    new AlignTo(swerve, Constants.Vision.leftLimelight));
+			case 2: case 12: return Commands.sequence(
+                new AlignToHeading(swerve, 137),
+                new AlignTo(swerve, Constants.Vision.leftLimelight));
+
+			// Reef
+			case 9: case 22: return reefAutoBehaivor(-137);
+			case 11: case 20: return reefAutoBehaivor(137);
+			case 6: case 19: return reefAutoBehaivor(47);
+			case 8: case 17: return reefAutoBehaivor(-47);
+			case 7: case 18: return reefAutoBehaivor(0);
+			case 10: case 21: return reefAutoBehaivor(180);
+			// Barge
+			case 5: case 14: return Commands.sequence(
+                    new AlignToHeading(swerve, 137),
+                    new AlignTo(swerve, Constants.Vision.leftLimelight),
+                    new WaitUntilCommand(() -> driverRightAlt.getAsDouble() > 0.6),
+                    StagingManager.L4_Rising(elevator, arm, intake, () -> true),
+                    Commands.waitSeconds(0.6),
+                    Commands.parallel(
                         Commands.sequence(
-                            driveFor(0.2, 0, 0.75),
-                            new WaitUntilCommand(() -> driverRightAlt.getAsDouble() < 0.6),
-                            driveFor(0.2, 0, 0.75)
+                            Commands.waitSeconds(0.5),
+                            Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_OUTAKE)),
+                            Commands.waitSeconds(Constants.Intake.kAlgaeOutakeDelay),
+                            Commands.runOnce(() -> intake.stop())
                         ),
-                        Commands.sequence(
-                            driveFor(0, 0.2 * (driverRightAlt.getAsDouble()/Math.abs(driverRightAlt.getAsDouble())), 0.2), // find adjustment time
-                            new WaitUntilCommand(() -> driverRightAlt.getAsDouble() < 0.6),
-                            driveFor(0.1, 0, 0.3)
-                        ), 
-                    () -> driverRightAlt.getAsDouble() > 0.6)
+                        Commands.deadline(
+                            Commands.waitSeconds(1),
+                            Commands.runEnd(
+                                () -> swerve.setChassisSpeeds(new ChassisSpeeds(
+                                    0.2 * Constants.Chassis.kMaxSpeed,
+                                    ySupplier.getAsDouble() * Constants.Chassis.kMaxSpeed * 0.3,
+                                    0)), 
+                                () -> {
+                                    swerve.setChassisSpeeds(new ChassisSpeeds());
+                                    StagingManager.L4_Falling(elevator, arm, intake, () -> false).schedule(); // assert that this doesn't interrupt the whole command
+                                }, swerve)
+                        )
+                    )
                 );
-			// case 2: case 12: return () -> coralStationAlign(-137);
-			// // Reef
-			// case 9: case 22: return () -> reefAlign(-137);
-			// case 11: case 20: return () -> reefAlign(137);
-			// case 6: case 19: return () -> reefAlign(47);
-			// case 8: case 17: return () -> reefAlign(-47);
-			// case 7: case 18: return () -> reefAlign(0);
-			// case 10: case 21: return () -> reefAlign(180);
-			// // Barge
-			// case 5: case 14: alignmentAction = () -> bargeAlign(); 
+
 			default: 
 				return Commands.none();
 		}
 	}
+
+    private Command reefAutoBehaivor(double heading){
+        return Commands.sequence(
+            new AlignToHeading(swerve, 0),
+            new AlignTo(swerve, Constants.Vision.rightLimelight),
+            new WaitUntilCommand(() -> rotSupplier.getAsDouble() > 0.6 || driverRightAlt.getAsDouble() > 0.6),
+            new ConditionalCommand(
+                Commands.sequence(
+                    driveFor(0.2, 0, 0.75),
+                    new WaitUntilCommand(() -> driverRightAlt.getAsDouble() < 0.6),
+                    driveFor(0.2, 0, 0.75)
+                ),
+                Commands.sequence(
+                    driveFor(0, 0.2 * (driverRightAlt.getAsDouble()/Math.abs(driverRightAlt.getAsDouble())), 0.2), // find adjustment time
+                    new WaitUntilCommand(() -> driverRightAlt.getAsDouble() < 0.6),
+                    driveFor(0.1, 0, 0.3)                
+                ), 
+            () -> driverRightAlt.getAsDouble() > 0.6)
+        );
+    }
 
     private class AlignToHeading extends Command {
         SwerveDrive swerve;
@@ -262,6 +285,6 @@ public class AlignmentManager {
     }
 
     public boolean isAutoAligning(){
-        return isAutoAligning;
+        return alignmentTrigger.getAsBoolean();
     }    
 }
