@@ -14,7 +14,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.autonomous.Leave;
-import frc.robot.autonomous.Vortex.VortexConfig;
+import frc.robot.autonomous.B3L1;
+import frc.robot.autonomous.CL4B1;
+import frc.robot.autonomous.L4;
 import frc.robot.commands.*;
 import frc.robot.commands.alignment.AlignmentManager;
 import frc.robot.commands.alignment.AutoPickupAlgae;
@@ -28,6 +30,8 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Intake.IntakingState;
 import frc.robot.subsystems.drive.*;
 import frc.robot.util.PigeonWrapper;
+
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.redstorm509.stormkit.controllers.ThrustmasterJoystick;
 import com.redstorm509.stormkit.controllers.ThrustmasterJoystick.StickButton;
 
@@ -39,13 +43,15 @@ public class RobotContainer {
 	private final ThrustmasterJoystick driverRight = new ThrustmasterJoystick(1);
 	private final CommandXboxController operator = new CommandXboxController(2);
 	private StagingManager stagingManager;
-	public AlignmentManager alignmentManager;
+	private AlignmentManager alignmentManager;
 
 	private final SwerveDrive swerve;
 	private final Elevator elevator;
 	private final Arm arm;
 	private final Intake intake;
 	private final Climber climber;
+
+	public static IntakingState autoEndIntakingState;
 	
 	private SendableChooser<Command> chooser = new SendableChooser<Command>();
 
@@ -173,54 +179,17 @@ public class RobotContainer {
 	}
 
 	private void addAutonomousRoutines() {
-		VortexConfig vortexConfig = new VortexConfig(
-			Constants.Chassis.kRobotWeight,
-			Constants.Chassis.kMOI, 
-			Constants.Chassis.kRobotWidth,
-			Constants.Chassis.kRobotWidth,
-			new VortexConfig.PathController() {
-				public void robotRelativeDrive(double vxMetersPerSecond, double vyMetersPerSecond, double omegaRadiansPerSecond){
-					swerve.drive(
-						new Translation2d(
-							vxMetersPerSecond,
-							vyMetersPerSecond
-						), omegaRadiansPerSecond, false, false);
-				}
-				public void fieldRelativeDrive(double vxMetersPerSecond, double vyMetersPerSecond, double omegaRadiansPerSecond){
-					swerve.drive(
-						new Translation2d(
-							vxMetersPerSecond,
-							vyMetersPerSecond
-						), omegaRadiansPerSecond, true, false);
-				}
-			}, 
-			new VortexConfig.Action[]{
-				new VortexConfig.Action("L4 Rising", StagingManager.L4_Rising(elevator, arm, intake, () -> false)),
-				new VortexConfig.Action("L4 Falling", StagingManager.L4_Rising(elevator, arm, intake, () -> false)),
-				new VortexConfig.Action("Barge Rising", StagingManager.L4_Rising(elevator, arm, intake, () -> true)),
-				new VortexConfig.Action("Barge Falling", StagingManager.L4_Rising(elevator, arm, intake, () -> true)),
-				new VortexConfig.Action("L3 Position", StagingManager.allSafe(StagingState.CORAL_L3, elevator, arm)),
-				new VortexConfig.Action("L2 Position", StagingManager.allSafe(StagingState.CORAL_L2, elevator, arm)),
-				new VortexConfig.Action("L1 Position", StagingManager.allSafe(StagingState.CORAL_L1, elevator, arm)),
-				new VortexConfig.Action("Zero", StagingManager.zero(elevator, arm, intake)),
-				new VortexConfig.Action("Intake Coral", Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake)),
-				new VortexConfig.Action("Intake Algae", Commands.runOnce(() -> intake.setState(IntakingState.CORAL_INTAKE), intake)),
-				new VortexConfig.Action("Outake Coral", Intake.outakeCommand(true, intake)),
-				new VortexConfig.Action("Outake Algae", Intake.outakeCommand(false, intake))
-			},
-			new VortexConfig.ConditionalTrigger[]{
-				new VortexConfig.ConditionalTrigger("Has Algae", () -> intake.getIntakingState().equals(IntakingState.ALGAE_PASSIVE), true),
-				new VortexConfig.ConditionalTrigger("Has Coral", () -> intake.getIntakingState().equals(IntakingState.CORAL_PASSIVE), true),
-			});
-
 		chooser.addOption("\"Go AFK\" (Null)", new InstantCommand());
-		chooser.addOption("Leave", new Leave(0.3, 1.0, swerve));
 		chooser.addOption("ReverseLeave", new Leave(-0.3, 1.0, swerve));
+		chooser.addOption("L4", new L4(swerve, elevator, arm, intake));
+		chooser.addOption("Left B1 L1", new B3L1(swerve, elevator, arm, intake));
+		chooser.addOption("Center L4 B1", new CL4B1(swerve, elevator, arm, intake));
 		SmartDashboard.putData("Auto Mode", chooser);
 
 		if (RobotBase.isSimulation()) {
 			SmartDashboard.putData("Reset Swerve", Commands.runOnce(swerve::resetSimState, swerve));
 		}
+		autoEndIntakingState = IntakingState.STOP;
 	}
 
 	public Command getAutonomousCommand() {
@@ -237,7 +206,7 @@ public class RobotContainer {
 	}
 
 	public void onTeleopEntry() {
-		pigeon.setYaw(180); // temp to correct yaw after straight leave auto
+		stagingManager.onTeleopEntry();
 	}
 
 	public void disabledInit(){

@@ -3,12 +3,14 @@ package frc.robot.commands.staging;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Intake.IntakingState;
+import frc.robot.RobotContainer;
 import frc.robot.commands.alignment.AlignmentManager;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Elevator;
@@ -71,6 +73,7 @@ public class StagingManager {
     private final Runnable relaxElevator;
     private boolean buttonIsPressed;
     private BooleanSupplier autoAligningSupplier;
+    private Command onInit;
 
     // Manual override
     private final StagingTrigger manualZero_StagingTrigger;
@@ -164,6 +167,11 @@ public class StagingManager {
         this.extensionSupplier = () -> elevator.getExtension();
         this.extensionDistance = () -> elevator.getDistanceOffGround();
         this.quedStage = null;
+        this.onInit = Commands.sequence(
+            Commands.runOnce(() -> intake.setState(RobotContainer.autoEndIntakingState), intake),
+            Commands.waitSeconds(0.3),
+            zero(elevator, arm, intake)
+        );
         this.buttonIsPressed = false;
         this.safeZero = new Runnable() {
             @Override
@@ -202,6 +210,10 @@ public class StagingManager {
         this.hardResetSupplier = hardResetSupplier;
 
         this.autoAligningSupplier = autoAligningSupplier;
+    }
+
+    public void onTeleopEntry(){
+        onInit.schedule();
     }
 
     public void update(){
@@ -272,7 +284,7 @@ public class StagingManager {
         CORAL_L4(4.777822,0.1240143),
         CORAL_L3(4.7708,0.475),
         CORAL_L2(3.347207,0.47),
-        CORAL_L1(1.8645,0.426),
+        CORAL_L1(1.95,0.426),
 
         // Algae
         ALGAE_HIGH(4.0967207,0.48338),
