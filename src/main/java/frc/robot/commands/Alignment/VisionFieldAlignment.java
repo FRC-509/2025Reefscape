@@ -56,8 +56,11 @@ public class VisionFieldAlignment extends Command {
 	private boolean begunHeadingAlignment;
 	private Timer headingTimer;
 
-	private static final double kReefAlignedTagPercent = 10.0;
+	private static final double kReefAlignedTagPercent = 2.33;
+	private static final double kReefAlignedLeftTx = 7.8;
+	private static final double kReefAlignedRightTx = -16.16;
 	private static final double ktP = 0.5;
+	private static final double krP = 0.2;
 
 	// Meant to be an "isDownBind" command
 	public VisionFieldAlignment(
@@ -78,8 +81,12 @@ public class VisionFieldAlignment extends Command {
 
 	@Override
 	public void initialize() {
+		LimelightHelpers.setPipelineIndex(highLimelight.name, Constants.Vision.Pipeline.AprilTags);
+		LimelightHelpers.setPipelineIndex(lowLimelight.name, Constants.Vision.Pipeline.AprilTags);
 		headingReached = false;
 		begunHeadingAlignment = false;
+		lastTagID = -1;
+		alignmentAction = () -> manualDrive();
 	}
 
 	@Override
@@ -97,44 +104,58 @@ public class VisionFieldAlignment extends Command {
 			begunHeadingAlignment = false;
 			headingReached = false;
 			headingTimer.restart();
-
-			switch ((int)LimelightHelpers.getFiducialID(activeLimelight.name)) {
-				// Coral Station
-				case 1: case 13: alignmentAction = () -> coralStationAlign(137); return;	
-				case 2: case 12: alignmentAction = () -> coralStationAlign(-137); return;
-	
-				// Reef
-				case 9: case 22: alignmentAction = () -> reefAlign(-137); return;
-				case 11: case 20: alignmentAction = () -> reefAlign(137); return;
-				case 6: case 19: alignmentAction = () -> reefAlign(47); return;
-				case 8: case 17: alignmentAction = () -> reefAlign(-47); return;
-				case 7: case 18: alignmentAction = () -> reefAlign(0); return;
-				case 10: case 21: alignmentAction = () -> reefAlign(180); return;
-	
-				// Barge
-				case 5: case 14: alignmentAction = () -> bargeAlign(); return;
-
-				default: alignmentAction = () -> manualDrive(); return;
-			}
+			alignmentAction = getBehavior();
 		}
 
+		SmartDashboard.putNumber("TA", LimelightHelpers.getTA(activeLimelight.name));
+		SmartDashboard.putNumber("Tag ID", LimelightHelpers.getFiducialID(activeLimelight.name));
+		SmartDashboard.putNumber("Forwards Move", MathUtil.clamp((kReefAlignedTagPercent - LimelightHelpers.getTA(activeLimelight.name))/kReefAlignedTagPercent * Constants.Chassis.kMaxSpeed * ktP,
+			-Constants.Chassis.kMaxSpeed,
+			Constants.Chassis.kMaxSpeed));
+		SmartDashboard.putString("Active Limelight", activeLimelight.name);
 		alignmentAction.run();
 	}
 
+	private Runnable getBehavior(){
+		switch ((int)LimelightHelpers.getFiducialID(activeLimelight.name)) {
+			// Coral Station
+			case 1: case 13: return () -> coralStationAlign(137);
+			case 2: case 12: return () -> coralStationAlign(-137);
+
+			// Reef
+			case 9: case 22: return () -> reefAlign(-137);
+			case 11: case 20: return () -> reefAlign(137);
+			case 6: case 19: return () -> reefAlign(47);
+			case 8: case 17: return () -> reefAlign(-47);
+			case 7: case 18: return () -> reefAlign(0);
+			case 10: case 21: return () -> reefAlign(180);
+			// Barge
+			case 5: case 14: return () -> bargeAlign();
+			default: 
+				return () -> manualDrive();
+		}
+	}
+
 	public void reefAlign(double heading){
-		if (!begunHeadingAlignment) {
-			swerve.setTargetHeading(heading);
-			begunHeadingAlignment = true;
-		} else if (!headingReached && (headingTimer.get() > 1 || MathUtil.isNear(heading, swerve.getYaw().getDegrees(), 1))) {
-			swerve.setTargetHeading(swerve.getYaw().getDegrees());
-			headingReached = true;
-		} else swerve.drive(
+		// if (!begunHeadingAlignment) {
+		// 	swerve.setTargetHeading(-90);
+		// 	begunHeadingAlignment = true;
+		// } else if (!headingReached && (headingTimer.get() > 1 || MathUtil.isNear(-90, swerve.getYaw().getDegrees(), 1))) {
+		// 	swerve.setTargetHeading(swerve.getYaw().getDegrees());
+		// 	headingReached = true;
+		// } else 
+		
+		double offsetTx;
+		if (Math.abs(rotationSupplier.getAsDouble()) < 0.4) offsetTx = 0;
+		else offsetTx = rotationSupplier.getAsDouble() < 0 ? kReefAlignedLeftTx : kReefAlignedRightTx;
+
+		swerve.drive(
 			new Translation2d(
-				MathUtil.clamp((kReefAlignedTagPercent - LimelightHelpers.getTA(highLimelight.name))/kReefAlignedTagPercent * Constants.Chassis.kMaxSpeed * ktP,
+				MathUtil.clamp((kReefAlignedTagPercent - LimelightHelpers.getTA(activeLimelight.name))/kReefAlignedTagPercent,
 					-Constants.Chassis.kMaxSpeed,
 					Constants.Chassis.kMaxSpeed),
-				LimelightHelpers.getTX(highLimelight.name)/(Constants.Vision.kxFOV) * Constants.Chassis.kMaxSpeed
-			), 0, false, false);
+				-(LimelightHelpers.getTX(activeLimelight.name)+offsetTx)/(Constants.Vision.kxFOV) * 0.5
+			).times(Constants.Chassis.kMaxSpeed * ktP), 0, false, false);
 	}
 
 	public void coralStationAlign(double heading){

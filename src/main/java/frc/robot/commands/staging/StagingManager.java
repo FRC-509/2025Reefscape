@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Intake.IntakingState;
+import frc.robot.commands.alignment.AlignmentManager;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Elevator;
 
@@ -17,7 +18,7 @@ public class StagingManager {
     private class StagingTrigger {
         BooleanSupplier booleanSupplier;
         boolean last; 
-        Runnable onTrue; 
+        Runnable onTrue;
         Runnable onFalse;
         BooleanSupplier alternateCondition;
         Runnable algaeAlternate;
@@ -69,6 +70,7 @@ public class StagingManager {
     private final Runnable safeZero;
     private final Runnable relaxElevator;
     private boolean buttonIsPressed;
+    private BooleanSupplier autoAligningSupplier;
 
     // Manual override
     private final StagingTrigger manualZero_StagingTrigger;
@@ -91,11 +93,11 @@ public class StagingManager {
         BooleanSupplier coralStation_Supplier,
         BooleanSupplier coralGround_Supplier,
         BooleanSupplier algaeGround_Supplier,
-        // BooleanSupplier shotput_Supplier,
         BooleanSupplier manualZeroSupplier,
         BooleanSupplier manualSafeZeroSupplier,
         BooleanSupplier softResetSupplier,
-        BooleanSupplier hardResetSupplier
+        BooleanSupplier hardResetSupplier,
+        BooleanSupplier autoAligningSupplier
     ){
         this.L4_StagingTrigger = new StagingTrigger(
             L4_Supplier,
@@ -158,11 +160,6 @@ public class StagingManager {
             () -> {
                 return intake.getIntakingState().equals(IntakingState.ALGAE_PASSIVE);
             });
-
-        // this.shotput_StagingTrigger = new StagingTrigger(
-        //         shotput_Supplier,
-        //         () -> shotput(elevator, arm, intake).schedule(), 
-        //         () -> allSafe(StagingState.ZEROED, elevator, arm));
         
         this.extensionSupplier = () -> elevator.getExtension();
         this.extensionDistance = () -> elevator.getDistanceOffGround();
@@ -203,6 +200,8 @@ public class StagingManager {
         };
         this.softResetSupplier = softResetSupplier;
         this.hardResetSupplier = hardResetSupplier;
+
+        this.autoAligningSupplier = autoAligningSupplier;
     }
 
     public void update(){
@@ -218,7 +217,7 @@ public class StagingManager {
             reseting = true;
             return;
         }
-        if (reseting) return;
+        if (reseting || autoAligningSupplier.getAsBoolean()) return;
 
         onChange(L3_StagingTrigger);
         onChange(L2_StagingTrigger);
@@ -265,7 +264,7 @@ public class StagingManager {
 
     public static enum StagingState {
         // Defaults                               
-        ZEROED(0.111523,0.01),
+        ZEROED(0.111523,0),
         SAFE(0.111523,0.257803),
         ALGAE_SAFE(0.111523, 0.2033887),
 
@@ -340,9 +339,12 @@ public class StagingManager {
 
     public static SequentialCommandGroup allSafe(StagingState state, Elevator elevator, Arm arm){
         return new SequentialCommandGroup(
-            Commands.runOnce(() -> arm.setRotation(StagingState.SAFE.rotation), arm),
-            Commands.waitSeconds(0.15),
-            all(state, elevator, arm)
+            // Commands.runOnce(() -> arm.setRotation(StagingState.SAFE.rotation), arm),
+            Commands.runOnce(() -> arm.setRotation(StagingState.ALGAE_SAFE.rotation), arm),
+            Commands.waitSeconds(0.3),
+            Commands.runOnce(() -> elevator.setExtension(state.extension), elevator),
+            Commands.waitSeconds(0.2),
+            Commands.runOnce(() -> arm.setRotation(state.rotation), arm)
         );
     }
 
@@ -362,7 +364,8 @@ public class StagingManager {
     public static SequentialCommandGroup zero(Elevator elevator, Arm arm, Intake intake){
         ParallelCommandGroup hasAlgae = !intake.hasAlgae()
             ? new ParallelCommandGroup(
-                new RotateTo(StagingState.ZEROED.rotation, () -> elevator.isInwardsRotationSafe(), arm),
+                new RotateTo(!intake.getIntakingState().equals(IntakingState.CORAL_PASSIVE) ? StagingState.ZEROED.rotation : 0.01, 
+                    () -> elevator.isInwardsRotationSafe(), arm),
                 new ExtendTo(StagingState.ZEROED.extension, () -> arm.isExtensionSafe(), elevator))
             : new ParallelCommandGroup(
                 new RotateTo(StagingState.ALGAE_SAFE.rotation, () -> elevator.isInwardsRotationSafe(), arm),

@@ -16,9 +16,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.autonomous.Leave;
 import frc.robot.autonomous.Vortex.VortexConfig;
 import frc.robot.commands.*;
-import frc.robot.commands.alignment.AlignToOffset;
 import frc.robot.commands.alignment.AlignmentManager;
-import frc.robot.commands.alignment.AlignToOffset.Limelight;
 import frc.robot.commands.alignment.AutoPickupAlgae;
 import frc.robot.commands.alignment.VisionFieldAlignment;
 import frc.robot.commands.staging.StagingManager;
@@ -107,7 +105,7 @@ public class RobotContainer {
 			swerve.setTargetHeading(0);
 		}, swerve));
 
-		driverRight.isPressedBind(StickButton.Bottom,
+		driverRight.isDownBind(StickButton.Bottom,
 			new VisionFieldAlignment(swerve,
 			() -> nonInvSquare(-driverLeft.getY()),
 			() -> nonInvSquare(-driverLeft.getX()),
@@ -132,6 +130,18 @@ public class RobotContainer {
 
 
 
+		this.alignmentManager = new AlignmentManager(
+			() -> driverLeft.getJoystickButton(StickButton.Bottom).getAsBoolean(), 
+			() -> driverRight.getJoystickButton(StickButton.Bottom).getAsBoolean(), 
+			() -> driverRight.getJoystickButton(StickButton.Right).getAsBoolean(),
+			() -> false, 
+			() -> nonInvSquare(-driverLeft.getY()),
+			() -> nonInvSquare(-driverLeft.getX()),
+			() -> nonInvSquare(-driverRight.getX()),
+			() -> nonInvSquare(-driverRight.getY()),
+			swerve, elevator, arm, intake);
+
+
 		// OPERATOR ------------------------------------
 
 		this.stagingManager = new StagingManager(
@@ -144,18 +154,13 @@ public class RobotContainer {
 			() -> operator.x().getAsBoolean(),
 			() -> driverLeft.getJoystickButton(StickButton.Right).getAsBoolean(),
 			() -> driverRight.getJoystickButton(StickButton.Right).getAsBoolean(),
-			() -> false,
+			() -> driverRight.getJoystickButton(StickButton.Left).getAsBoolean(),
 			() -> (driverLeft.getPOV(0) == 0),
 			() -> (driverLeft.getPOV(0) == 270),
 			() -> (driverLeft.getPOV(0) == 90),
-			() -> (driverLeft.getPOV(0) == 180));
+			() -> (driverLeft.getPOV(0) == 180),
+			() -> alignmentManager.isAutoAligning());
 
-		this.alignmentManager = new AlignmentManager(
-			() -> nonInvSquare(-driverLeft.getY()), 
-			() -> false, 
-			() -> false,
-			() -> false,
-			swerve, elevator, arm, intake);
 
 		// // Algae Intake / outake on release
 		operator.rightBumper().onTrue(Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_INTAKE), intake));
