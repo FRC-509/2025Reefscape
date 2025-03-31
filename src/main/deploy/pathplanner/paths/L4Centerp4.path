@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.558,
-        "y": 4.049928977272727
+        "x": 7.688096590909091,
+        "y": 4.9972301136363635
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.651051136363637,
-        "y": 3.661036931818182
+        "x": 4.527102272727273,
+        "y": 5.166747159090908
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.992926136363637,
-        "y": 3.8006392045454542
+        "x": 5.1553125,
+        "y": 5.156775568181818
       },
       "prevControl": {
-        "x": 6.561306818181818,
-        "y": 3.8006392045454542
+        "x": 6.4615909090909085,
+        "y": 7.81919034090909
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -179.17565717915483
+    "rotation": -120.7627195342389
   },
   "reversed": false,
-  "folder": "Cl4B1 WIP",
+  "folder": "L4Center",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 23.962488974578203
   },
   "useDefaultConstraints": true
 }
