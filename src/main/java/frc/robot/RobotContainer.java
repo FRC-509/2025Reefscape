@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.autonomous.Leave;
 import frc.robot.autonomous.SimpleCenter;
 import frc.robot.autonomous.B3L1;
@@ -55,6 +56,7 @@ public class RobotContainer {
 	public static IntakingState autoEndIntakingState;
 	
 	private SendableChooser<Command> chooser = new SendableChooser<Command>();
+	public SendableChooser<Alliance> allianceChooser = new SendableChooser<Alliance>();
 
 	public RobotContainer() {
 		this.swerve = new SwerveDrive(pigeon);
@@ -180,6 +182,10 @@ public class RobotContainer {
 	}
 
 	private void addAutonomousRoutines() {
+		allianceChooser.addOption("Blue Alliance", Alliance.Blue);
+		allianceChooser.addOption("Red Alliance", Alliance.Red);
+		SmartDashboard.putData("Alliance", allianceChooser);
+
 		chooser.addOption("\"Go AFK\" (Null)", new InstantCommand());
 		chooser.addOption("ReverseLeave", new Leave(-0.3, 1.0, swerve));
 		chooser.addOption("L4", new L4(swerve, elevator, arm, intake));

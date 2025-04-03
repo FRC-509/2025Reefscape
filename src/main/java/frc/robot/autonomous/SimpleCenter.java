@@ -35,7 +35,7 @@ public class SimpleCenter extends SequentialCommandGroup {
                     Commands.waitSeconds(0.6),
                     StagingManager.allSafe(StagingState.CORAL_L1, elevator, arm),
                     Commands.waitSeconds(1.5),
-                    Commands.runOnce(() -> intake.setState(IntakingState.CORAL_OUTAKE), intake)
+                    Commands.runOnce(() -> intake.setState(IntakingState.CORAL_OUTAKE_L1), intake)
                 )
             ),
             Commands.waitSeconds(Constants.Intake.kCoralOutakeDelay/3.5),
@@ -72,9 +72,7 @@ public class SimpleCenter extends SequentialCommandGroup {
                 p5.pathCommand,
                 Commands.sequence(
                     Commands.waitSeconds(0.45),
-                    StagingManager.L4_Rising(elevator, arm, intake, () -> true),
-                    Commands.waitSeconds(1.65),
-                    Commands.runOnce(() -> intake.setState(IntakingState.ALGAE_OUTAKE), intake)
+                    StagingManager.zero(elevator, arm, intake)
                 )
             ),
             Commands.runOnce(() -> swerve.stopModules(), swerve),
