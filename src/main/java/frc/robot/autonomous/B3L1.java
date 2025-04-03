@@ -36,7 +36,7 @@ public class B3L1 extends SequentialCommandGroup {
                     Commands.waitSeconds(0.6),
                     StagingManager.allSafe(StagingState.CORAL_L1, elevator, arm),
                     Commands.waitSeconds(1.5),
-                    Commands.runOnce(() -> intake.setState(IntakingState.CORAL_OUTAKE), intake)
+                    Commands.runOnce(() -> intake.setState(IntakingState.CORAL_OUTAKE_L1), intake)
                 )
             ),
             Commands.waitSeconds(Constants.Intake.kCoralOutakeDelay/3.5),

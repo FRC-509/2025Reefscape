@@ -188,9 +188,9 @@ public class RobotContainer {
 
 		chooser.addOption("\"Go AFK\" (Null)", new InstantCommand());
 		chooser.addOption("ReverseLeave", new Leave(-0.3, 1.0, swerve));
-		chooser.addOption("L4", new L4(swerve, elevator, arm, intake));
+		// chooser.addOption("L4", new L4(swerve, elevator, arm, intake));
 		chooser.addOption("Left B1 L1", new B3L1(swerve, elevator, arm, intake));
-		chooser.addOption("Center L4 B1", new CL4B1(swerve, elevator, arm, intake));
+		// chooser.addOption("Center L4 B1", new CL4B1(swerve, elevator, arm, intake));
 		chooser.addOption("Simple Center", new SimpleCenter(swerve, elevator, arm, intake));
 		SmartDashboard.putData("Auto Mode", chooser);
 
