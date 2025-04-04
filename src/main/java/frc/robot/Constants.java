@@ -82,7 +82,7 @@ public final class Constants {
 			IDs.kFrontRightEncoder,
 			IDs.kFrontRightSteer,
 			IDs.kFrontRightDrive,
-			118.587891);
+			116.087891);
 
 		public static final SwerveModuleConfiguration kFrontLeft = new SwerveModuleConfiguration(
 			1,

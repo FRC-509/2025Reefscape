@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.autonomous.Leave;
+import frc.robot.autonomous.RedSimpleCenter;
 import frc.robot.autonomous.SimpleCenter;
 import frc.robot.autonomous.B3L1;
 import frc.robot.autonomous.CL4B1;
@@ -192,6 +193,7 @@ public class RobotContainer {
 		chooser.addOption("Left B1 L1", new B3L1(swerve, elevator, arm, intake));
 		// chooser.addOption("Center L4 B1", new CL4B1(swerve, elevator, arm, intake));
 		chooser.addOption("Simple Center", new SimpleCenter(swerve, elevator, arm, intake));
+		chooser.addOption("RedSimple Center", new RedSimpleCenter(swerve, elevator, arm, intake));
 		SmartDashboard.putData("Auto Mode", chooser);
 
 		if (RobotBase.isSimulation()) {
