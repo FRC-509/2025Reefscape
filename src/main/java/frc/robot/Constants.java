@@ -235,7 +235,7 @@ public final class Constants {
 			public static final double kHeadingAggressiveP = 4.5;
 			public static final double kHeadingAggressiveI = 0.25;
 			public static final double kHeadingAggressiveD = 0.0;
-			public static final double kHeadingTimeout = 0.25;
+			public static final double kHeadingTimeout = 0.05;
 			public static final double kMinHeadingCorrectionSpeed = 0.1;
 		}
 

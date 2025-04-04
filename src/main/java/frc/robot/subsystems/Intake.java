@@ -23,7 +23,7 @@ public class Intake extends SubsystemBase {
 
     public enum IntakingState {
         CORAL_INTAKE(Constants.Intake.kCoralIntakeVoltage),
-        CORAL_OUTAKE(Constants.Intake.kCoralOutakeVoltage * 0.4),
+        CORAL_OUTAKE(Constants.Intake.kCoralOutakeVoltage * 0.2),
         CORAL_OUTAKE_L1(Constants.Intake.kCoralOutakeVoltage),
         CORAL_PASSIVE(Constants.Intake.kCoralPassiveVoltage),
 
